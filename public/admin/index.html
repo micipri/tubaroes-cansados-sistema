@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10 Anos - Gestão Financeira</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header" style="justify-content: center; padding: 1rem 0;">
+                <img src="logodourada.jpg" alt="Logo Evento 10 Anos" style="max-width: 100%; max-height: 120px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-target="dashboard"><i class="ri-dashboard-fill"></i> Dashboard</li>
+                <li data-target="registrations"><i class="ri-user-star-fill"></i> Inscrições Lotes</li>
+                <li data-target="registrations-mod2"><i class="ri-user-add-line"></i> Inscrições Mod. 2</li>
+                <li data-target="party"><i class="ri-coupon-3-fill"></i> Ingressos Festa</li>
+                <li data-target="store"><i class="ri-store-2-fill"></i> Lojinha</li>
+                <li data-target="costs"><i class="ri-wallet-3-fill"></i> Custos</li>
+                <li data-target="sponsors"><i class="ri-hand-heart-fill"></i> Patrocínios</li>
+                <li id="nav-users" data-target="users" style="display:none;"><i class="ri-team-fill"></i> Usuários</li>
+            </ul>
+            <div style="padding: 1rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.08);">
+                <div id="user-info" style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-bottom:0.75rem; text-align:center;"></div>
+                <button id="btn-logout" class="btn btn-primary" style="width:100%; padding:0.5rem; font-size:0.85rem; background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);">
+                    <i class="ri-logout-circle-line"></i> Sair
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-title">
+                    <h1 id="page-title">Dashboard</h1>
+                </div>
+            </header>
+
+            <div class="scroll-area">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="page-section active">
+                    <div class="dashboard-grid">
+                        <div class="card glass-card stat-card income">
+                            <i class="ri-arrow-right-up-line icon"></i>
+                            <div class="details">
+                                <span class="label">Receitas Totais</span>
+                                <h3 id="total-income">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="card glass-card stat-card expense">
+                            <i class="ri-arrow-right-down-line icon"></i>
+                            <div class="details">
+                                <span class="label">Despesas Totais</span>
+                                <h3 id="total-expenses">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="card glass-card stat-card balance">
+                            <i class="ri-scales-3-line icon"></i>
+                            <div class="details">
+                                <span class="label">Saldo Líquido</span>
+                                <h3 id="total-balance">R$ 0,00</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-details grid-2">
+                        <div class="card glass-card details-card">
+                            <h3><i class="ri-pie-chart-2-fill"></i> Resumo de Receitas</h3>
+                            <ul class="breakdown-list" id="income-breakdown"></ul>
+                        </div>
+                        <div class="card glass-card details-card">
+                            <h3><i class="ri-pie-chart-line"></i> Resumo de Despesas</h3>
+                            <ul class="breakdown-list" id="expenses-breakdown"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Registrations Section (Batches) -->
+                <section id="registrations" class="page-section hidden">
+                    <div class="card glass-card form-container">
+                        <h3>Cadastrar Lote (Inscrições)</h3>
+                        <form id="form-registration" class="flex-form">
+                            <input type="text" id="reg-name" placeholder="Descrição do Lote" required>
+                            <input type="number" id="reg-quantity" placeholder="Quantidade" required>
+                            <input type="number" step="0.01" id="reg-amount" placeholder="Valor Unitário (R$)" required>
+                            <input type="date" id="reg-date" required>
+                            <button type="submit" class="btn btn-primary">Adicionar Lote</button>
+                        </form>
+                    </div>
+                    <div class="card glass-card table-container mt-4">
+                        <h3>Lotes de Inscrições</h3>
+                        <table>
+                            <thead><tr><th>ID</th><th>Lote</th><th>Qtd</th><th>Valor Unit.</th><th>Total</th><th>Data</th><th>Ação</th></tr></thead>
+                            <tbody id="table-registrations"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Registrations Mod 2 Section -->
+                <section id="registrations-mod2" class="page-section hidden">
+                    <div class="card glass-card form-container">
+                        <h3>Nova Inscrição (Modalidade 2)</h3>
+                        <form id="form-reg-mod2" class="flex-form">
+                            <input type="text" id="reg2-name" placeholder="Nome Completo" required>
+                            <input type="email" id="reg2-email" placeholder="E-mail" required>
+                            <input type="text" id="reg2-cap" placeholder="Nome na Touca" required>
+                            <input type="number" step="0.01" id="reg2-amount" placeholder="Valor (R$)" required>
+                            <input type="date" id="reg2-date" required>
+                            <div style="flex-basis: 100%; display: flex; gap: 20px; text-align: left; margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" id="reg2-receipt"> Comprovante Enviado
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" id="reg2-confirmed"> Confirmação Concluída
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Salvar Inscrição</button>
+                        </form>
+                    </div>
+                    <div class="card glass-card table-container mt-4">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                            <h3 style="margin-bottom: 0;">Inscrições Individuais</h3>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <select id="sort-mod2" onchange="loadRegistrationsMod2()" style="padding: 0.5rem; border-radius: 6px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                                    <option value="id_desc">Mais Recentes (Padrão)</option>
+                                    <option value="name_asc">Ordem Alfabética (Participante)</option>
+                                    <option value="cap_asc">Ordem Alfabética (Touca)</option>
+                                    <option value="receipt_ok">Comprovante OK Primeiro</option>
+                                </select>
+                                <button type="button" class="btn btn-primary" onclick="exportTableToXLSX('table-registrations-mod2', 'Inscricoes_Mod2.xlsx')" style="padding: 0.5rem 1rem; font-size: 0.9rem;"><i class="ri-file-excel-2-line"></i> Exportar Excel</button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead><tr><th>ID</th><th>Participante</th><th>Email</th><th>Touca</th><th>Valor</th><th>Comprovante</th><th>Confirmado</th><th>Data</th><th>Ação</th></tr></thead>
+                            <tbody id="table-registrations-mod2"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Party Tickets Section -->
+                <section id="party" class="page-section hidden">
+                    <div class="card glass-card form-container">
+                        <h3>Venda de Ingresso da Festa</h3>
+                        <form id="form-party-ticket" class="flex-form">
+                            <input type="text" id="ticket-name" placeholder="Nome do Comprador" required>
+                            <input type="number" step="0.01" id="ticket-amount" placeholder="Valor (R$)" required>
+                            <input type="date" id="ticket-date" required>
+                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                        </form>
+                    </div>
+                    <div class="card glass-card table-container mt-4">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin-bottom: 0;">Ingressos Vendidos</h3>
+                            <button type="button" class="btn btn-primary" onclick="exportTableToXLSX('table-party-tickets', 'Ingressos_Festa.xlsx')" style="padding: 0.5rem 1rem; font-size: 0.9rem;"><i class="ri-file-excel-2-line"></i> Exportar Excel</button>
+                        </div>
+                        <table>
+                            <thead><tr><th>ID</th><th>Nome</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+                            <tbody id="table-party-tickets"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Store Section -->
+                <section id="store" class="page-section hidden">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="tab-store-sales">Vendas</button>
+                        <button class="tab-btn" data-tab="tab-store-products">Produtos & Estoque</button>
+                    </div>
+                    <div id="tab-store-sales" class="tab-content active">
+                        <div class="card glass-card form-container mt-4">
+                            <h3>Registrar Venda</h3>
+                            <form id="form-store-sale" class="flex-form">
+                                <select id="sale-product-id" required>
+                                    <option value="" disabled selected>Selecione um Produto</option>
+                                </select>
+                                <input type="number" id="sale-quantity" placeholder="Quantidade" required>
+                                <input type="date" id="sale-date" required>
+                                <button type="submit" class="btn btn-primary">Vender</button>
+                            </form>
+                        </div>
+                        <div class="card glass-card table-container mt-4">
+                            <h3>Histórico de Vendas</h3>
+                            <table>
+                                <thead><tr><th>Produto</th><th>Qtd</th><th>Total</th><th>Data</th></tr></thead>
+                                <tbody id="table-store-sales"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="tab-store-products" class="tab-content hidden">
+                        <div class="card glass-card form-container mt-4">
+                            <h3>Novo Produto</h3>
+                            <form id="form-store-product" class="grid-form">
+                                <input type="text" id="prod-name" placeholder="Nome do Produto" required>
+                                <input type="number" id="prod-stock" placeholder="Estoque Inicial" required>
+                                <input type="number" step="0.01" id="prod-cost" placeholder="Preço de Custo (R$)" required>
+                                <input type="number" step="0.01" id="prod-sell" placeholder="Preço de Venda (R$)" required>
+                                <button type="submit" class="btn btn-primary">Adicionar Produto</button>
+                            </form>
+                        </div>
+                        <div class="card glass-card table-container mt-4">
+                            <h3>Estoque</h3>
+                            <table>
+                                <thead><tr><th>ID</th><th>Produto</th><th>Estoque</th><th>Custo</th><th>Venda</th><th>Ações</th></tr></thead>
+                                <tbody id="table-store-products"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Costs Section -->
+                <section id="costs" class="page-section hidden">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="tab-costs-event">Custos do Evento</button>
+                        <button class="tab-btn" data-tab="tab-costs-party">Custos da Festa</button>
+                    </div>
+                    <div id="tab-costs-event" class="tab-content active">
+                        <div class="card glass-card form-container mt-4">
+                            <h3>Novo Custo do Evento</h3>
+                            <form id="form-event-cost" class="flex-form">
+                                <input type="text" id="ecost-desc" placeholder="Descrição" required>
+                                <input type="number" step="0.01" id="ecost-amount" placeholder="Valor (R$)" required>
+                                <input type="date" id="ecost-date" required>
+                                <button type="submit" class="btn btn-primary">Adicionar</button>
+                            </form>
+                        </div>
+                        <div class="card glass-card table-container mt-4">
+                            <h3>Lista de Custos - Evento</h3>
+                            <table>
+                                <thead><tr><th>ID</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+                                <tbody id="table-event-costs"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="tab-costs-party" class="tab-content hidden">
+                        <div class="card glass-card form-container mt-4">
+                            <h3>Novo Custo da Festa</h3>
+                            <form id="form-party-cost" class="flex-form">
+                                <input type="text" id="pcost-desc" placeholder="Descrição" required>
+                                <input type="number" step="0.01" id="pcost-amount" placeholder="Valor (R$)" required>
+                                <input type="date" id="pcost-date" required>
+                                <button type="submit" class="btn btn-primary">Adicionar</button>
+                            </form>
+                        </div>
+                        <div class="card glass-card table-container mt-4">
+                            <h3>Lista de Custos - Festa</h3>
+                            <table>
+                                <thead><tr><th>ID</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+                                <tbody id="table-party-costs"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sponsors Section -->
+                <section id="sponsors" class="page-section hidden">
+                    <div class="card glass-card form-container">
+                        <h3>Novo Patrocinador</h3>
+                        <form id="form-sponsor" class="flex-form">
+                            <input type="text" id="sponsor-name" placeholder="Nome do Patrocinador" required>
+                            <input type="number" step="0.01" id="sponsor-amount" placeholder="Valor (R$)" required>
+                            <input type="date" id="sponsor-date" required>
+                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                        </form>
+                    </div>
+                    <div class="card glass-card table-container mt-4">
+                        <h3>Patrocínios Recebidos</h3>
+                        <table>
+                            <thead><tr><th>ID</th><th>Nome</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+                            <tbody id="table-sponsors"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Users Section (master only) -->
+                <section id="users" class="page-section hidden">
+                    <div class="card glass-card form-container">
+                        <h3><i class="ri-user-add-line"></i> Cadastrar Novo Usuário</h3>
+                        <form id="form-user" class="flex-form">
+                            <input type="text" id="new-username" placeholder="Nome de usuário" autocomplete="off" required>
+                            <input type="password" id="new-password" placeholder="Senha (mín. 6 caracteres)" autocomplete="new-password" required>
+                            <button type="submit" class="btn btn-primary">Cadastrar Usuário</button>
+                        </form>
+                    </div>
+                    <div class="card glass-card table-container mt-4">
+                        <h3>Usuários do Sistema</h3>
+                        <table>
+                            <thead><tr><th>ID</th><th>Usuário</th><th>Perfil</th><th>Criado em</th><th>Ação</th></tr></thead>
+                            <tbody id="table-users"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

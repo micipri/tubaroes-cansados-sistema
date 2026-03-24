@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tubarões Cansados — Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0f1e 0%, #0d2137 50%, #0a1628 100%);
+            overflow: hidden;
+        }
+
+        /* Animated ocean background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(0,120,200,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,80,160,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .bubbles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            animation: rise linear infinite;
+        }
+        .bubble:nth-child(1)  { left: 10%; width: 20px; height: 20px; animation-duration: 8s;  animation-delay: 0s; }
+        .bubble:nth-child(2)  { left: 25%; width: 35px; height: 35px; animation-duration: 12s; animation-delay: 2s; }
+        .bubble:nth-child(3)  { left: 45%; width: 15px; height: 15px; animation-duration: 9s;  animation-delay: 4s; }
+        .bubble:nth-child(4)  { left: 65%; width: 25px; height: 25px; animation-duration: 11s; animation-delay: 1s; }
+        .bubble:nth-child(5)  { left: 80%; width: 18px; height: 18px; animation-duration: 10s; animation-delay: 3s; }
+        .bubble:nth-child(6)  { left: 90%; width: 30px; height: 30px; animation-duration: 14s; animation-delay: 5s; }
+        @keyframes rise {
+            0%   { transform: translateY(0) scale(1);   opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 0.5; }
+            100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 10;
+            animation: fadeUp 0.6s ease forwards;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .login-logo img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            border-radius: 12px;
+            filter: drop-shadow(0 4px 20px rgba(212,175,55,0.4));
+        }
+        .login-logo h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .login-logo span {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.3);
+            font-size: 1.1rem;
+        }
+        .input-wrap input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.8rem;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.2s, background 0.2s;
+            outline: none;
+        }
+        .input-wrap input:focus {
+            border-color: rgba(212,175,55,0.6);
+            background: rgba(255,255,255,0.1);
+        }
+        .input-wrap input::placeholder { color: rgba(255,255,255,0.25); }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #c9a227, #e8c84a);
+            border: none;
+            border-radius: 12px;
+            color: #0a0f1e;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            margin-top: 0.5rem;
+            letter-spacing: 0.03em;
+        }
+        .btn-login:hover  { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212,175,55,0.35); }
+        .btn-login:active { transform: translateY(0); }
+        .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .error-msg {
+            background: rgba(220,50,50,0.15);
+            border: 1px solid rgba(220,50,50,0.3);
+            color: #ff7070;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+            animation: shake 0.4s ease;
+        }
+        .error-msg.show { display: block; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25%       { transform: translateX(-6px); }
+            75%       { transform: translateX(6px); }
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: rgba(255,255,255,0.35);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: rgba(255,255,255,0.6); }
+    </style>
+</head>
+<body>
+    <div class="bubbles">
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+    </div>
+
+    <div class="login-card">
+        <div class="login-logo">
+            <img src="logodourada.jpg" alt="Tubarões Cansados">
+            <h1>Sistema de Gestão</h1>
+            <span>10 Anos Tubarões Cansados</span>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Usuário</label>
+                <div class="input-wrap">
+                    <i class="ri-user-line"></i>
+                    <input type="text" id="username" placeholder="seu usuário" autocomplete="username" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <div class="input-wrap">
+                    <i class="ri-lock-line"></i>
+                    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-login" id="btn-submit">
+                <i class="ri-login-circle-line"></i> Entrar
+            </button>
+            <div class="error-msg" id="error-msg"></div>
+        </form>
+
+        <a href="/" class="back-link"><i class="ri-arrow-left-line"></i> Voltar ao site</a>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            const errEl = document.getElementById('error-msg');
+            errEl.classList.remove('show');
+            btn.disabled = true;
+            btn.textContent = 'Entrando...';
+
+            try {
+                const res = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value.trim(),
+                        password: document.getElementById('password').value
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    window.location.href = '/admin';
+                } else {
+                    errEl.textContent = data.error || 'Erro ao fazer login.';
+                    errEl.classList.add('show');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ri-login-circle-line"></i> Entrar';
+                }
+            } catch {
+                errEl.textContent = 'Erro de conexão. Tente novamente.';
+                errEl.classList.add('show');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-login-circle-line"></i> Entrar';
+            }
+        });
+    </script>
+</body>
+</html>

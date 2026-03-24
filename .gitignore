@@ -1,0 +1,23 @@
+# Node / npm
+node_modules/
+
+# Database (dados locais — não subir para o repositório)
+database.sqlite
+
+# Arquivos de backup legados
+public/index.html.bak
+public/app.js.bak
+
+# Variáveis de ambiente
+.env
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
