@@ -1,29 +1,33 @@
 const API_URL = '/api';
 
-// ── Mobile Sidebar Toggle ─────────────────────────────────────
-function setupMobileMenu() {
-    const btn     = document.getElementById('hamburger-btn');
-    const overlay = document.getElementById('sidebar-overlay');
+// ── Mobile Sidebar (global — chamado via onclick no HTML) ─────
+window.toggleSidebar = function() {
     const sidebar = document.querySelector('.sidebar');
-    if (!btn || !sidebar) return;
+    const overlay = document.getElementById('sidebar-overlay');
+    const btn     = document.getElementById('hamburger-btn');
+    if (!sidebar) return;
+    const isOpen = sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active', isOpen);
+    if (btn) btn.innerHTML = isOpen
+        ? '<i class="ri-close-line"></i>'
+        : '<i class="ri-menu-line"></i>';
+};
 
-    function openSidebar()  { sidebar.classList.add('open');    overlay.classList.add('active'); btn.innerHTML = '<i class="ri-close-line"></i>'; }
-    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); btn.innerHTML = '<i class="ri-menu-line"></i>'; }
-
-    btn.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
-    overlay.addEventListener('click', closeSidebar);
-
-    // Close sidebar when a nav link is tapped on mobile
-    document.querySelectorAll('.nav-links li').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth <= 768) closeSidebar();
-        });
-    });
-}
+window.closeSidebar = function() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const btn     = document.getElementById('hamburger-btn');
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('active');
+    if (btn) btn.innerHTML = '<i class="ri-menu-line"></i>';
+};
 
 // ── Auth Check on Load ────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-    setupMobileMenu();
+    // Close sidebar when a nav link is tapped on mobile
+    document.querySelectorAll('.nav-links li').forEach(link => {
+        link.addEventListener('click', () => { if (window.innerWidth <= 768) window.closeSidebar(); });
+    });
     try {
         const res = await fetch('/auth/me', { credentials: 'include' });
         if (!res.ok) { window.location.href = '/admin/login.html'; return; }

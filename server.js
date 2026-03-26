@@ -37,6 +37,15 @@ function requireMaster(req, res, next) {
     return res.status(403).json({ error: 'Acesso negado. Apenas o usuário master pode realizar esta ação.' });
 }
 
+// ─── Protect /admin/index.html BEFORE any static middleware ──────────────────
+// This must be first: express.static would otherwise serve it unauthenticated
+app.use('/admin/index.html', (req, res, next) => {
+    if (!req.session || !req.session.userId) {
+        return res.redirect('/admin/login.html');
+    }
+    next();
+});
+
 // ─── Public static assets (images, CSS, fonts etc.) ─────────────────────────
 // Note: index:false prevents auto-serving any index.html from public/
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
@@ -46,7 +55,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
 
-// ─── Admin static assets (served without auth — CSS/JS/images for login page) ─
+// ─── Admin static assets (CSS/JS/images for login page — no auth needed) ────
 app.use('/admin', express.static(path.join(__dirname, 'public', 'admin'), { index: false }));
 
 // ─── Admin login page (public) ───────────────────────────────────────────────
