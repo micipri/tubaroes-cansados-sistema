@@ -2,7 +2,9 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const dbPath = path.resolve(__dirname, 'database.sqlite');
+// DB_PATH env var allows Railway volume persistence (ex: /data/database.sqlite)
+// Falls back to local file for development
+const dbPath = process.env.DB_PATH || path.resolve(__dirname, 'database.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error connecting to database:', err.message);
