@@ -1,7 +1,29 @@
 const API_URL = '/api';
 
+// ── Mobile Sidebar Toggle ─────────────────────────────────────
+function setupMobileMenu() {
+    const btn     = document.getElementById('hamburger-btn');
+    const overlay = document.getElementById('sidebar-overlay');
+    const sidebar = document.querySelector('.sidebar');
+    if (!btn || !sidebar) return;
+
+    function openSidebar()  { sidebar.classList.add('open');    overlay.classList.add('active'); btn.innerHTML = '<i class="ri-close-line"></i>'; }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); btn.innerHTML = '<i class="ri-menu-line"></i>'; }
+
+    btn.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+    overlay.addEventListener('click', closeSidebar);
+
+    // Close sidebar when a nav link is tapped on mobile
+    document.querySelectorAll('.nav-links li').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) closeSidebar();
+        });
+    });
+}
+
 // ── Auth Check on Load ────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+    setupMobileMenu();
     try {
         const res = await fetch('/auth/me', { credentials: 'include' });
         if (!res.ok) { window.location.href = '/admin/login.html'; return; }
