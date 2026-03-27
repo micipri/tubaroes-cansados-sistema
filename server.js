@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 const bcrypt = require('bcryptjs');
 const db = require('./database');
 
@@ -15,6 +16,10 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'tubaroes-cansados-secret-2026',
     resave: false,
     saveUninitialized: false,
+    store: new SQLiteStore({
+        db: 'sessions.sqlite',
+        dir: process.env.DB_DIR || __dirname
+    }),
     cookie: { httpOnly: true, maxAge: 8 * 60 * 60 * 1000 } // 8 hours
 }));
 
