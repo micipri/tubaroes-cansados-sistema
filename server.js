@@ -359,15 +359,11 @@ app.get('/api/summary', requireAuth, (req, res) => {
     });
 });
 
-// ─── Admin panel (protected) ─────────────────────────────────────────────────
-app.get('/admin', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
-});
-app.get('/admin/', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
-});
+// ─── Global error handlers (prevent silent crashes on Railway) ───────────────
+process.on('uncaughtException',  (err)    => console.error('[CRASH] uncaughtException:', err));
+process.on('unhandledRejection', (reason) => console.error('[CRASH] unhandledRejection:', reason));
 
 // ─── Start ───────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
 });
