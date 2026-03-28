@@ -42,6 +42,20 @@ function requireMaster(req, res, next) {
     return res.status(403).json({ error: 'Acesso negado. Apenas o usuário master pode realizar esta ação.' });
 }
 
+// ─── TEMP: diagnóstico de filesystem (remover após debug) ────────────────────
+app.get('/debug-fs', (req, res) => {
+    const fs = require('fs');
+    const check = (p) => { try { return fs.readdirSync(p); } catch(e) { return 'ERR: ' + e.message; } };
+    res.json({
+        __dirname,
+        cwd: process.cwd(),
+        public:       check(path.join(__dirname, 'public')),
+        publicAdmin:  check(path.join(__dirname, 'public', 'admin')),
+        cwdPublic:    check(path.join(process.cwd(), 'public')),
+        cwdAdmin:     check(path.join(process.cwd(), 'public', 'admin')),
+    });
+});
+
 // ─── Landing page ────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
     res.sendFile('landing.html', { root: path.join(__dirname, 'public') });
