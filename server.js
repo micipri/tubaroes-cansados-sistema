@@ -42,34 +42,35 @@ function requireMaster(req, res, next) {
     return res.status(403).json({ error: 'Acesso negado. Apenas o usuário master pode realizar esta ação.' });
 }
 
-// ─── Explicit page routes (MUST come before static middleware in Express 5) ───
-
-// Public landing page
+// ─── Landing page ────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'landing.html'));
+    res.sendFile('landing.html', { root: path.join(__dirname, 'public') });
 });
 
-// Admin panel (protected)
-app.get('/admin', requireAuth, (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'admin', 'index.html'));
-});
-app.get('/admin/', requireAuth, (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'admin', 'index.html'));
-});
-app.get('/admin/index.html', requireAuth, (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'admin', 'index.html'));
-});
-
-// Admin login (public)
-app.get('/admin/login.html', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'admin', 'login.html'));
-});
-
-// ─── Public static assets (CSS, JS, images, fonts) ───────────────────────────
+// ─── Public static assets (CSS, JS, images) ──────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
-// ─── Admin static assets (CSS/JS/images for login page — no auth needed) ────
-app.use('/admin', express.static(path.join(__dirname, 'public', 'admin'), { index: false }));
+// ─── Admin area ───────────────────────────────────────────────────────────────
+// Auth middleware: blocks /admin and /admin/index.html, allows everything else
+// (login.html, CSS, JS, images needed by the login page)
+app.use('/admin', (req, res, next) => {
+    // Public assets and login page — always allowed
+    const pub = ['/login.html', '/login', ''];
+    const isPublicAsset = /\.(css|js|jpg|jpeg|png|ico|svg|woff2?)$/i.test(req.path);
+    if (pub.includes(req.path) || isPublicAsset) return next();
+
+    // Everything else (index.html, /, '') requires auth
+    if (!req.session || !req.session.userId) {
+        return res.redirect('/admin/login.html');
+    }
+    next();
+});
+
+// Serve all admin files (index.html served for / and /index.html)
+app.use('/admin', express.static(path.join(__dirname, 'public', 'admin'), {
+    index: 'index.html'
+}));
+
 
 
 // ─── Auth Routes ────────────────────────────────────────────────────────────
