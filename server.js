@@ -12,14 +12,29 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
+const sessionDir = process.env.DB_DIR || __dirname;
+
+// Ensure session directory exists (needed when DB_DIR=/data without a Volume)
+const fs = require('fs');
+if (!fs.existsSync(sessionDir)) {
+    try { fs.mkdirSync(sessionDir, { recursive: true }); }
+    catch (e) { console.warn('Could not create session dir, using app dir:', e.message); }
+}
+
+let sessionStore;
+try {
+    sessionStore = new SQLiteStore({ db: 'sessions.sqlite', dir: fs.existsSync(sessionDir) ? sessionDir : __dirname });
+    console.log(`Session store: ${sessionDir}/sessions.sqlite`);
+} catch(e) {
+    console.warn('SQLiteStore failed, using MemoryStore:', e.message);
+    sessionStore = undefined; // express-session will use MemoryStore
+}
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'tubaroes-cansados-secret-2026',
     resave: false,
     saveUninitialized: false,
-    store: new SQLiteStore({
-        db: 'sessions.sqlite',
-        dir: process.env.DB_DIR || __dirname
-    }),
+    ...(sessionStore ? { store: sessionStore } : {}),
     cookie: { httpOnly: true, maxAge: 8 * 60 * 60 * 1000 } // 8 hours
 }));
 
