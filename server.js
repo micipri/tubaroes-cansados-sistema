@@ -1,41 +1,30 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+const FileStore = require('session-file-store')(session);
 const bcrypt = require('bcryptjs');
 const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors({ credentials: true, origin: true }));
-app.use(express.json());
-const fs = require('fs');
-
-// Resolve session directory — real fallback to app dir if configured path fails
-let sessionDir = __dirname; // always writable fallback
-if (process.env.DB_DIR) {
-    const target = process.env.DB_DIR;
-    if (!fs.existsSync(target)) {
-        try { fs.mkdirSync(target, { recursive: true }); sessionDir = target; }
-        catch (e) { console.warn(`Cannot use DB_DIR ${target}, using app dir:`, e.message); }
-    } else {
-        sessionDir = target;
-    }
-}
-console.log('Session dir:', sessionDir);
+// ─── Session Setup ────────────────────────────────────────────────────────────
+const sessionsDir = path.join(__dirname, 'sessions');
+if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir, { recursive: true });
 
 let sessionStore;
 try {
-    sessionStore = new SQLiteStore({ db: 'sessions.sqlite', dir: sessionDir });
-    console.log('SQLiteStore initialized at', sessionDir);
+    sessionStore = new FileStore({ path: sessionsDir, retries: 0, logFn: () => {} });
 } catch(e) {
-    console.warn('SQLiteStore init failed, using MemoryStore:', e.message);
-    sessionStore = undefined;
+    console.warn('FileStore failed, using MemoryStore:', e.message);
 }
 
+
+// Middleware
+app.use(cors({ credentials: true, origin: true }));
+app.use(express.json());
 app.use(session({
     secret: process.env.SESSION_SECRET || 'tubaroes-cansados-secret-2026',
     resave: false,
@@ -43,6 +32,7 @@ app.use(session({
     ...(sessionStore ? { store: sessionStore } : {}),
     cookie: { httpOnly: true, maxAge: 8 * 60 * 60 * 1000 } // 8 hours
 }));
+
 
 // ─── Auth Middleware ────────────────────────────────────────────────────────
 
