@@ -12,22 +12,28 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
-const sessionDir = process.env.DB_DIR || __dirname;
-
-// Ensure session directory exists (needed when DB_DIR=/data without a Volume)
 const fs = require('fs');
-if (!fs.existsSync(sessionDir)) {
-    try { fs.mkdirSync(sessionDir, { recursive: true }); }
-    catch (e) { console.warn('Could not create session dir, using app dir:', e.message); }
+
+// Resolve session directory — real fallback to app dir if configured path fails
+let sessionDir = __dirname; // always writable fallback
+if (process.env.DB_DIR) {
+    const target = process.env.DB_DIR;
+    if (!fs.existsSync(target)) {
+        try { fs.mkdirSync(target, { recursive: true }); sessionDir = target; }
+        catch (e) { console.warn(`Cannot use DB_DIR ${target}, using app dir:`, e.message); }
+    } else {
+        sessionDir = target;
+    }
 }
+console.log('Session dir:', sessionDir);
 
 let sessionStore;
 try {
-    sessionStore = new SQLiteStore({ db: 'sessions.sqlite', dir: fs.existsSync(sessionDir) ? sessionDir : __dirname });
-    console.log(`Session store: ${sessionDir}/sessions.sqlite`);
+    sessionStore = new SQLiteStore({ db: 'sessions.sqlite', dir: sessionDir });
+    console.log('SQLiteStore initialized at', sessionDir);
 } catch(e) {
-    console.warn('SQLiteStore failed, using MemoryStore:', e.message);
-    sessionStore = undefined; // express-session will use MemoryStore
+    console.warn('SQLiteStore init failed, using MemoryStore:', e.message);
+    sessionStore = undefined;
 }
 
 app.use(session({

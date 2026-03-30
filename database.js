@@ -3,16 +3,24 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
 
-// DB_PATH env var allows Railway volume persistence (ex: /data/database.sqlite)
-// Falls back to local file for development
-const dbPath = process.env.DB_PATH || path.resolve(__dirname, 'database.sqlite');
+// Resolve database path — with real fallback to app directory if configured path fails
+let dbPath = path.join(__dirname, 'database.sqlite'); // safe default
 
-// Ensure the directory exists (critical for Railway volumes and first-run)
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-    try { fs.mkdirSync(dbDir, { recursive: true }); }
-    catch (e) { console.error('Could not create DB dir, falling back:', e.message); }
+if (process.env.DB_PATH) {
+    const targetDir = path.dirname(path.resolve(process.env.DB_PATH));
+    if (!fs.existsSync(targetDir)) {
+        try {
+            fs.mkdirSync(targetDir, { recursive: true });
+            dbPath = path.resolve(process.env.DB_PATH);
+            console.log('DB dir created:', targetDir);
+        } catch (e) {
+            console.warn(`Cannot create DB dir ${targetDir}, falling back to app dir:`, e.message);
+        }
+    } else {
+        dbPath = path.resolve(process.env.DB_PATH);
+    }
 }
+console.log('Database path:', dbPath);
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error connecting to database:', err.message);
