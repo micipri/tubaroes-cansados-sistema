@@ -11,8 +11,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ─── Session Setup ────────────────────────────────────────────────────────────
-const sessionsDir = path.join(__dirname, 'sessions');
+// Use /app/data/sessions if the volume is mounted, otherwise fall back to app dir
+const volumeDataDir = '/app/data';
+const baseSessionDir = fs.existsSync(volumeDataDir) ? volumeDataDir : (() => {
+    try { fs.mkdirSync(volumeDataDir, { recursive: true }); return volumeDataDir; } catch(e) { return __dirname; }
+})();
+const sessionsDir = path.join(baseSessionDir, 'sessions');
 if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir, { recursive: true });
+console.log('Sessions dir:', sessionsDir);
 
 let sessionStore;
 try {

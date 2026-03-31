@@ -3,22 +3,26 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
 
-// Resolve database path — with real fallback to app directory if configured path fails
-let dbPath = path.join(__dirname, 'database.sqlite'); // safe default
-
+// Resolve database path — default to /app/data (Volume mount) with fallback
+let dbPath;
 if (process.env.DB_PATH) {
+    // Explicit env var takes precedence
     const targetDir = path.dirname(path.resolve(process.env.DB_PATH));
     if (!fs.existsSync(targetDir)) {
-        try {
-            fs.mkdirSync(targetDir, { recursive: true });
-            dbPath = path.resolve(process.env.DB_PATH);
-            console.log('DB dir created:', targetDir);
-        } catch (e) {
-            console.warn(`Cannot create DB dir ${targetDir}, falling back to app dir:`, e.message);
-        }
+        try { fs.mkdirSync(targetDir, { recursive: true }); dbPath = path.resolve(process.env.DB_PATH); }
+        catch (e) { console.warn(`Cannot create DB dir ${targetDir}, using app dir:`, e.message); }
     } else {
         dbPath = path.resolve(process.env.DB_PATH);
     }
+}
+if (!dbPath) {
+    // Default: try /app/data (Railway Volume), fall back to __dirname
+    const volumeDir = '/app/data';
+    const fallbackDir = __dirname;
+    const chosenDir = fs.existsSync(volumeDir) ? volumeDir : (() => {
+        try { fs.mkdirSync(volumeDir, { recursive: true }); return volumeDir; } catch(e) { return fallbackDir; }
+    })();
+    dbPath = path.join(chosenDir, 'database.sqlite');
 }
 console.log('Database path:', dbPath);
 const db = new sqlite3.Database(dbPath, (err) => {
