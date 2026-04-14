@@ -43,11 +43,24 @@
         .sp-asset-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:700;font-family:Outfit,sans-serif;cursor:pointer;border:1px solid #e2e8f0;background:#fff;color:#64748b;transition:all .2s;text-align:left;width:100%}
         .sp-asset-btn:hover{background:#f8fafc}
         .sp-asset-btn.active{background:#0284c7;color:#fff;border-color:#0369a1}
-        .sp-asset-display{flex:1;background:#fff;border-radius:16px;padding:0;border:1px solid #e2e8f0;height:320px;display:flex;align-items:stretch;overflow:hidden}
-        .sp-asset-inner{display:flex;gap:20px;align-items:flex-start}
-        .sp-asset-icon-wrap{width:72px;height:72px;border-radius:50%;background:#e0f2fe;border:1px solid #bae6fd;display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0}
-        .sp-asset-display h5{font-size:1.2rem;font-weight:900;color:#1e293b;margin:0 0 10px}
-        .sp-asset-display p{font-size:.95rem;color:#64748b;line-height:1.7;margin:0}
+        .sp-asset-display{flex:1;background:#fff;border-radius:16px;padding:0;border:1px solid #e2e8f0;overflow:hidden;display:flex}
+        @media(min-width:768px){.sp-asset-display{height:320px}}
+        
+        .sp-asset-card{display:flex;flex-direction:column;width:100%}
+        @media(min-width:768px){.sp-asset-card{flex-direction:row;height:100%}}
+        
+        .sp-asset-text-col{padding:24px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+        @media(min-width:768px){.sp-asset-text-col{flex:0 0 65%;padding:24px;overflow-y:auto}}
+        
+        .sp-asset-img-col{width:100%;aspect-ratio:1/1;overflow:hidden;border-top:1px solid #e2e8f0}
+        @media(min-width:768px){.sp-asset-img-col{flex:0 0 35%;height:100%;aspect-ratio:auto;border-top:0;border-left:1px solid #e2e8f0}}
+        
+        .sp-asset-img-col img{width:100%;height:100%;object-fit:cover;display:block}
+        
+        .sp-asset-inner{display:flex;gap:16px;align-items:flex-start}
+        .sp-asset-icon-wrap{width:56px;height:56px;border-radius:50%;background:#e0f2fe;border:1px solid #bae6fd;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;color:#0284c7}
+        .sp-asset-display h5{font-size:1.1rem;font-weight:900;color:#1e293b;margin:0 0 8px}
+        .sp-asset-display p{font-size:.9rem;color:#64748b;line-height:1.5;margin:0}
         .sp-tabs{display:flex;border-bottom:2px solid #e2e8f0;margin-bottom:24px;overflow-x:auto}
         .sp-tab-btn{padding:14px 20px;font-size:.95rem;font-weight:700;font-family:Outfit,sans-serif;color:#94a3b8;border-bottom:4px solid transparent;margin-bottom:-2px;cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .2s}
         .sp-tab-btn:hover{color:#475569}
@@ -486,15 +499,18 @@
                 menu.querySelectorAll('.sp-asset-btn').forEach(b=>b.classList.remove('active'));
                 btn.classList.add('active');
                 disp.innerHTML=`
-                    <div style="display:flex;width:100%;height:100%;">
-                        <div style="flex:0 0 65%;padding:24px;display:flex;flex-direction:column;justify-content:center;gap:12px;overflow-y:auto;">
-                            <div class="sp-asset-inner" style="margin:0">
-                                <div class="sp-asset-icon-wrap" style="width:56px;height:56px;font-size:1.5rem;">${a.icon}</div>
-                                <div><h5 style="margin-bottom:8px;">${a.title}</h5><p style="font-size:0.9rem;line-height:1.5;">${a.desc}</p></div>
+                    <div class="sp-asset-card">
+                        <div class="sp-asset-text-col">
+                            <div class="sp-asset-inner">
+                                <div class="sp-asset-icon-wrap">${a.icon}</div>
+                                <div>
+                                    <h5>${a.title}</h5>
+                                    <p>${a.desc}</p>
+                                </div>
                             </div>
                         </div>
-                        <div style="flex:0 0 35%;height:100%;overflow:hidden;border-left:1px solid #e2e8f0;">
-                            <img src="${a.img}" alt="${a.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                        <div class="sp-asset-img-col">
+                            <img src="${a.img}" alt="${a.title}">
                         </div>
                     </div>`;
             }
