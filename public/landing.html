@@ -9,6 +9,78 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="icon" href="/logodourada.jpg" type="image/jpeg">
     <link rel="stylesheet" href="landing.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sp-section{background:#f8fafc;padding:80px 0}
+        .sp-container{max-width:1200px;margin:0 auto;padding:0 24px}
+        .sp-header{text-align:center;margin-bottom:56px}
+        .sp-header.left{text-align:left}
+        .sp-tag{display:inline-block;background:#0284c7;color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 14px;border-radius:99px;margin-bottom:14px}
+        .sp-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:#0f172a;line-height:1.15;margin:0 0 12px}
+        .sp-subtitle{font-size:1.05rem;color:#64748b;max-width:680px;margin:0 auto;line-height:1.7}
+        .sp-hero{background:linear-gradient(135deg,#0c4a6e 0%,#0f172a 100%);border-radius:24px;padding:56px 40px;text-align:center;margin-bottom:64px;position:relative;overflow:hidden}
+        .sp-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 2px 2px,rgba(255,255,255,.08) 1px,transparent 0);background-size:30px 30px}
+        .sp-hero-badge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#bae6fd;font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 16px;border-radius:99px;margin-bottom:20px;position:relative}
+        .sp-hero h3{font-size:clamp(1.6rem,3.5vw,2.6rem);font-weight:900;color:#fff;margin:0 0 14px;position:relative}
+        .sp-hero p{font-size:1.05rem;color:#bae6fd;max-width:600px;margin:0 auto;line-height:1.7;position:relative}
+        .sp-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+        @media(min-width:640px){.sp-metrics{grid-template-columns:repeat(4,1fr)}}
+        .sp-metric-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px 16px;text-align:center;transition:transform .25s,box-shadow .25s}
+        .sp-metric-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,.08)}
+        .sp-metric-icon{font-size:2rem;margin-bottom:10px}
+        .sp-metric-num{font-size:2.2rem;font-weight:900;color:#0284c7;line-height:1}
+        .sp-metric-label{font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+        .sp-two-col{display:grid;grid-template-columns:1fr;gap:32px;align-items:center;margin-top:48px}
+        @media(min-width:900px){.sp-two-col{grid-template-columns:5fr 7fr}}
+        .sp-card{background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:32px}
+        .sp-card h4{font-size:1.1rem;font-weight:800;color:#1e293b;margin:0 0 6px}
+        .sp-card p{font-size:.87rem;color:#94a3b8;margin:0 0 16px;line-height:1.6}
+        .sp-chart-wrap{position:relative;width:100%;height:300px}
+        .sp-asset-layout{display:flex;flex-direction:column;gap:16px;background:#f1f5f9;border-radius:24px;padding:24px;border:1px solid #e2e8f0}
+        @media(min-width:768px){.sp-asset-layout{flex-direction:row}}
+        .sp-asset-menu{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+        @media(min-width:768px){.sp-asset-menu{min-width:200px}}
+        .sp-asset-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:700;font-family:Outfit,sans-serif;cursor:pointer;border:1px solid #e2e8f0;background:#fff;color:#64748b;transition:all .2s;text-align:left;width:100%}
+        .sp-asset-btn:hover{background:#f8fafc}
+        .sp-asset-btn.active{background:#0284c7;color:#fff;border-color:#0369a1}
+        .sp-asset-display{flex:1;background:#fff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;min-height:200px;display:flex;align-items:center}
+        .sp-asset-inner{display:flex;gap:20px;align-items:flex-start}
+        .sp-asset-icon-wrap{width:72px;height:72px;border-radius:50%;background:#e0f2fe;border:1px solid #bae6fd;display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0}
+        .sp-asset-display h5{font-size:1.2rem;font-weight:900;color:#1e293b;margin:0 0 10px}
+        .sp-asset-display p{font-size:.95rem;color:#64748b;line-height:1.7;margin:0}
+        .sp-tabs{display:flex;border-bottom:2px solid #e2e8f0;margin-bottom:24px;overflow-x:auto}
+        .sp-tab-btn{padding:14px 20px;font-size:.95rem;font-weight:700;font-family:Outfit,sans-serif;color:#94a3b8;border-bottom:4px solid transparent;margin-bottom:-2px;cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .2s}
+        .sp-tab-btn:hover{color:#475569}
+        .sp-tab-btn.active{color:#0284c7;border-bottom-color:#0284c7}
+        .sp-tier-content{background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:40px}
+        .sp-tier-inner{display:flex;flex-direction:column;gap:32px}
+        @media(min-width:768px){.sp-tier-inner{flex-direction:row;gap:48px;align-items:flex-start}}
+        .sp-tier-left{flex-shrink:0}
+        @media(min-width:768px){.sp-tier-left{width:240px;border-right:1px solid #e2e8f0;padding-right:40px}}
+        .sp-tier-badge{display:inline-block;font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:99px;margin-bottom:12px}
+        .sp-tier-name{font-size:1.8rem;font-weight:900;color:#0f172a;margin:0 0 6px}
+        .sp-tier-price{font-size:1.5rem;font-weight:900;margin:0 0 12px}
+        .sp-tier-desc{font-size:.9rem;color:#64748b;line-height:1.6;margin:0}
+        .sp-tier-right{flex:1}
+        .sp-tier-right h6{font-size:.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;margin:0 0 16px}
+        .sp-tier-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+        .sp-tier-list li{display:flex;gap:10px;align-items:flex-start;font-size:.95rem;color:#334155;line-height:1.5}
+        .sp-check{font-weight:900;flex-shrink:0;margin-top:1px}
+        .sp-muted{color:#cbd5e1}
+        .sp-cta{background:linear-gradient(135deg,#0c4a6e 0%,#0f172a 100%);border-radius:24px;padding:56px 32px;text-align:center;margin-top:56px;position:relative;overflow:hidden}
+        .sp-cta::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse at 20% 50%,rgba(2,132,199,.35) 0,transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(212,175,55,.2) 0,transparent 60%)}
+        .sp-cta h4{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:900;color:#fff;margin:0 0 12px;position:relative}
+        .sp-cta>p{font-size:1rem;color:#bae6fd;max-width:540px;margin:0 auto 32px;line-height:1.7;position:relative}
+        .sp-contacts{display:flex;flex-direction:column;gap:16px;justify-content:center;position:relative}
+        @media(min-width:768px){.sp-contacts{flex-direction:row;flex-wrap:wrap}}
+        .sp-contact-card{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:20px 24px;display:flex;gap:14px;align-items:center;text-align:left}
+        .sp-c-icon{font-size:1.8rem}
+        .sp-c-label{font-size:.7rem;font-weight:700;color:#7dd3fc;text-transform:uppercase;letter-spacing:.1em}
+        .sp-c-value{font-size:1rem;font-weight:800;color:#fff;line-height:1.3}
+        .sp-c-sub{font-size:.8rem;color:#bae6fd}
+        .sp-divider{height:2px;background:linear-gradient(90deg,transparent,#e2e8f0 20%,#e2e8f0 80%,transparent);margin:48px 0;border:none}
+        .sp-info-cards{display:flex;flex-direction:column;gap:16px}
+    </style>
 </head>
 <body>
 
@@ -23,6 +95,7 @@
                 <a href="#historia">História</a>
                 <a href="#treinos">Treinos</a>
                 <a href="#evento">Evento 10 Anos</a>
+                <a href="#patrocinio">Patrocínio</a>
                 <a href="#contato" class="btn-nav-cta">Contato</a>
             </nav>
             <button class="hamburger" id="hamburger" aria-label="Menu">
@@ -34,8 +107,10 @@
             <a href="#historia" class="mobile-link">História</a>
             <a href="#treinos" class="mobile-link">Treinos</a>
             <a href="#evento" class="mobile-link">Evento 10 Anos</a>
+            <a href="#patrocinio" class="mobile-link">Patrocínio</a>
             <a href="#contato" class="mobile-link">Contato</a>
         </div>
+
     </header>
 
     <!-- ── HERO ──────────────────────────────────────────────── -->
@@ -189,7 +264,118 @@
         </div>
     </section>
 
+
+    <!-- ── PATROCÍNIO ────────────────────────────────────────── -->
+    <section class="sp-section" id="patrocinio">
+        <div class="sp-container">
+
+            <div class="sp-header">
+                <div class="sp-tag">🤝 Seja Parceiro</div>
+                <h2 class="sp-title">Conecte sua marca à <span class="gold">Grande Travessia</span></h2>
+                <p class="sp-subtitle">Uma década unindo atletas, famílias e comunidade. Conecte a sua marca à saúde, superação e bem-estar num evento histórico na Praia de Itaparica.</p>
+            </div>
+
+            <div class="sp-hero">
+                <div class="sp-hero-badge">🏆 Edição Histórica · 10 Anos</div>
+                <h3>Muito mais que uma competição.</h3>
+                <p>Sua marca presente no maior evento de natação em águas abertas do Espírito Santo. 250+ atletas, famílias e comunidade reunidos na praia.</p>
+            </div>
+
+            <hr class="sp-divider">
+            <div class="sp-header">
+                <div class="sp-tag">Números</div>
+                <h2 class="sp-title">O Tamanho do <span class="gold">Nosso Impacto</span></h2>
+                <p class="sp-subtitle">Nossa arena é projetada para maximizar a exposição da sua marca em todos os ângulos.</p>
+            </div>
+
+            <div class="sp-metrics">
+                <div class="sp-metric-card"><div class="sp-metric-icon">🏊</div><div class="sp-metric-num">250</div><div class="sp-metric-label">Atletas Inscritos</div></div>
+                <div class="sp-metric-card"><div class="sp-metric-icon">🎒</div><div class="sp-metric-num">250</div><div class="sp-metric-label">Kits Entregues</div></div>
+                <div class="sp-metric-card"><div class="sp-metric-icon">📌</div><div class="sp-metric-num">80</div><div class="sp-metric-label">Placas no Percurso</div></div>
+                <div class="sp-metric-card"><div class="sp-metric-icon">🚩</div><div class="sp-metric-num">40+</div><div class="sp-metric-label">Bandeiras Hasteadas</div></div>
+            </div>
+
+            <div class="sp-two-col">
+                <div class="sp-card">
+                    <h4>Composição da Sinalização de Arena</h4>
+                    <p>Distribuição dos ativos físicos de alto impacto visual ao longo do circuito.</p>
+                    <div class="sp-chart-wrap"><canvas id="infraChart"></canvas></div>
+                </div>
+                <div class="sp-info-cards">
+                    <div class="sp-card" style="padding:20px 24px">
+                        <h4 style="margin-bottom:6px;font-size:.95rem">📍 Arena completa na praia</h4>
+                        <p style="margin:0;color:#64748b">Toda a infraestrutura é montada na Praia de Itaparica, garantindo visibilidade ao público de atletas, familiares e banhistas.</p>
+                    </div>
+                    <div class="sp-card" style="padding:20px 24px">
+                        <h4 style="margin-bottom:6px;font-size:.95rem">📸 Cobertura de mídia</h4>
+                        <p style="margin:0;color:#64748b">O evento recebe cobertura fotográfica e nas redes sociais, amplificando o alcance da sua marca além do dia do evento.</p>
+                    </div>
+                    <div class="sp-card" style="padding:20px 24px">
+                        <h4 style="margin-bottom:6px;font-size:.95rem">🎙️ Locutor oficial</h4>
+                        <p style="margin:0;color:#64748b">Menções exclusivas ao vivo para patrocinadores ao longo de toda a programação, da abertura até a premiação.</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="sp-divider">
+            <div class="sp-header left" style="margin-bottom:32px">
+                <div class="sp-tag">Visibilidade</div>
+                <h2 class="sp-title" style="text-align:left">Onde a sua marca <span class="gold">vai estar?</span></h2>
+                <p class="sp-subtitle" style="margin:0;text-align:left">Nosso projeto não deixa pontos cegos. Clique nos ativos para ver os detalhes.</p>
+            </div>
+            <div class="sp-asset-layout">
+                <div class="sp-asset-menu" id="sp-asset-menu"></div>
+                <div class="sp-asset-display" id="sp-asset-display"></div>
+            </div>
+
+            <hr class="sp-divider">
+            <div class="sp-header">
+                <div class="sp-tag">Cotas</div>
+                <h2 class="sp-title">Análise de <span class="gold">Cotas e Retorno</span></h2>
+                <p class="sp-subtitle">Correlação entre investimento e Índice de Visibilidade projetado. A cota Diamante oferece protagonismo exponencial.</p>
+            </div>
+            <div class="sp-card" style="margin-bottom:40px">
+                <h4>Investimento (R$) vs. Índice de Visibilidade</h4>
+                <p>Quanto maior o investimento, maior o protagonismo em todos os pontos da arena.</p>
+                <div class="sp-chart-wrap"><canvas id="roiChart"></canvas></div>
+            </div>
+            <div class="sp-tabs" id="sp-tier-tabs"></div>
+            <div class="sp-tier-content" id="sp-tier-content"></div>
+
+            <div class="sp-cta">
+                <h4>Vamos fazer história juntos!</h4>
+                <p>As cotas são limitadas para garantir máxima exclusividade. Entre em contato e garanta a sua participação.</p>
+                <div class="sp-contacts">
+                    <div class="sp-contact-card">
+                        <div class="sp-c-icon">📱</div>
+                        <div>
+                            <div class="sp-c-label">WhatsApp / Telefone</div>
+                            <div class="sp-c-value">27-99299.0002</div>
+                            <div class="sp-c-sub">Falar com Michel Cipriano</div>
+                        </div>
+                    </div>
+                    <div class="sp-contact-card">
+                        <div class="sp-c-icon">✉️</div>
+                        <div>
+                            <div class="sp-c-label">E-mail</div>
+                            <div class="sp-c-value">ostubaroescansados@gmail.com</div>
+                        </div>
+                    </div>
+                    <div class="sp-contact-card">
+                        <div class="sp-c-icon">📸</div>
+                        <div>
+                            <div class="sp-c-label">Instagram</div>
+                            <div class="sp-c-value">@tubaroescansados</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <!-- ── CONTATO ─────────────────────────────────────────────── -->
+
     <section class="section section-dark" id="contato">
         <div class="container contato-wrap">
             <div class="section-header">
@@ -249,6 +435,122 @@
             el.classList.add('fade-in');
             observer.observe(el);
         });
+
+        // ── Patrocínio JS ─────────────────────────────────────────
+        function spWrapLabel(t){if(!t||t.length<=16)return t;const w=t.split(' ');let l=[],c='';w.forEach(x=>{if((c+x).length>16){if(c.trim())l.push(c.trim());c=x+' ';}else c+=x+' ';});if(c.trim())l.push(c.trim());return l;}
+        const spTT={callbacks:{title:i=>{const l=i[0].chart.data.labels[i[0].dataIndex];return Array.isArray(l)?l.join(' '):l;}}};
+
+        // Donut chart
+        (function(){
+            const d=[{label:'Placas de Publicidade',v:80},{label:'Bandeiras de Percurso',v:40},{label:'Wind Banners',v:10},{label:'Tendas Estruturais',v:4},{label:'Pórticos Infláveis',v:2}];
+            new Chart(document.getElementById('infraChart').getContext('2d'),{
+                type:'doughnut',
+                data:{labels:d.map(x=>spWrapLabel(x.label)),datasets:[{data:d.map(x=>x.v),backgroundColor:['#0284c7','#38bdf8','#d4af37','#10b981','#0f172a'],borderWidth:2,borderColor:'#fff',hoverOffset:8}]},
+                options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{padding:14,font:{size:12,family:'Outfit'}}},tooltip:spTT}}
+            });
+        })();
+
+        // ROI combo chart
+        (function(){
+            const t=[{tier:'Cota Prata',price:2000,vis:35},{tier:'Cota Ouro',price:3000,vis:65},{tier:'Cota Diamante',price:6000,vis:100}];
+            new Chart(document.getElementById('roiChart').getContext('2d'),{
+                data:{
+                    labels:t.map(x=>spWrapLabel(x.tier)),
+                    datasets:[
+                        {type:'line',label:'Índice de Visibilidade',data:t.map(x=>x.vis),borderColor:'#d4af37',backgroundColor:'#d4af37',borderWidth:3,tension:0.4,yAxisID:'yV',pointRadius:6,pointBackgroundColor:'#fff',pointBorderWidth:3},
+                        {type:'bar',label:'Investimento (R$)',data:t.map(x=>x.price),backgroundColor:'rgba(2,132,199,.8)',borderRadius:6,yAxisID:'yP',barPercentage:0.55}
+                    ]
+                },
+                options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+                    plugins:{legend:{position:'top',labels:{usePointStyle:true,boxWidth:8,font:{family:'Outfit'}}},tooltip:spTT},
+                    scales:{
+                        yP:{type:'linear',position:'left',title:{display:true,text:'Valor (R$)',font:{weight:'bold',family:'Outfit'}},grid:{color:'#f1f5f9'},ticks:{callback:v=>'R$ '+v}},
+                        yV:{type:'linear',position:'right',title:{display:true,text:'Escala de Visibilidade',font:{weight:'bold',family:'Outfit'}},min:0,max:120,grid:{drawOnChartArea:false}}
+                    }
+                }
+            });
+        })();
+
+        // Asset map
+        (function(){
+            const assets=[
+                {icon:'⚡',title:'Pórticos Infláveis',desc:'Estruturas gigantes que marcam a largada, chegada e acesso à praia. O ponto de maior retenção de olhares e registro de fotos. Marcas Diamante recebem destaque máximo nas colunas principais.'},
+                {icon:'📸',title:'Backdrop do Pódio',desc:'O painel oficial das premiações onde todos os atletas registram sua vitória. A hierarquia de cotas define o tamanho da logomarca: Diamante (área nobre), Ouro (premium) ou Prata (malha).'},
+                {icon:'⛺',title:'Tendas e Salas',desc:'Áreas de convivência (6×6m) e tendas de apoio (4×4m) recebem a logomarca nas testeiras, dominando o topo visual da arena de todos os ângulos.'},
+                {icon:'🚩',title:'Wind Banners',desc:'Bandeiras móveis de alta dinamicidade posicionadas no funil de chegada. A cota Diamante garante o monopólio com 10 unidades exclusivas em pontos estratégicos.'},
+                {icon:'🎒',title:'Bolsas do Kit',desc:'Entregues aos 250 inscritos. Ativo de maior durabilidade pós-evento — a sua marca continua circulando pela cidade no dia a dia dos atletas.'}
+            ];
+            const menu=document.getElementById('sp-asset-menu');
+            const disp=document.getElementById('sp-asset-display');
+            function show(a,btn){
+                menu.querySelectorAll('.sp-asset-btn').forEach(b=>b.classList.remove('active'));
+                btn.classList.add('active');
+                disp.innerHTML=`<div class="sp-asset-inner"><div class="sp-asset-icon-wrap">${a.icon}</div><div><h5>${a.title}</h5><p>${a.desc}</p></div></div>`;
+            }
+            assets.forEach((a,i)=>{
+                const btn=document.createElement('button');
+                btn.className='sp-asset-btn'+(i===0?' active':'');
+                btn.innerHTML=`<span>${a.icon}</span>${a.title}`;
+                btn.onclick=()=>show(a,btn);
+                menu.appendChild(btn);
+            });
+            show(assets[0],menu.querySelector('.sp-asset-btn'));
+        })();
+
+        // Tier tabs
+        (function(){
+            const tiers=[
+                {name:'Cota Diamante',price:'R$ 6.000,00',color:'#0284c7',bgBadge:'#e0f2fe',badge:'💎 Protagonismo Máximo',
+                 desc:'A exclusividade e o protagonismo máximo da sua marca em todos os pontos de contato com o atleta e o público.',
+                 items:[
+                    {ok:true,t:'Destaque MÁXIMO nos Pórticos (Entrada e Praia)'},
+                    {ok:true,t:'Logomarca "Master" na área nobre do Backdrop'},
+                    {ok:true,t:'Logomarca nas testeiras das Tendas principais (6×6m)'},
+                    {ok:true,t:'10 Wind Banners exclusivos em pontos estratégicos'},
+                    {ok:true,t:'Destaque nas 80 Placas e 40 Bandeiras do percurso'},
+                    {ok:true,t:'Logomarca aplicada nas 250 Bolsas (Kit Atleta)'},
+                    {ok:true,t:'Menções e agradecimentos especiais pelo Locutor'}
+                ]},
+                {name:'Cota Ouro',price:'R$ 3.000,00',color:'#d4af37',bgBadge:'#fefce8',badge:'🥇 Alta Visibilidade',
+                 desc:'Garante que sua marca seja vista com grande destaque nos pontos cruciais de concentração do nosso público.',
+                 items:[
+                    {ok:true,t:'Logomarca no Pórtico de Entrada'},
+                    {ok:true,t:'Logomarca "Premium" no Backdrop de fotos oficiais'},
+                    {ok:true,t:'Logomarca nas testeiras das Tendas (4×4m)'},
+                    {ok:true,t:'2 Wind Banners na arena do evento'},
+                    {ok:true,t:'Presença garantida nas Placas e Bandeiras no percurso'},
+                    {ok:true,t:'Logomarca aplicada nas 250 Bolsas (Kit Atleta)'},
+                    {ok:true,t:'Menções de destaque pelo Locutor Oficial'}
+                ]},
+                {name:'Cota Prata',price:'R$ 2.000,00',color:'#64748b',bgBadge:'#f8fafc',badge:'🥈 Custo-Benefício',
+                 desc:'Excelente relação custo-benefício para marcas que desejam apoiar o esporte e fixar sua imagem na comunidade.',
+                 items:[
+                    {ok:true,t:'Logomarca na malha de parceiros no Backdrop'},
+                    {ok:true,t:'Logomarca nas testeiras das tendas de apoio'},
+                    {ok:true,t:'Presença em placas e/ou bandeiras na praia'},
+                    {ok:true,t:'Logomarca aplicada nas 250 Bolsas (Kit Atleta)'},
+                    {ok:true,t:'Menções de agradecimento pelo Locutor Oficial'},
+                    {ok:false,t:'Sem Wind Banners exclusivos'},
+                    {ok:false,t:'Sem destaque em Pórticos'}
+                ]}
+            ];
+            const tabs=document.getElementById('sp-tier-tabs');
+            const cont=document.getElementById('sp-tier-content');
+            function showTier(tier,btn){
+                tabs.querySelectorAll('.sp-tab-btn').forEach(b=>b.classList.remove('active'));
+                btn.classList.add('active');
+                const items=tier.items.map(i=>`<li><span class="sp-check" style="color:${i.ok?'#10b981':'#cbd5e1'}">${i.ok?'✔':'✖'}</span><span class="${i.ok?'':'sp-muted'}">${i.t}</span></li>`).join('');
+                cont.innerHTML=`<div class="sp-tier-inner"><div class="sp-tier-left"><div class="sp-tier-badge" style="background:${tier.bgBadge};color:${tier.color};border:1px solid ${tier.color}44">${tier.badge}</div><div class="sp-tier-name">${tier.name}</div><div class="sp-tier-price" style="color:${tier.color}">${tier.price}</div><p class="sp-tier-desc">${tier.desc}</p></div><div class="sp-tier-right"><h6>Entregas da Cota</h6><ul class="sp-tier-list">${items}</ul></div></div>`;
+            }
+            tiers.forEach((t,i)=>{
+                const btn=document.createElement('button');
+                btn.className='sp-tab-btn'+(i===0?' active':'');
+                btn.textContent=t.name;
+                btn.onclick=()=>showTier(t,btn);
+                tabs.appendChild(btn);
+            });
+            showTier(tiers[0],tabs.querySelector('.sp-tab-btn'));
+        })();
     </script>
 </body>
 </html>
