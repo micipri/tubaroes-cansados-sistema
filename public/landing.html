@@ -43,7 +43,7 @@
         .sp-asset-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:700;font-family:Outfit,sans-serif;cursor:pointer;border:1px solid #e2e8f0;background:#fff;color:#64748b;transition:all .2s;text-align:left;width:100%}
         .sp-asset-btn:hover{background:#f8fafc}
         .sp-asset-btn.active{background:#0284c7;color:#fff;border-color:#0369a1}
-        .sp-asset-display{flex:1;background:#fff;border-radius:16px;padding:24px;border:1px solid #e2e8f0;min-height:200px;display:flex;align-items:flex-start}
+        .sp-asset-display{flex:1;background:#fff;border-radius:16px;padding:0;border:1px solid #e2e8f0;min-height:220px;display:flex;align-items:stretch;overflow:hidden}
         .sp-asset-inner{display:flex;gap:20px;align-items:flex-start}
         .sp-asset-icon-wrap{width:72px;height:72px;border-radius:50%;background:#e0f2fe;border:1px solid #bae6fd;display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0}
         .sp-asset-display h5{font-size:1.2rem;font-weight:900;color:#1e293b;margin:0 0 10px}
@@ -486,11 +486,15 @@
                 menu.querySelectorAll('.sp-asset-btn').forEach(b=>b.classList.remove('active'));
                 btn.classList.add('active');
                 disp.innerHTML=`
-                    <div style="width:100%">
-                        <img src="${a.img}" alt="${a.title}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-bottom:20px;display:block">
-                        <div class="sp-asset-inner">
-                            <div class="sp-asset-icon-wrap">${a.icon}</div>
-                            <div><h5>${a.title}</h5><p>${a.desc}</p></div>
+                    <div style="display:flex;width:100%;gap:0;height:100%;min-height:220px;">
+                        <div style="flex:0 0 75%;padding:28px 24px 28px 0;display:flex;flex-direction:column;justify-content:center;gap:14px;">
+                            <div class="sp-asset-inner" style="margin:0">
+                                <div class="sp-asset-icon-wrap">${a.icon}</div>
+                                <div><h5>${a.title}</h5><p>${a.desc}</p></div>
+                            </div>
+                        </div>
+                        <div style="flex:0 0 25%;overflow:hidden;border-radius:12px;">
+                            <img src="${a.img}" alt="${a.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
                         </div>
                     </div>`;
             }
@@ -503,6 +507,8 @@
             });
             show(assets[0],menu.querySelector('.sp-asset-btn'));
         })();
+
+
 
 
         // Tier tabs
