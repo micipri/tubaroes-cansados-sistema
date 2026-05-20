@@ -1,144 +1,157 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
-const fs = require('fs');
 
-// Resolve database path — default to /app/data (Volume mount) with fallback
-let dbPath;
-if (process.env.DB_PATH) {
-    // Explicit env var takes precedence
-    const targetDir = path.dirname(path.resolve(process.env.DB_PATH));
-    if (!fs.existsSync(targetDir)) {
-        try { fs.mkdirSync(targetDir, { recursive: true }); dbPath = path.resolve(process.env.DB_PATH); }
-        catch (e) { console.warn(`Cannot create DB dir ${targetDir}, using app dir:`, e.message); }
-    } else {
-        dbPath = path.resolve(process.env.DB_PATH);
-    }
+// Database configuration via connection string (DATABASE_URL env var)
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+    console.warn("WARNING: DATABASE_URL environment variable is not defined!");
 }
-if (!dbPath) {
-    // Default: try /app/data (Railway Volume), fall back to __dirname
-    const volumeDir = '/app/data';
-    const fallbackDir = __dirname;
-    const chosenDir = fs.existsSync(volumeDir) ? volumeDir : (() => {
-        try { fs.mkdirSync(volumeDir, { recursive: true }); return volumeDir; } catch(e) { return fallbackDir; }
-    })();
-    dbPath = path.join(chosenDir, 'database.sqlite');
-}
-console.log('Database path:', dbPath);
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Error connecting to database:', err.message);
-    } else {
-        console.log('Connected to the SQLite database.');
-        createTables();
-    }
+
+const pool = new Pool({
+    connectionString,
+    // Enable SSL for production database connection
+    ssl: connectionString && !connectionString.includes('localhost') && !connectionString.includes('127.0.0.1') ? {
+        rejectUnauthorized: false
+    } : false
 });
 
-function createTables() {
-    db.serialize(() => {
-        // Registrations (Batches)
-        db.run(`CREATE TABLE IF NOT EXISTS registrations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            quantity INTEGER NOT NULL,
-            unit_amount REAL NOT NULL,
-            total_amount REAL NOT NULL,
-            date TEXT NOT NULL
-        )`);
+pool.on('error', (err) => {
+    console.error('Unexpected error on idle PostgreSQL client', err);
+});
 
-        // Registrations Modality 2 (Individual)
-        db.run(`CREATE TABLE IF NOT EXISTS registrations_mod2 (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            cap_name TEXT NOT NULL,
-            amount REAL NOT NULL,
-            has_receipt BOOLEAN NOT NULL DEFAULT 0,
-            is_confirmed BOOLEAN NOT NULL DEFAULT 0,
-            date TEXT NOT NULL
-        )`);
+async function createTables() {
+    if (!connectionString) {
+        console.warn("Skipping table creation: DATABASE_URL is not set.");
+        return;
+    }
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        
+        // Registrations
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS registrations (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                unit_amount NUMERIC(10, 2) NOT NULL,
+                total_amount NUMERIC(10, 2) NOT NULL,
+                date TEXT NOT NULL
+            )
+        `);
+
+        // Registrations Modality 2
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS registrations_mod2 (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                cap_name TEXT NOT NULL,
+                amount NUMERIC(10, 2) NOT NULL,
+                has_receipt BOOLEAN NOT NULL DEFAULT FALSE,
+                is_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+                date TEXT NOT NULL
+            )
+        `);
 
         // Party tickets
-        db.run(`CREATE TABLE IF NOT EXISTS party_tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            amount REAL NOT NULL,
-            date TEXT NOT NULL
-        )`);
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS party_tickets (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                amount NUMERIC(10, 2) NOT NULL,
+                date TEXT NOT NULL
+            )
+        `);
 
-        // Store Products
-        db.run(`CREATE TABLE IF NOT EXISTS store_products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            stock INTEGER NOT NULL DEFAULT 0,
-            cost_price REAL NOT NULL,
-            sell_price REAL NOT NULL
-        )`);
+        // Store products
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS store_products (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                stock INTEGER NOT NULL DEFAULT 0,
+                cost_price NUMERIC(10, 2) NOT NULL,
+                sell_price NUMERIC(10, 2) NOT NULL
+            )
+        `);
 
-        // Store Sales
-        db.run(`CREATE TABLE IF NOT EXISTS store_sales (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            product_id INTEGER NOT NULL,
-            quantity INTEGER NOT NULL,
-            total_amount REAL NOT NULL,
-            date TEXT NOT NULL,
-            FOREIGN KEY (product_id) REFERENCES store_products (id)
-        )`);
+        // Store sales
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS store_sales (
+                id SERIAL PRIMARY KEY,
+                product_id INTEGER NOT NULL REFERENCES store_products(id) ON DELETE CASCADE,
+                quantity INTEGER NOT NULL,
+                total_amount NUMERIC(10, 2) NOT NULL,
+                date TEXT NOT NULL
+            )
+        `);
 
-        // Party Costs
-        db.run(`CREATE TABLE IF NOT EXISTS party_costs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            description TEXT NOT NULL,
-            amount REAL NOT NULL,
-            date TEXT NOT NULL
-        )`);
+        // Party costs
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS party_costs (
+                id SERIAL PRIMARY KEY,
+                description TEXT NOT NULL,
+                amount NUMERIC(10, 2) NOT NULL,
+                date TEXT NOT NULL
+            )
+        `);
 
-        // Event Costs
-        db.run(`CREATE TABLE IF NOT EXISTS event_costs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            description TEXT NOT NULL,
-            amount REAL NOT NULL,
-            date TEXT NOT NULL
-        )`);
+        // Event costs
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS event_costs (
+                id SERIAL PRIMARY KEY,
+                description TEXT NOT NULL,
+                amount NUMERIC(10, 2) NOT NULL,
+                date TEXT NOT NULL
+            )
+        `);
 
         // Sponsors
-        db.run(`CREATE TABLE IF NOT EXISTS sponsors (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            amount REAL NOT NULL,
-            date TEXT NOT NULL
-        )`);
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS sponsors (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                amount NUMERIC(10, 2) NOT NULL,
+                date TEXT NOT NULL
+            )
+        `);
 
-        // Users (for system access)
-        db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL,
-            is_master INTEGER NOT NULL DEFAULT 0,
-            created_at TEXT NOT NULL DEFAULT (datetime('now'))
-        )`, (err) => {
-            if (err) {
-                console.error('Error creating users table:', err.message);
-                return;
-            }
-            // Seed master user if not exists
-            db.get("SELECT id FROM users WHERE username = 'michel'", (err, row) => {
-                if (!row) {
-                    const hash = bcrypt.hashSync('tubaroes2026', 10);
-                    db.run(
-                        "INSERT INTO users (username, password_hash, is_master) VALUES (?, ?, 1)",
-                        ['michel', hash],
-                        (err) => {
-                            if (err) console.error('Error seeding master user:', err.message);
-                            else console.log('Master user "michel" created.');
-                        }
-                    );
-                }
-            });
-        });
+        // Users
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                is_master INTEGER NOT NULL DEFAULT 0,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
 
+        // Seed master user
+        const { rows } = await client.query("SELECT id FROM users WHERE username = 'michel'");
+        if (rows.length === 0) {
+            const hash = bcrypt.hashSync('tubaroes2026', 10);
+            await client.query(
+                "INSERT INTO users (username, password_hash, is_master) VALUES ('michel', $1, 1)",
+                [hash]
+            );
+            console.log('Master user "michel" created in database.');
+        }
+
+        await client.query('COMMIT');
         console.log('Database tables created/verified successfully.');
-    });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Error during database schema creation:', err.message);
+    } finally {
+        client.release();
+    }
 }
 
-module.exports = db;
+// Automatically create tables on import if DATABASE_URL is present
+createTables().catch(err => {
+    console.error('Failed to initialize database tables:', err.message);
+});
+
+module.exports = pool;
