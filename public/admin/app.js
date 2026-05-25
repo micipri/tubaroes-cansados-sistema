@@ -172,6 +172,16 @@ async function deleteData(endpoint, id) {
     return res.json();
 }
 
+async function putData(endpoint, data) {
+    const res = await fetch(`${API_URL}/${endpoint}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+    });
+    return res.json();
+}
+
 const deleteHandler = (endpoint, id, reloadFunc) => async (e) => {
     if (e) e.preventDefault();
     if (confirm('Tem certeza que deseja excluir?')) {
@@ -335,7 +345,11 @@ async function loadStoreProducts() {
     select.innerHTML = '<option value="" disabled selected>Selecione um Produto</option>';
     data.forEach(item => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>#${item.id}</td><td>${item.name}</td><td>${item.stock} un.</td><td>${formatCurrency(item.cost_price)}</td><td>${formatCurrency(item.sell_price)}</td><td><button type="button" class="btn-icon add-stock"><i class="ri-add-line"></i></button><button type="button" class="btn-icon btn-danger delete-prod"><i class="ri-delete-bin-line"></i></button></td>`;
+        tr.innerHTML = `<td>#${item.id}</td><td>${item.name}</td><td>${item.stock} un.</td><td>${formatCurrency(item.cost_price)}</td><td>${formatCurrency(item.sell_price)}</td><td>
+            <button type="button" class="btn-icon add-stock" title="Adicionar Estoque"><i class="ri-add-line"></i></button>
+            <button type="button" class="btn-icon btn-edit edit-prod" title="Editar"><i class="ri-pencil-line"></i></button>
+            <button type="button" class="btn-icon btn-danger delete-prod" title="Excluir"><i class="ri-delete-bin-line"></i></button>
+        </td>`;
         tr.querySelector('.add-stock').onclick = async () => {
             const qty = prompt(`Quantas unidades adicionar ao produto ${item.name}?`);
             if (qty && !isNaN(qty)) {
@@ -346,6 +360,7 @@ async function loadStoreProducts() {
                 loadStoreProducts(); loadDashboard();
             }
         };
+        tr.querySelector('.edit-prod').onclick = () => openEditProductModal(item);
         tr.querySelector('.delete-prod').onclick = deleteHandler('store_products', item.id, loadStoreProducts);
         tbody.appendChild(tr);
         if (item.stock > 0) select.innerHTML += `<option value="${item.id}">${item.name} (Estoque: ${item.stock} | ${formatCurrency(item.sell_price)})</option>`;
@@ -391,8 +406,12 @@ async function loadCosts(type) {
     tbody.innerHTML = '';
     data.forEach(item => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>#${item.id}</td><td>${item.description}</td><td>${formatCurrency(item.amount)}</td><td>${formatDate(item.date)}</td><td><button class="btn-icon btn-danger"><i class="ri-delete-bin-line"></i></button></td>`;
-        tr.querySelector('button').onclick = deleteHandler(`costs/${type}`, item.id, () => loadCosts(type));
+        tr.innerHTML = `<td>#${item.id}</td><td>${item.description}</td><td>${formatCurrency(item.amount)}</td><td>${formatDate(item.date)}</td><td>
+            <button class="btn-icon btn-edit edit-cost" title="Editar"><i class="ri-pencil-line"></i></button>
+            <button class="btn-icon btn-danger delete-cost" title="Excluir"><i class="ri-delete-bin-line"></i></button>
+        </td>`;
+        tr.querySelector('.edit-cost').onclick = () => openEditCostModal(type, item);
+        tr.querySelector('.delete-cost').onclick = deleteHandler(`costs/${type}`, item.id, () => loadCosts(type));
         tbody.appendChild(tr);
     });
 }
@@ -469,3 +488,105 @@ document.getElementById('form-user').addEventListener('submit', async (e) => {
     e.target.reset();
     loadUsers();
 });
+
+// ── Edit Modals ───────────────────────────────────────────────
+function createModal(title, bodyHTML, onConfirm) {
+    // Remove any existing modal
+    const existing = document.getElementById('edit-modal-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'edit-modal-overlay';
+    overlay.style.cssText = `
+        position:fixed;inset:0;z-index:9999;
+        background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);
+        display:flex;align-items:center;justify-content:center;padding:1rem;
+    `;
+
+    overlay.innerHTML = `
+        <div id="edit-modal" style="
+            background:#1a1f2e;border:1px solid rgba(212,175,55,0.3);
+            border-radius:16px;padding:2rem;width:100%;max-width:480px;
+            box-shadow:0 24px 64px rgba(0,0,0,0.6);
+            animation:modalIn .2s ease;
+        ">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                <h3 style="margin:0;color:#d4af37;font-size:1.1rem;">${title}</h3>
+                <button id="modal-close-btn" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.4rem;cursor:pointer;line-height:1;">×</button>
+            </div>
+            <div class="modal-body" style="display:flex;flex-direction:column;gap:0.75rem;">
+                ${bodyHTML}
+            </div>
+            <div style="display:flex;gap:0.75rem;margin-top:1.5rem;justify-content:flex-end;">
+                <button id="modal-cancel-btn" class="btn" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:0.5rem 1.25rem;border-radius:8px;cursor:pointer;">Cancelar</button>
+                <button id="modal-confirm-btn" class="btn btn-primary" style="padding:0.5rem 1.25rem;">Salvar</button>
+            </div>
+        </div>
+    `;
+
+    // Inject keyframe animation once
+    if (!document.getElementById('modal-anim-style')) {
+        const style = document.createElement('style');
+        style.id = 'modal-anim-style';
+        style.textContent = `
+            @keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+            #edit-modal input, #edit-modal select {
+                width:100%;padding:.6rem .9rem;border-radius:8px;
+                background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+                color:#fff;font-size:.95rem;font-family:Outfit,sans-serif;box-sizing:border-box;
+            }
+            #edit-modal label { font-size:.82rem;color:rgba(255,255,255,.55);margin-bottom:2px;display:block; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    document.getElementById('modal-close-btn').onclick = close;
+    document.getElementById('modal-cancel-btn').onclick = close;
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.getElementById('modal-confirm-btn').onclick = async () => {
+        const success = await onConfirm();
+        if (success !== false) close();
+    };
+}
+
+function openEditProductModal(item) {
+    createModal('Editar Produto', `
+        <div><label>Nome do Produto</label><input id="ep-name" type="text" value="${item.name}"></div>
+        <div><label>Estoque (unidades)</label><input id="ep-stock" type="number" value="${item.stock}"></div>
+        <div><label>Preço de Custo (R$)</label><input id="ep-cost" type="number" step="0.01" value="${item.cost_price}"></div>
+        <div><label>Preço de Venda (R$)</label><input id="ep-sell" type="number" step="0.01" value="${item.sell_price}"></div>
+    `, async () => {
+        const name = document.getElementById('ep-name').value.trim();
+        const stock = parseInt(document.getElementById('ep-stock').value);
+        const cost_price = parseFloat(document.getElementById('ep-cost').value);
+        const sell_price = parseFloat(document.getElementById('ep-sell').value);
+        if (!name || isNaN(stock) || isNaN(cost_price) || isNaN(sell_price)) {
+            alert('Preencha todos os campos corretamente.'); return false;
+        }
+        const res = await putData(`store_products/${item.id}`, { name, stock, cost_price, sell_price });
+        if (res.error) { alert(res.error); return false; }
+        loadStoreProducts(); loadDashboard();
+    });
+}
+
+function openEditCostModal(type, item) {
+    const label = type === 'party' ? 'Custo da Festa' : 'Custo do Evento';
+    createModal(`Editar ${label}`, `
+        <div><label>Descrição</label><input id="ec-desc" type="text" value="${item.description.replace(/"/g, '&quot;')}"></div>
+        <div><label>Valor (R$)</label><input id="ec-amount" type="number" step="0.01" value="${item.amount}"></div>
+        <div><label>Data</label><input id="ec-date" type="date" value="${item.date}"></div>
+    `, async () => {
+        const description = document.getElementById('ec-desc').value.trim();
+        const amount = parseFloat(document.getElementById('ec-amount').value);
+        const date = document.getElementById('ec-date').value;
+        if (!description || isNaN(amount) || !date) {
+            alert('Preencha todos os campos corretamente.'); return false;
+        }
+        const res = await putData(`costs/${type}/${item.id}`, { description, amount, date });
+        if (res.error) { alert(res.error); return false; }
+        loadCosts(type); loadDashboard();
+    });
+}

@@ -281,6 +281,17 @@ app.delete('/api/store_products/:id', requireAuth, (req, res) => {
         res.json({ deleted: this.changes > 0 });
     });
 });
+app.put('/api/store_products/:id', requireAuth, (req, res) => {
+    const { name, stock, cost_price, sell_price } = req.body;
+    db.run(
+        "UPDATE store_products SET name = ?, stock = ?, cost_price = ?, sell_price = ? WHERE id = ?",
+        [name, stock, cost_price, sell_price, req.params.id],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ updated: this.changes > 0 });
+        }
+    );
+});
 app.put('/api/store_products/:id/stock', requireAuth, (req, res) => {
     const { stock } = req.body;
     db.run("UPDATE store_products SET stock = stock + ? WHERE id = ?", [stock, req.params.id], function(err) {
@@ -342,6 +353,18 @@ app.delete('/api/costs/:type/:id', requireAuth, (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ deleted: this.changes > 0 });
     });
+});
+app.put('/api/costs/:type/:id', requireAuth, (req, res) => {
+    const table = req.params.type === 'party' ? 'party_costs' : 'event_costs';
+    const { description, amount, date } = req.body;
+    db.run(
+        `UPDATE ${table} SET description = ?, amount = ?, date = ? WHERE id = ?`,
+        [description, amount, date, req.params.id],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ updated: this.changes > 0 });
+        }
+    );
 });
 
 // --- Sponsors ---

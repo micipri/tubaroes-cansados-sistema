@@ -319,6 +319,14 @@ input:focus, select:focus { border-color: var(--brand-primary); }
     font-size: 0.85rem;
 }
 .btn-danger:hover { background: var(--danger); color: white; }
+.btn-edit {
+    background: rgba(245,158,11,0.15);
+    color: var(--warning);
+    border: 1px solid rgba(245,158,11,0.3);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+.btn-edit:hover { background: var(--warning); color: #0a0a0f; }
 
 .btn-icon {
     background: rgba(109,40,217,0.2);
