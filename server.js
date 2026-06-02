@@ -78,6 +78,13 @@ app.get('/', (req, res) => {
     res.sendFile('landing.html', { root: path.join(__dirname, 'public') });
 });
 
+app.get('/projeto-secreto', (req, res) => {
+    res.sendFile('projeto-secreto/index.html', { root: path.join(__dirname, 'public') });
+});
+app.get('/projeto-secreto/', (req, res) => {
+    res.sendFile('projeto-secreto/index.html', { root: path.join(__dirname, 'public') });
+});
+
 // ─── Public static assets (CSS, JS, images) ──────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
