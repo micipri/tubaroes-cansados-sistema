@@ -115,6 +115,16 @@ function createTables() {
             date TEXT NOT NULL
         )`);
 
+        // Secret Survey
+        db.run(`CREATE TABLE IF NOT EXISTS secret_survey (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            will_go BOOLEAN NOT NULL,
+            companions INTEGER NOT NULL DEFAULT 0,
+            suggestion TEXT,
+            date TEXT NOT NULL
+        )`);
+
         // Sponsors
         db.run(`CREATE TABLE IF NOT EXISTS sponsors (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

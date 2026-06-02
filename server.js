@@ -424,6 +424,27 @@ app.delete('/api/sponsors/:id', requireAuth, (req, res) => {
     });
 });
 
+// --- Secret Survey ---
+app.get('/api/survey', requireAuth, (req, res) => {
+    db.all("SELECT * FROM secret_survey ORDER BY id DESC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+app.post('/api/survey', (req, res) => {
+    // PUBLIC ROUTE - Anyone can answer
+    const { name, will_go, companions, suggestion } = req.body;
+    const date = new Date().toISOString().split('T')[0];
+    db.run(
+        "INSERT INTO secret_survey (name, will_go, companions, suggestion, date) VALUES (?, ?, ?, ?, ?)",
+        [name, will_go ? 1 : 0, parseInt(companions) || 0, suggestion || '', date],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id: this.lastID, success: true });
+        }
+    );
+});
+
 // --- Dashboard Summary ---
 app.get('/api/summary', requireAuth, (req, res) => {
     const summary = {

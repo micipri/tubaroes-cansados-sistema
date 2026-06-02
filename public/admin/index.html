@@ -31,6 +31,7 @@
                 <li data-target="store"><i class="ri-store-2-fill"></i> Lojinha</li>
                 <li data-target="costs"><i class="ri-wallet-3-fill"></i> Custos</li>
                 <li data-target="sponsors"><i class="ri-hand-heart-fill"></i> Patrocínios</li>
+                <li data-target="survey"><i class="ri-spy-fill"></i> Pesquisa Secreta</li>
                 <li id="nav-users" data-target="users" style="display:none;"><i class="ri-team-fill"></i> Usuários</li>
             </ul>
             <div style="padding: 1rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.08);">
@@ -280,6 +281,33 @@
                         <table>
                             <thead><tr><th>ID</th><th>Nome</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
                             <tbody id="table-sponsors"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Secret Survey Section -->
+                <section id="survey" class="page-section hidden">
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 2rem;">
+                        <div class="card glass-card stat-card income">
+                            <i class="ri-thumb-up-fill icon" style="background: rgba(0,255,100,0.2); color: #00ff88;"></i>
+                            <div class="details">
+                                <span class="label">Disseram SIM</span>
+                                <h3 id="survey-yes-count">0</h3>
+                            </div>
+                        </div>
+                        <div class="card glass-card stat-card expense">
+                            <i class="ri-thumb-down-line icon" style="background: rgba(255,0,50,0.2); color: #ff3366;"></i>
+                            <div class="details">
+                                <span class="label">Disseram NÃO</span>
+                                <h3 id="survey-no-count">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card glass-card table-container">
+                        <h3>Respostas da Pesquisa</h3>
+                        <table>
+                            <thead><tr><th>ID</th><th>Nome</th><th>Vai?</th><th>Acompanhantes</th><th>Sugestão</th><th>Data</th></tr></thead>
+                            <tbody id="table-survey"></tbody>
                         </table>
                     </div>
                 </section>

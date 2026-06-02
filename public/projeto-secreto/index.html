@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projeto Confidencial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="icon" href="/logodourada.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <div class="container">
+        
+        <!-- Passo 1: Bloqueio (Identificação) -->
+        <div id="step-1" class="step active">
+            <div class="top-secret-badge"><i class="ri-lock-password-line"></i> Acesso Restrito</div>
+            <h1 class="main-title">Você foi selecionado(a)</h1>
+            <p class="subtitle">Esta é uma pesquisa altamente confidencial sobre o futuro dos Tubarões Cansados.<br><strong>Por favor, não divulgue este link.</strong></p>
+            
+            <form id="form-auth" class="auth-form">
+                <div class="input-group">
+                    <label for="user-name">Identifique-se para acessar o arquivo:</label>
+                    <input type="text" id="user-name" placeholder="Digite seu nome completo" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-glow">
+                    <span>Conhecer o Projeto Secreto</span>
+                    <i class="ri-arrow-right-line"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Passo 2: O Projeto (A Pesquisa) -->
+        <div id="step-2" class="step hidden">
+            <div class="top-secret-badge unlocked"><i class="ri-lock-unlock-line"></i> Acesso Liberado</div>
+            <h2 class="section-title">O Plano dos 10 Anos</h2>
+            
+            <div class="briefing-box">
+                <p>Temos o grande sonho de fazer uma festa inesquecível para o nosso grupo exatamente no dia em que completamos 10 anos: <strong>26 de Junho</strong>.</p>
+                <p><strong>Nosso plano:</strong> Escolhemos um bar muito especial para realizar um show com uma grande banda de pop rock do cenário capixaba.</p>
+                <p><strong>A ideia:</strong> A festa começa às 18h00 e já às 19h00 a banda começa a animação. Teremos uma entrada simbólica de <strong>R$ 70</strong> para custear a banda e, de presente, alguns copos de chope para os primeiros que comprarem o ingresso!</p>
+            </div>
+
+            <form id="form-survey" class="survey-form">
+                <div class="question">
+                    <label>1. Você topa? Você iria?</label>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="will_go" value="yes" required>
+                            <span class="card-content"><i class="ri-thumb-up-fill"></i> Sim, eu topo!</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="will_go" value="no">
+                            <span class="card-content"><i class="ri-thumb-down-line"></i> Não poderei</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question" id="companions-q">
+                    <label>2. Você iria sozinho ou levaria acompanhante(s)? Se sim, quantos?</label>
+                    <input type="number" id="companions" min="0" max="99" placeholder="Ex: 0 para nenhum" class="number-input">
+                </div>
+
+                <div class="question">
+                    <label>3. Gostaria de dar alguma sugestão para a festa?</label>
+                    <textarea id="suggestion" rows="3" placeholder="Sua opinião é valiosa para nós..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-glow submit-btn">
+                    <span>Enviar Confirmação Secreta</span>
+                    <i class="ri-send-plane-fill"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Passo 3: Conclusão -->
+        <div id="step-3" class="step hidden text-center">
+            <div class="success-icon"><i class="ri-check-double-line"></i></div>
+            <h1 class="main-title">Missão Cumprida</h1>
+            <p class="subtitle">Sua resposta foi registrada com segurança no banco de dados.</p>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 2rem;">Lembre-se: Mantenha segredo absoluto.</p>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
