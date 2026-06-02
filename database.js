@@ -84,7 +84,20 @@ function createTables() {
             total_amount REAL NOT NULL,
             date TEXT NOT NULL,
             FOREIGN KEY (product_id) REFERENCES store_products (id)
-        )`);
+        )`, () => {
+            // Migration: Add discount column to existing online databases
+            db.all("PRAGMA table_info(store_sales)", (err, columns) => {
+                if (!err && columns) {
+                    const hasDiscount = columns.some(col => col.name === 'discount');
+                    if (!hasDiscount) {
+                        db.run("ALTER TABLE store_sales ADD COLUMN discount REAL NOT NULL DEFAULT 0", (err) => {
+                            if (err) console.error("Migration Error (store_sales):", err.message);
+                            else console.log("Migration: Added 'discount' column to store_sales.");
+                        });
+                    }
+                }
+            });
+        });
 
         // Party Costs
         db.run(`CREATE TABLE IF NOT EXISTS party_costs (

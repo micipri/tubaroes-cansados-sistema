@@ -429,7 +429,6 @@ document.getElementById('form-store-sale').addEventListener('submit', async (e) 
     if (res.error) alert(res.error);
     else { 
         e.target.reset(); 
-        document.getElementById('sale-discount').value = '0';
         loadStoreSales(); 
         loadStoreProducts(); 
         loadDashboard(); 
