@@ -303,7 +303,7 @@ app.put('/api/store_products/:id/stock', requireAuth, (req, res) => {
 // --- Store Sales ---
 app.get('/api/store_sales', requireAuth, (req, res) => {
     const query = `
-        SELECT s.id, p.name as product_name, s.quantity, s.total_amount, s.date
+        SELECT s.id, p.name as product_name, s.quantity, s.discount, s.total_amount, s.date
         FROM store_sales s
         JOIN store_products p ON s.product_id = p.id
         ORDER BY s.id DESC
@@ -314,19 +314,50 @@ app.get('/api/store_sales', requireAuth, (req, res) => {
     });
 });
 app.post('/api/store_sales', requireAuth, (req, res) => {
-    const { product_id, quantity, date } = req.body;
+    const { product_id, quantity, discount, date } = req.body;
     db.get("SELECT sell_price, stock FROM store_products WHERE id = ?", [product_id], (err, product) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!product) return res.status(404).json({ error: "Product not found" });
         if (product.stock < quantity) return res.status(400).json({ error: "Insufficient stock" });
 
-        const total_amount = product.sell_price * quantity;
+        const total_amount = (product.sell_price * quantity) - (parseFloat(discount) || 0);
         db.serialize(() => {
-            db.run("INSERT INTO store_sales (product_id, quantity, total_amount, date) VALUES (?, ?, ?, ?)", [product_id, quantity, total_amount, date]);
+            db.run("INSERT INTO store_sales (product_id, quantity, discount, total_amount, date) VALUES (?, ?, ?, ?, ?)", [product_id, quantity, parseFloat(discount) || 0, total_amount, date]);
             db.run("UPDATE store_products SET stock = stock - ? WHERE id = ?", [quantity, product_id], function(err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ success: true, total_amount });
             });
+        });
+    });
+});
+app.delete('/api/store_sales/:id', requireAuth, (req, res) => {
+    db.get("SELECT product_id, quantity FROM store_sales WHERE id = ?", [req.params.id], (err, sale) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!sale) return res.status(404).json({ error: "Sale not found" });
+        db.serialize(() => {
+            db.run("DELETE FROM store_sales WHERE id = ?", [req.params.id]);
+            db.run("UPDATE store_products SET stock = stock + ? WHERE id = ?", [sale.quantity, sale.product_id], function(err) {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json({ deleted: true });
+            });
+        });
+    });
+});
+app.put('/api/store_sales/:id/discount', requireAuth, (req, res) => {
+    const { discount } = req.body;
+    db.get(`
+        SELECT s.quantity, p.sell_price 
+        FROM store_sales s 
+        JOIN store_products p ON s.product_id = p.id 
+        WHERE s.id = ?
+    `, [req.params.id], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: "Sale not found" });
+        
+        const new_total = (row.sell_price * row.quantity) - (parseFloat(discount) || 0);
+        db.run("UPDATE store_sales SET discount = ?, total_amount = ? WHERE id = ?", [parseFloat(discount) || 0, new_total, req.params.id], function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ updated: this.changes > 0, total_amount: new_total });
         });
     });
 });

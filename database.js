@@ -80,6 +80,7 @@ function createTables() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             product_id INTEGER NOT NULL,
             quantity INTEGER NOT NULL,
+            discount REAL NOT NULL DEFAULT 0,
             total_amount REAL NOT NULL,
             date TEXT NOT NULL,
             FOREIGN KEY (product_id) REFERENCES store_products (id)

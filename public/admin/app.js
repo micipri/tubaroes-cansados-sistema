@@ -384,7 +384,37 @@ async function loadStoreSales() {
     tbody.innerHTML = '';
     data.forEach(item => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${item.product_name}</td><td>${item.quantity} un.</td><td>${formatCurrency(item.total_amount)}</td><td>${formatDate(item.date)}</td>`;
+        tr.innerHTML = `
+            <td>${item.product_name}</td>
+            <td>${item.quantity} un.</td>
+            <td>${formatCurrency(item.discount || 0)}</td>
+            <td><strong>${formatCurrency(item.total_amount)}</strong></td>
+            <td>${formatDate(item.date)}</td>
+            <td>
+                <button type="button" class="btn-icon btn-edit edit-sale-discount" title="Editar Desconto"><i class="ri-pencil-line"></i></button>
+                <button type="button" class="btn-icon btn-danger delete-sale" title="Excluir Venda"><i class="ri-delete-bin-line"></i></button>
+            </td>
+        `;
+        
+        tr.querySelector('.edit-sale-discount').onclick = async () => {
+            const newDiscount = prompt(`Editar desconto para venda de ${item.product_name} (Atual: ${formatCurrency(item.discount || 0)}):`, item.discount || 0);
+            if (newDiscount !== null) {
+                const parsedDiscount = parseFloat(newDiscount.replace(',', '.'));
+                if (!isNaN(parsedDiscount)) {
+                    const res = await putData(`store_sales/${item.id}/discount`, { discount: parsedDiscount });
+                    if (res.error) alert(res.error);
+                    else { loadStoreSales(); loadDashboard(); }
+                } else {
+                    alert('Valor inválido!');
+                }
+            }
+        };
+        
+        tr.querySelector('.delete-sale').onclick = deleteHandler('store_sales', item.id, () => {
+            loadStoreSales(); 
+            loadStoreProducts(); // restore stock visually
+        });
+        
         tbody.appendChild(tr);
     });
 }
@@ -393,10 +423,17 @@ document.getElementById('form-store-sale').addEventListener('submit', async (e) 
     const res = await postData('store_sales', {
         product_id: parseInt(document.getElementById('sale-product-id').value),
         quantity: parseInt(document.getElementById('sale-quantity').value),
+        discount: parseFloat(document.getElementById('sale-discount').value) || 0,
         date: document.getElementById('sale-date').value
     });
     if (res.error) alert(res.error);
-    else { e.target.reset(); loadStoreSales(); loadStoreProducts(); loadDashboard(); }
+    else { 
+        e.target.reset(); 
+        document.getElementById('sale-discount').value = '0';
+        loadStoreSales(); 
+        loadStoreProducts(); 
+        loadDashboard(); 
+    }
 });
 
 // ── Costs ─────────────────────────────────────────────────────
