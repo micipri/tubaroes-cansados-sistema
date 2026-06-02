@@ -321,10 +321,15 @@ app.post('/api/store_sales', requireAuth, (req, res) => {
         if (product.stock < quantity) return res.status(400).json({ error: "Insufficient stock" });
 
         const total_amount = (product.sell_price * quantity) - (parseFloat(discount) || 0);
-        db.serialize(() => {
-            db.run("INSERT INTO store_sales (product_id, quantity, discount, total_amount, date) VALUES (?, ?, ?, ?, ?)", [product_id, quantity, parseFloat(discount) || 0, total_amount, date]);
-            db.run("UPDATE store_products SET stock = stock - ? WHERE id = ?", [quantity, product_id], function(err) {
-                if (err) return res.status(500).json({ error: err.message });
+        
+        db.run("INSERT INTO store_sales (product_id, quantity, discount, total_amount, date) VALUES (?, ?, ?, ?, ?)", 
+        [product_id, quantity, parseFloat(discount) || 0, total_amount, date], 
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            
+            // Only update stock if the insert was successful
+            db.run("UPDATE store_products SET stock = stock - ? WHERE id = ?", [quantity, product_id], function(errStock) {
+                if (errStock) return res.status(500).json({ error: errStock.message });
                 res.json({ success: true, total_amount });
             });
         });
