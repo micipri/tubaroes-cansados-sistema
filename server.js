@@ -483,6 +483,58 @@ app.get('/api/summary', requireAuth, (req, res) => {
     });
 });
 
+// ─── Check-in Tutubas ────────────────────────────────────────────────────────
+const checkinVolumeDir = path.join(baseSessionDir, 'checkin');
+const checkinUploadsDir = path.join(checkinVolumeDir, 'uploads');
+const checkinDataFile = path.join(checkinVolumeDir, 'data.json');
+
+if (!fs.existsSync(checkinUploadsDir)) fs.mkdirSync(checkinUploadsDir, { recursive: true });
+if (!fs.existsSync(checkinDataFile)) {
+    const sourceDataFile = path.join(__dirname, 'checkin', 'public', 'data.json');
+    if (fs.existsSync(sourceDataFile)) {
+        fs.copyFileSync(sourceDataFile, checkinDataFile);
+    } else {
+        fs.writeFileSync(checkinDataFile, '[]');
+    }
+}
+
+// Em vez de restringir a pasta inteira para /checkin (que limitaria requests sem a barra no final), 
+// montamos a pasta estática sob /checkin
+app.use('/checkin', express.static(path.join(__dirname, 'checkin')));
+app.use('/checkin/uploads', express.static(checkinUploadsDir));
+
+app.get('/checkin/data.json', (req, res) => {
+    res.sendFile(checkinDataFile);
+});
+
+app.post('/checkin/data.json', (req, res) => {
+    fs.writeFile(checkinDataFile, JSON.stringify(req.body, null, 2), (err) => {
+        if (err) return res.status(500).json({ error: "Failed to save data" });
+        res.json({ success: true });
+    });
+});
+
+app.post('/checkin/upload.php', (req, res) => {
+    const { image, id } = req.body;
+    if (!image || !id) return res.status(400).json({ error: "Missing image or ID" });
+
+    const imageParts = image.split(";base64,");
+    if (imageParts.length !== 2) return res.status(400).json({ error: "Invalid image format" });
+
+    const imageTypeAux = imageParts[0].split("image/");
+    const imageType = imageTypeAux[1] || 'jpg';
+    const imageBase64 = Buffer.from(imageParts[1], 'base64');
+
+    const sanitizedId = String(id).replace(/[^a-zA-Z0-9_-]/g, '');
+    const fileName = `atleta_${sanitizedId}.${imageType}`;
+    const filePath = path.join(checkinUploadsDir, fileName);
+
+    fs.writeFile(filePath, imageBase64, (err) => {
+        if (err) return res.status(500).json({ error: "Failed to save image" });
+        res.status(200).json({ success: true, url: `uploads/${fileName}` });
+    });
+});
+
 // ─── Global error handlers (prevent silent crashes on Railway) ───────────────
 process.on('uncaughtException',  (err)    => console.error('[CRASH] uncaughtException:', err));
 process.on('unhandledRejection', (reason) => console.error('[CRASH] unhandledRejection:', reason));

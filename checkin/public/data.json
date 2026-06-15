@@ -1,0 +1,1928 @@
+[
+  {
+    "id": 1,
+    "nome": "Adeli Mendes de Oliveira Gavina",
+    "cpf": "75099314791",
+    "telefone": "+55 (27) 98841-8204",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 2,
+    "nome": "Adrian Carlos Pereira",
+    "cpf": "11028463766",
+    "telefone": "+55 (27) 99953-1225",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 3,
+    "nome": "Afonso Celso Andara da Silva Filho",
+    "cpf": "08783973702",
+    "telefone": "+55 (27) 98117-6050",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 4,
+    "nome": "Alan Fassarella Shunck",
+    "cpf": "13894378760",
+    "telefone": "+55 (27) 99720-9100",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 5,
+    "nome": "Alessandra Andréa Fattori Dias de Souza",
+    "cpf": "87525658900",
+    "telefone": "+55 (27) 99284-0080",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 6,
+    "nome": "ALESSANDRA ROCHA MIRANDA DE SOUZA",
+    "cpf": "06903001662",
+    "telefone": "+55 (31) 98742-3613",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 7,
+    "nome": "Alessandro Mendes Miranda",
+    "cpf": "08022901750",
+    "telefone": "+55 (27) 99625-2003",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 8,
+    "nome": "Alex Furtado de Oliveira",
+    "cpf": "05155338743",
+    "telefone": "+55 (27) 98131-7266",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 9,
+    "nome": "Alexandre Davilademacedo",
+    "cpf": "57738955791",
+    "telefone": "+55 (27) 98816-9784",
+    "camisa": "NÃO",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 10,
+    "nome": "Alexandre Vasconcellos",
+    "cpf": "23767014734",
+    "telefone": "+55 (27) 99950-0165",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 11,
+    "nome": "Aline Cristina Vilbert",
+    "cpf": "01123861056",
+    "telefone": "+55 (27) 99951-1031",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 12,
+    "nome": "Ana Paula Nascimento dos Santoa",
+    "cpf": "07445983708",
+    "telefone": "+55 (27) 99225-6935",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 13,
+    "nome": "Ana Polez",
+    "cpf": "12240345705",
+    "telefone": "",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 14,
+    "nome": "Anderson Alves Landim",
+    "cpf": "10503716740",
+    "telefone": "+55 (27) 99625-3954",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 15,
+    "nome": "Anderson Coutinho Corona",
+    "cpf": "08517532724",
+    "telefone": "+55 (27) 99966-3040",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 16,
+    "nome": "Andréa Nicacio Peralva",
+    "cpf": "04170999835",
+    "telefone": "",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 17,
+    "nome": "angela dalton",
+    "cpf": "09030381701",
+    "telefone": "+55 (27) 99928-0150",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 18,
+    "nome": "Antonio Jorge Augusto Regis de Farias",
+    "cpf": "05515795792",
+    "telefone": "+55 (27) 99906-9850",
+    "camisa": "M",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 19,
+    "nome": "Arian Nunes Dubois",
+    "cpf": "14891406704",
+    "telefone": "+55 (27) 99291-9599",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 20,
+    "nome": "Ariany Ferreira",
+    "cpf": "11796119776",
+    "telefone": "+55 (27) 99836-1192",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 21,
+    "nome": "Bernardo Bastos",
+    "cpf": "08462547784",
+    "telefone": "+55 (27) 99944-5773",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 22,
+    "nome": "Bianca Baracho da Silva Vargas de Oliveira",
+    "cpf": "00792169433",
+    "telefone": "+55 (27) 99930-1929",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 23,
+    "nome": "Bruna Vidigal Coutinho",
+    "cpf": "08265438710",
+    "telefone": "+55 (27) 98154-3282",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 24,
+    "nome": "Carolina de Souza Carvalho",
+    "cpf": "06136452782",
+    "telefone": "+55 (27) 99613-3362",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 25,
+    "nome": "Carolina Ferreira do Lago",
+    "cpf": "05944586680",
+    "telefone": "+55 (27) 99906-6475",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 26,
+    "nome": "Carolina Monteiro Salaroli",
+    "cpf": "13454233739",
+    "telefone": "+55 (27) 99718-2861",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 27,
+    "nome": "Catarina Marques de Freitas",
+    "cpf": "13784695779",
+    "telefone": "+55 (21) 98891-8092",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 28,
+    "nome": "Cesar Augusto Bravin",
+    "cpf": "08001581721",
+    "telefone": "+55 (27) 99949-6635",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 29,
+    "nome": "Clara Moraes",
+    "cpf": "09401796793",
+    "telefone": "+55 (27) 99686-2389",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 30,
+    "nome": "CLARISSA DUARTE BICALHO",
+    "cpf": "15118483751",
+    "telefone": "+55 (28) 99950-3599",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 31,
+    "nome": "Claudio Luiz Fernandes Barboza",
+    "cpf": "03173095790",
+    "telefone": "+55 (27) 98880-7532",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 32,
+    "nome": "DALTON ALMEIDA RIBEIRO",
+    "cpf": "03774446776",
+    "telefone": "+55 (27) 99915-6735",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 33,
+    "nome": "Dani Laranja",
+    "cpf": "07778715724",
+    "telefone": "+55 (28) 99274-9672",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 34,
+    "nome": "Daniel dos Santos Magevski",
+    "cpf": "14492941703",
+    "telefone": "+55 (27) 99625-9365",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 35,
+    "nome": "Daniela Abaurre Ferrari",
+    "cpf": "05263214740",
+    "telefone": "+55 (27) 98133-2322",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 36,
+    "nome": "Daniela Pereira Viera Souza",
+    "cpf": "05888502766",
+    "telefone": "+55 (27) 99979-4898",
+    "camisa": "P",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 37,
+    "nome": "Daniele Ferreira Cassa",
+    "cpf": "08785353736",
+    "telefone": "+55 (27) 99632-6541",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 38,
+    "nome": "Daniella Fereghetti",
+    "cpf": "88968090106",
+    "telefone": "+55 (27) 99774-9231",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 39,
+    "nome": "Davi Bonatto Abreu",
+    "cpf": "22448060738",
+    "telefone": "+55 (27) 99248-8477",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 40,
+    "nome": "Debora Rangel Machado Sardinha",
+    "cpf": "00290733758",
+    "telefone": "+55 (27) 99983-4902",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 41,
+    "nome": "Diego Cupertino",
+    "cpf": "08808709744",
+    "telefone": "+55 (27) 99848-8019",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 42,
+    "nome": "Diego Dondoni Grijó",
+    "cpf": "11544605765",
+    "telefone": "+55 (27) 98815-2630",
+    "camisa": "G",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 43,
+    "nome": "DIEGO POLTRONIERI VALIATI",
+    "cpf": "10839371705",
+    "telefone": "+55 (27) 99623-4050",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 44,
+    "nome": "Diogo de Holanda",
+    "cpf": "03455528147",
+    "telefone": "+55 (11) 97572-2227",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 45,
+    "nome": "Eduardo Dos Santos Ribeiro",
+    "cpf": "11750666723",
+    "telefone": "+55 (27) 99263-2010",
+    "camisa": "G",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 46,
+    "nome": "Eduardo Francisco Fernandes de Miranda",
+    "cpf": "98577840700",
+    "telefone": "+55 (27) 99238-2126",
+    "camisa": "G",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 47,
+    "nome": "Elaine Cristina Barbosa Lima Da Silva",
+    "cpf": "12789633754",
+    "telefone": "+55 (27) 99911-9360",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 48,
+    "nome": "Elisangela Liibe da Costa",
+    "cpf": "10401462790",
+    "telefone": "+55 (27) 99943-8597",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 49,
+    "nome": "Emanuela Lia Novaes",
+    "cpf": "27338289832",
+    "telefone": "+55 (11) 99728-8056",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 50,
+    "nome": "Emerson Furtado",
+    "cpf": "55394620687",
+    "telefone": "+55 (27) 99253-2849",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 51,
+    "nome": "Enica Hosana Hochscheidt",
+    "cpf": "63478307015",
+    "telefone": "+55 (27) 99740-3839",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 52,
+    "nome": "Enzo Martins Rebouças",
+    "cpf": "12950281745",
+    "telefone": "+55 (27) 98802-7043",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 53,
+    "nome": "Eric Santos Silva",
+    "cpf": "01769287744",
+    "telefone": "+55 (27) 99776-1918",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 54,
+    "nome": "Eunice Vargas Assad",
+    "cpf": "57766827700",
+    "telefone": "+55 (27) 99961-3114",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 55,
+    "nome": "evandro suares savergnini",
+    "cpf": "01538815770",
+    "telefone": "+55 (27) 99728-0942",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 56,
+    "nome": "Fabio Hebert da Silva",
+    "cpf": "07505339788",
+    "telefone": "+55 (27) 99924-6286",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 57,
+    "nome": "Fabricio Dutra Tebaldi",
+    "cpf": "07751089792",
+    "telefone": "+55 (27) 99273-0977",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 58,
+    "nome": "Fabricio QG3",
+    "cpf": "09713059786",
+    "telefone": "+55 (27) 99727-0331",
+    "camisa": "NÃO",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 59,
+    "nome": "Felipe Barbosa da Silva",
+    "cpf": "10940023725",
+    "telefone": "+55 (27) 99828-0538",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 60,
+    "nome": "Felipe Pianos",
+    "cpf": "08254952701",
+    "telefone": "+55 (27) 99921-1733",
+    "camisa": "GG",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 61,
+    "nome": "Felipe Trabach da Vitória",
+    "cpf": "10678926727",
+    "telefone": "+55 (27) 99226-0256",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 62,
+    "nome": "Fernanda de Souza Batista Pimenta",
+    "cpf": "09857457703",
+    "telefone": "+55 (27) 99999-9596",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 63,
+    "nome": "Fernanda Guimarães Marques Ortiz",
+    "cpf": "12463080701",
+    "telefone": "+55 (27) 99836-3224",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 64,
+    "nome": "FLAVIA DA SILVA BESSONI FERREIRA",
+    "cpf": "05517280781",
+    "telefone": "",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 65,
+    "nome": "Flávia Pessoa Cipriano",
+    "cpf": "22350240843",
+    "telefone": "+55 (11) 99977-8445",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 66,
+    "nome": "Flávia Saade Oliveira",
+    "cpf": "09558088714",
+    "telefone": "+55 (27) 99747-4170",
+    "camisa": "GG",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 67,
+    "nome": "Flavio Toi",
+    "cpf": "10793147840",
+    "telefone": "+55 (19) 99797-4834",
+    "camisa": "M",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 68,
+    "nome": "Gabriel Sampaio Deoteronio",
+    "cpf": "11066931593",
+    "telefone": "+55 (27) 99883-3695",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 69,
+    "nome": "Gabriela Barros",
+    "cpf": "10190632461",
+    "telefone": "+55 (81) 98164-8703",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 70,
+    "nome": "Guilherme Gotardo Pereira",
+    "cpf": "21209056739",
+    "telefone": "+55 (27) 99976-5289",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 71,
+    "nome": "Hagesandro Agostinho Silveira",
+    "cpf": "05569325794",
+    "telefone": "+55 (27) 99967-2792",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 72,
+    "nome": "HUMBERTO MANOEL PASSOS BEIRIZ",
+    "cpf": "75689820687",
+    "telefone": "+55 (27) 99837-2520",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 73,
+    "nome": "Icaro Rafael",
+    "cpf": "18139389706",
+    "telefone": "+55 (27) 99908-2108",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 74,
+    "nome": "Igor Risoli Salvador",
+    "cpf": "14093477701",
+    "telefone": "+55 (27) 99627-9271",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 75,
+    "nome": "Isabela Costa Bazzarella",
+    "cpf": "14165098795",
+    "telefone": "+55 (27) 99950-8241",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 76,
+    "nome": "Ivan Mudri Junior",
+    "cpf": "12669620850",
+    "telefone": "+55 (11) 94021-2369",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 77,
+    "nome": "ivanilda lima",
+    "cpf": "95562044749",
+    "telefone": "+55 (27) 99298-3370",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 78,
+    "nome": "Izabella Cruz Barreto",
+    "cpf": "14789901718",
+    "telefone": "+55 (27) 99502-0541",
+    "camisa": "NÃO",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 79,
+    "nome": "JABES LOMEO GUIMARAES JUNIOR",
+    "cpf": "75102250787",
+    "telefone": "+55 (27) 99746-9497",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 80,
+    "nome": "Jady picoli mai",
+    "cpf": "14335879717",
+    "telefone": "+55 (27) 99279-4480",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 81,
+    "nome": "Jair Pereira Bragança Júnior",
+    "cpf": "05577524776",
+    "telefone": "+55 (27) 98816-1980",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 82,
+    "nome": "Janaina Bonadiman trevisani",
+    "cpf": "12103465750",
+    "telefone": "+55 (27) 99283-9491",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 83,
+    "nome": "Jance de Souza Luiz",
+    "cpf": "08810904761",
+    "telefone": "+55 (27) 99870-1042",
+    "camisa": "M",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 84,
+    "nome": "janice delunardo",
+    "cpf": "02281427765",
+    "telefone": "+55 (98) 17860-30",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 85,
+    "nome": "Jaqueline Melgaço de Souza",
+    "cpf": "11538578719",
+    "telefone": "+55 (27) 98127-8185",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 86,
+    "nome": "JEFFERSON ELER",
+    "cpf": "03466545722",
+    "telefone": "",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 87,
+    "nome": "Jennifer de Paula",
+    "cpf": "11574705725",
+    "telefone": "+55 (27) 99234-3422",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 88,
+    "nome": "Jessika de paula Gomes",
+    "cpf": "11574699733",
+    "telefone": "+55 (27) 99228-2439",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 89,
+    "nome": "João luiz Aguiar Júnior",
+    "cpf": "05495981707",
+    "telefone": "+55 (27) 99776-9916",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 90,
+    "nome": "Jonatas Andrade de Oliveira",
+    "cpf": "09235534798",
+    "telefone": "+55 (27) 99794-2458",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 91,
+    "nome": "Jorge Fernando Serpa Ferreira Junior",
+    "cpf": "31329695836",
+    "telefone": "+55 (27) 98188-7705",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 92,
+    "nome": "JUAN GUSTAVO PIZETTA PALOMINO",
+    "cpf": "11301220779",
+    "telefone": "+55 (27) 98173-7595",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 93,
+    "nome": "JULIANA LEITE DE CASTRO MORAES",
+    "cpf": "96249641904",
+    "telefone": "+55 (27) 99226-0041",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 94,
+    "nome": "Julie Borchardt",
+    "cpf": "15178727746",
+    "telefone": "+55 (27) 99627-7077",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 95,
+    "nome": "JULIO CESAR DE PAULA MONTEIRO",
+    "cpf": "03563835632",
+    "telefone": "+55 (27) 98165-2427",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 96,
+    "nome": "Julio Cesar Pereira",
+    "cpf": "01990137725",
+    "telefone": "+55 (27) 99768-5510",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 97,
+    "nome": "Junia Guerra Martins",
+    "cpf": "60797231668",
+    "telefone": "+55 (48) 99101-1516",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 98,
+    "nome": "Lara Regina Dias Furtado",
+    "cpf": "62815369672",
+    "telefone": "+55 (27) 99253-2849",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 99,
+    "nome": "Lauro Vieira Filho",
+    "cpf": "97790311700",
+    "telefone": "+55 (27) 99984-8170",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 100,
+    "nome": "Leilane Resende de Oliveira",
+    "cpf": "10060797770",
+    "telefone": "+55 (28) 28999-3557",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 101,
+    "nome": "Liliane Valença Fonseca",
+    "cpf": "00811411737",
+    "telefone": "+55 (27) 99975-5181",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 102,
+    "nome": "Lorenzo Fontes Esposito",
+    "cpf": "07569035720",
+    "telefone": "+55 (27) 99963-0468",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 103,
+    "nome": "Luciana Perim",
+    "cpf": "02013830718",
+    "telefone": "+55 (28) 99975-8418",
+    "camisa": "M",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 104,
+    "nome": "Luciani de Mello Bottecchia",
+    "cpf": "03924659737",
+    "telefone": "+55 (27) 99577-4334",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 105,
+    "nome": "luciano vargas",
+    "cpf": "08024724782",
+    "telefone": "+55 (27) 99975-6974",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 106,
+    "nome": "Luciene Cris Bonatto Abreu",
+    "cpf": "04214062752",
+    "telefone": "+55 (27) 99248-8477",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 107,
+    "nome": "LUIZ FELIPE MATHIAS GOMES",
+    "cpf": "09011899792",
+    "telefone": "+55 (27) 99962-1908",
+    "camisa": "GG",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 108,
+    "nome": "Luiz Fernando da Silva Brumana",
+    "cpf": "11624553737",
+    "telefone": "+55 (27) 98835-7010",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 109,
+    "nome": "Marcelo de brito rocha lima",
+    "cpf": "01085137775",
+    "telefone": "+55 (27) 99875-9141",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 110,
+    "nome": "Marcelo Santos",
+    "cpf": "12413206752",
+    "telefone": "+55 (27) 99882-1771",
+    "camisa": "GG",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 111,
+    "nome": "Márcia da Silva Menezes de Souza",
+    "cpf": "01992519757",
+    "telefone": "+55 (27) 99944-1970",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 112,
+    "nome": "Márcio Antônio da Costa",
+    "cpf": "74282590700",
+    "telefone": "+55 (27) 99277-6600",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 113,
+    "nome": "Márcio Silva Souza",
+    "cpf": "12735739783",
+    "telefone": "+55 (27) 99664-8624",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 114,
+    "nome": "Marcos Roberto Rodrigues Zarth",
+    "cpf": "00069041067",
+    "telefone": "+55 (31) 98506-4817",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 115,
+    "nome": "MARIA ALICE BARRETO MARINS RAMPINELLI",
+    "cpf": "81887973400",
+    "telefone": "+55 (27) 99921-4468",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 116,
+    "nome": "Maria Amélia Boechat",
+    "cpf": "02895869766",
+    "telefone": "+55 (22) 99839-8621",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 117,
+    "nome": "Maria Cortez Salviano",
+    "cpf": "14721622775",
+    "telefone": "+55 (27) 99914-5307",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 118,
+    "nome": "Maria Elisa Tosi Roquette",
+    "cpf": "12359235761",
+    "telefone": "+55 (27) 99637-5641",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 119,
+    "nome": "Maria Helena dos Santos Teixeira",
+    "cpf": "07127982775",
+    "telefone": "+55 (27) 99730-2861",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 120,
+    "nome": "Maria Sylvia Marques Abaurre",
+    "cpf": "82077304715",
+    "telefone": "+55 (27) 98895-2238",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 121,
+    "nome": "Mariana Santos Camara Gomes",
+    "cpf": "11886821720",
+    "telefone": "",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 122,
+    "nome": "MARIVALDO SILVA DE JESUS",
+    "cpf": "80517145553",
+    "telefone": "+55 (71) 98807-6404",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 123,
+    "nome": "Matheus Batista",
+    "cpf": "17852446710",
+    "telefone": "+55 (27) 99311-6846",
+    "camisa": "P",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 124,
+    "nome": "Mirinalva Ferreira",
+    "cpf": "45014469787",
+    "telefone": "",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 125,
+    "nome": "Moisés Abreu da Silva",
+    "cpf": "05434990730",
+    "telefone": "+55 (27) 99248-8477",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 126,
+    "nome": "ONALDO RIOS RODRIGUES",
+    "cpf": "68077475787",
+    "telefone": "+55 (27) 99888-9681",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 127,
+    "nome": "PABLO LOBATO RAMOS",
+    "cpf": "07678558767",
+    "telefone": "+55 (27) 98831-8968",
+    "camisa": "GG",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 128,
+    "nome": "Patricia Alves Salvino da Silva",
+    "cpf": "00806903783",
+    "telefone": "+55 (27) 99848-1700",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 129,
+    "nome": "PEDRO A GUASTI JR",
+    "cpf": "09945913735",
+    "telefone": "+55 (27) 99782-5028",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 130,
+    "nome": "Pedro José Bonatto Abreu",
+    "cpf": "05434990730",
+    "telefone": "+55 (27) 99248-8477",
+    "camisa": "P",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 131,
+    "nome": "Petrus Romagna",
+    "cpf": "15139828774",
+    "telefone": "+55 (27) 99252-3102",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 132,
+    "nome": "Philipe Batista",
+    "cpf": "08782542775",
+    "telefone": "+55 (27) 99411-6846",
+    "camisa": "G",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 133,
+    "nome": "Pierre calmon",
+    "cpf": "01697622704",
+    "telefone": "",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 134,
+    "nome": "Polyanna Gotardo",
+    "cpf": "09428346748",
+    "telefone": "+55 (27) 99976-5289",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 135,
+    "nome": "Priscilla Huttenlocher",
+    "cpf": "18385336800",
+    "telefone": "+55 (11) 99941-5973",
+    "camisa": "P",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 136,
+    "nome": "Ramon Marcos",
+    "cpf": "14001566702",
+    "telefone": "+55 (27) 98838-7619",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 137,
+    "nome": "Regina Morandi",
+    "cpf": "86071432715",
+    "telefone": "+55 (27) 99989-5339",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 138,
+    "nome": "Renata Alice Francisca da Silva",
+    "cpf": "10994272740",
+    "telefone": "+55 (27) 99855-5778",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 139,
+    "nome": "Renata Gandra de Melo",
+    "cpf": "01514773708",
+    "telefone": "+55 (27) 99923-1188",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 140,
+    "nome": "RENATA PIRES NOGUEIRA LIMA",
+    "cpf": "06950848790",
+    "telefone": "+55 (27) 99979-8857",
+    "camisa": "NÃO",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 141,
+    "nome": "Renzo Vetorazzi Becacici Gozze",
+    "cpf": "13318913707",
+    "telefone": "+55 (27) 99714-1025",
+    "camisa": "G",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 142,
+    "nome": "RHYAN MARCELO DOS SANTOS CORTE",
+    "cpf": "09337189771",
+    "telefone": "+55 (27) 99827-4683",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 143,
+    "nome": "Ricardo Toneto de Melo",
+    "cpf": "00298674793",
+    "telefone": "+55 (27) 99311-6840",
+    "camisa": "G",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 144,
+    "nome": "Ricardo Welsing Pagiola",
+    "cpf": "03590396776",
+    "telefone": "+55 (27) 98823-0137",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 145,
+    "nome": "ROBERT MONTEIRO GOMES",
+    "cpf": "03469744700",
+    "telefone": "+55 (27) 99841-0995",
+    "camisa": "G",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 146,
+    "nome": "Roberta Bertoani Fieni",
+    "cpf": "09680505731",
+    "telefone": "+55 (27) 99741-6102",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 147,
+    "nome": "Roberta Goltara Coelho",
+    "cpf": "09603161756",
+    "telefone": "+55 (27) 99927-8608",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 148,
+    "nome": "Roberta Scardua",
+    "cpf": "01719473714",
+    "telefone": "+55 (99) 76928-28",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 149,
+    "nome": "Roberto Luiz de França",
+    "cpf": "92791662715",
+    "telefone": "+55 (99) 99297-12",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 150,
+    "nome": "ROBSON MARIANO RAMPINELLI",
+    "cpf": "99303353749",
+    "telefone": "+55 (27) 99921-4468",
+    "camisa": "GG",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 151,
+    "nome": "Rodolfo Moreira Muniz",
+    "cpf": "07140244731",
+    "telefone": "+55 (27) 99930-2724",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 152,
+    "nome": "Rodrigo Lima",
+    "cpf": "07824953700",
+    "telefone": "+55 (27) 99623-0167",
+    "camisa": "NÃO",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 153,
+    "nome": "Rodrigo Santos Gomes",
+    "cpf": "79709290606",
+    "telefone": "+55 (11) 99728-8056",
+    "camisa": "GG",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 154,
+    "nome": "Rogério Lattufe",
+    "cpf": "00972238751",
+    "telefone": "+55 (27) 99605-2670",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 155,
+    "nome": "Ronald Rangel",
+    "cpf": "00701404728",
+    "telefone": "+55 (27) 99809-5188",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 156,
+    "nome": "Roney Januario Gomes",
+    "cpf": "08939478738",
+    "telefone": "+55 (27) 99989-2422",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 157,
+    "nome": "Sabrina Andreatta Ewald",
+    "cpf": "14929000793",
+    "telefone": "+55 (27) 99618-8786",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 158,
+    "nome": "Sabrina Lacerda Beiriz",
+    "cpf": "19924043723",
+    "telefone": "+55 (27) 99717-2301",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 159,
+    "nome": "SAMUEL DEOTERONIO DA SILVA",
+    "cpf": "92506143149",
+    "telefone": "+55 (27) 99883-3695",
+    "camisa": "G",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 160,
+    "nome": "Samuel Perim Nascimento",
+    "cpf": "17258580700",
+    "telefone": "+55 (27) 99524-5272",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 161,
+    "nome": "Sérgio Garcia Rocha",
+    "cpf": "14442873704",
+    "telefone": "+55 (27) 99792-2307",
+    "camisa": "GG",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 162,
+    "nome": "Sergio Levy Alves de Souza",
+    "cpf": "62121430725",
+    "telefone": "",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 163,
+    "nome": "shirley franco oliveira morais rosa",
+    "cpf": "94769826753",
+    "telefone": "+55 (27) 99979-2841",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 164,
+    "nome": "Suzana Fiorio Cardoso Salvador",
+    "cpf": "16180961760",
+    "telefone": "+55 (27) 99790-3128",
+    "camisa": "P",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 165,
+    "nome": "Tarciso Maia Jr",
+    "cpf": "10582786738",
+    "telefone": "+55 (27) 98118-6179",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 166,
+    "nome": "Tathiana Strobl Vertamatti",
+    "cpf": "33575562865",
+    "telefone": "+55 (11) 97408-2626",
+    "camisa": "M",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 167,
+    "nome": "Tatiana oliari negris",
+    "cpf": "11653355735",
+    "telefone": "+55 (27) 99962-8801",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 168,
+    "nome": "Thais Prata da Silva",
+    "cpf": "04010239662",
+    "telefone": "+55 (27) 98825-8414",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 169,
+    "nome": "Thiago Costa Carvalho",
+    "cpf": "10617525773",
+    "telefone": "+55 (27) 99522-1984",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 170,
+    "nome": "Tiago gabriel de melo",
+    "cpf": "16280730719",
+    "telefone": "+55 (27) 99226-4924",
+    "camisa": "NÃO",
+    "prova": "NENHUM",
+    "checkinRealizado": false
+  },
+  {
+    "id": 171,
+    "nome": "ubiratan Menezes de Souza Junior",
+    "cpf": "85373990787",
+    "telefone": "+55 (27) 99827-8276",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 172,
+    "nome": "Victor Ribeiro Nazareth",
+    "cpf": "03085564705",
+    "telefone": "+55 (22) 99899-4298",
+    "camisa": "NÃO",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 173,
+    "nome": "Vinicius Alves Santana",
+    "cpf": "12225067775",
+    "telefone": "+55 (27) 99963-1249",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 174,
+    "nome": "Vinicius Araújo Rocha",
+    "cpf": "05968426608",
+    "telefone": "+55 (27) 99613-2616",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 175,
+    "nome": "Vinicius moraes",
+    "cpf": "09401796793",
+    "telefone": "+55 (27) 99686-2389",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 176,
+    "nome": "Vinicius Moyses Monteiro",
+    "cpf": "13933445779",
+    "telefone": "+55 (27) 99983-2388",
+    "camisa": "NÃO",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 177,
+    "nome": "Viviany padrao nunes",
+    "cpf": "00806909714",
+    "telefone": "+55 (27) 99883-0453",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 178,
+    "nome": "Wanderson Luiz de Paula",
+    "cpf": "04560890714",
+    "telefone": "+55 (27) 99729-3940",
+    "camisa": "GG",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 179,
+    "nome": "WESLEY BRUN SANGALIA",
+    "cpf": "07748083738",
+    "telefone": "+55 (27) 99523-3283",
+    "camisa": "G",
+    "prova": "3 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 180,
+    "nome": "Wesley Fernando Oliveira Baptista",
+    "cpf": "09025058744",
+    "telefone": "+55 (27) 99525-3342",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 181,
+    "nome": "Yuri Lovato pereira",
+    "cpf": "12349885771",
+    "telefone": "+55 (28) 99922-4701",
+    "camisa": "GG",
+    "prova": "TODAS",
+    "checkinRealizado": false
+  },
+  {
+    "id": 182,
+    "nome": "João Henrique Mariani Sena",
+    "cpf": "167.855.387-50",
+    "telefone": "27997156280",
+    "camisa": "M",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 183,
+    "nome": "Andréia Cristina Moraes freire",
+    "cpf": "031.484.077-09",
+    "telefone": "27 988118304",
+    "camisa": "M",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 184,
+    "nome": "Marcilea Dia do Nascimento",
+    "cpf": "862.542.437-68",
+    "telefone": "27996330745",
+    "camisa": "G",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 185,
+    "nome": "Elisangela Toledo",
+    "cpf": "079.158.917-07",
+    "telefone": "27999863701",
+    "camisa": "M",
+    "prova": "3km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 186,
+    "nome": "Kátia Regina de Freitas Martinelli",
+    "cpf": "028.675.227-14",
+    "telefone": "27996867625",
+    "camisa": "M",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 187,
+    "nome": "Emerson Silva Conceição ",
+    "cpf": "055.657.417-69",
+    "telefone": "27996253898",
+    "camisa": "G",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 188,
+    "nome": "Livia Bodevan A da Costa",
+    "cpf": "031.796.097-02",
+    "telefone": "27998315001",
+    "camisa": "M",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 189,
+    "nome": "Gabriel Bodevan da Costa",
+    "cpf": "191.785.427-74",
+    "telefone": "27999935002",
+    "camisa": "G",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 190,
+    "nome": "Solange Maria Vieira",
+    "cpf": "075.438.777-16",
+    "telefone": "27997665870",
+    "camisa": "P",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 191,
+    "nome": "Alessandra Mariani da Silva",
+    "cpf": "086.630.277-88",
+    "telefone": "27997156280",
+    "camisa": "G",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 192,
+    "nome": "Maria Eduarda Mariani sena",
+    "cpf": "213.578.957-71",
+    "telefone": "27997156280",
+    "camisa": "P",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 193,
+    "nome": "Gabriela Dias Florindo",
+    "cpf": "170.036.997-02",
+    "telefone": "27996330745",
+    "camisa": "G",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 194,
+    "nome": "Brenda Benachio Ramos",
+    "cpf": "151.679.567-90",
+    "telefone": "27988797088",
+    "camisa": "G",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 195,
+    "nome": "Ludmila Pires",
+    "cpf": "078.481.477-54",
+    "telefone": "27988819574",
+    "camisa": "G",
+    "prova": "3km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 196,
+    "nome": "Fabiana Oliveira Ramos",
+    "cpf": "054.085.457-33",
+    "telefone": "27998255626",
+    "camisa": "M",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 197,
+    "nome": "Carolina Rocha Ferreira",
+    "cpf": "279.981.319-12",
+    "telefone": "27998131912",
+    "camisa": "GG",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 198,
+    "nome": "Kalleu Higor de Oliveira",
+    "cpf": "137.304.096-38",
+    "telefone": "33988537288",
+    "camisa": "G",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 199,
+    "nome": "Diane Cristina  Santana",
+    "cpf": "088.221.557-42",
+    "telefone": "27998415425",
+    "camisa": "M",
+    "prova": "3km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 200,
+    "nome": "Allison de Freitas Pereira",
+    "cpf": "122.531.987-06",
+    "telefone": "27996102070",
+    "camisa": "XG",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 201,
+    "nome": "Antonio de Almeida",
+    "cpf": "46105646704",
+    "telefone": "27998146426",
+    "camisa": "XG",
+    "prova": "3k",
+    "checkinRealizado": false
+  },
+  {
+    "id": 202,
+    "nome": "Guilherme Zerbone da cista",
+    "cpf": "017.302.897-70",
+    "telefone": "27999613232",
+    "camisa": "G",
+    "prova": "1k",
+    "checkinRealizado": false
+  },
+  {
+    "id": 203,
+    "nome": "Stephannie Laudelino",
+    "cpf": "168.636.577-88",
+    "telefone": "27988545066",
+    "camisa": "M",
+    "prova": "1k",
+    "checkinRealizado": false
+  },
+  {
+    "id": 204,
+    "nome": "Jessica Rodrigues Pereira BOrlot",
+    "cpf": "123.707.067-83",
+    "telefone": "27997091085",
+    "camisa": "P",
+    "prova": "1k",
+    "checkinRealizado": false
+  },
+  {
+    "id": 205,
+    "nome": "Gabriela Luiz Meigre Dias Pereira",
+    "cpf": "12965486437",
+    "telefone": "27998384674",
+    "camisa": "P",
+    "prova": "1k",
+    "checkinRealizado": false
+  },
+  {
+    "id": 206,
+    "nome": "Barbara Cristina de Oliveira Guimarães Santos",
+    "cpf": "5587900703",
+    "telefone": "000",
+    "camisa": "gg",
+    "prova": "3k",
+    "checkinRealizado": false
+  },
+  {
+    "id": 207,
+    "nome": "Carla de Deus",
+    "cpf": "094.090.547-70",
+    "telefone": "27 999238764",
+    "camisa": "G",
+    "prova": "1k",
+    "checkinRealizado": false
+  },
+  {
+    "id": 208,
+    "nome": "Bruno Cordeiro de Castro",
+    "cpf": "6914488410",
+    "telefone": "000",
+    "camisa": "G",
+    "prova": "1k",
+    "checkinRealizado": false
+  },
+  {
+    "id": 209,
+    "nome": "Rosfranklin  Furtado  dos Anjos",
+    "cpf": "1524629707",
+    "telefone": "27992514613",
+    "camisa": "M",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 210,
+    "nome": "Heraldo Tubarões ",
+    "cpf": "000",
+    "telefone": "000",
+    "camisa": "G",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 211,
+    "nome": "Miriam Machado",
+    "cpf": "64538400734",
+    "telefone": "000",
+    "camisa": "M",
+    "prova": "1km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 212,
+    "nome": "Breno Coelho Ringuier",
+    "cpf": "000",
+    "telefone": "000",
+    "camisa": "M",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 213,
+    "nome": "Adilton da Conceição ",
+    "cpf": "89423615520",
+    "telefone": "000",
+    "camisa": "P",
+    "prova": "1 km",
+    "checkinRealizado": false
+  },
+  {
+    "id": 214,
+    "nome": "Rafaella Rodrigues de Castro",
+    "cpf": "CPF: 192704217-83",
+    "telefone": "000",
+    "camisa": "P",
+    "prova": "1km",
+    "checkinRealizado": false
+  }
+]
