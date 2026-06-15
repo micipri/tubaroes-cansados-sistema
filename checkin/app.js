@@ -227,15 +227,32 @@ function formatCPF(cpf) {
 }
 
 // Perform Checkout
-async function performCheckout(id) {
+async function performCheckout(id, distance = null) {
   const athlete = athletes.find(a => a.id === id);
   if (!athlete) return;
   
-  if (confirm(`Confirmar o check-out (término da prova) para o atleta:\n#${athlete.id} - ${athlete.nome}?`)) {
-    athlete.checkoutRealizado = true;
+  let msg = `Confirmar o check-out (término da prova) para o atleta:\n#${athlete.id} - ${athlete.nome}?`;
+  if (distance) {
+    msg = `Confirmar o check-out da prova de ${distance} para o atleta:\n#${athlete.id} - ${athlete.nome}?`;
+  }
+  
+  if (confirm(msg)) {
+    if (distance === '1km') athlete.checkout1kmRealizado = true;
+    else if (distance === '3km') athlete.checkout3kmRealizado = true;
+    else athlete.checkoutRealizado = true;
+    
+    if (athlete.checkout1kmRealizado && athlete.checkout3kmRealizado) {
+      athlete.checkoutRealizado = true;
+    }
+    
     await saveData();
     renderDashboard(dashboardSearch.value);
-    closeModal(modalCheckoutSearch);
+    
+    if (checkoutSearchInput && checkoutSearchInput.value) {
+      checkoutSearchInput.dispatchEvent(new Event('input'));
+    } else {
+      closeModal(modalCheckoutSearch);
+    }
     showToast('Check-out realizado com sucesso!', 'success');
   }
 }
@@ -266,6 +283,12 @@ function renderDashboard(filterText = '') {
     if (a.checkoutRealizado) {
       statusClass = 'checkout';
       statusText = 'Check-out Finalizado';
+    } else if (a.checkout1kmRealizado && !a.checkout3kmRealizado) {
+      statusClass = 'checkout';
+      statusText = '1km Finalizado';
+    } else if (a.checkout3kmRealizado && !a.checkout1kmRealizado) {
+      statusClass = 'checkout';
+      statusText = '3km Finalizado';
     } else if (a.checkinRealizado) {
       statusClass = 'status-done';
       statusText = 'Realizado';
@@ -362,8 +385,12 @@ function setupEventListeners() {
           actionBtn = `<span class="status-badge checkout">Check-out Finalizado</span>`;
         } else if (!a.checkinRealizado) {
           actionBtn = `<span class="status-badge status-pending">Sem Check-in</span>`;
+        } else if (a.prova && a.prova.toUpperCase() === 'TODAS') {
+          let btn1 = a.checkout1kmRealizado ? `<span class="status-badge checkout" style="margin-right: 5px;">1km Ok</span>` : `<button class="checkout-btn btn-dist" data-id="${a.id}" data-dist="1km" style="padding: 6px 12px; font-size: 0.9rem; margin-right: 5px;">1 km</button>`;
+          let btn2 = a.checkout3kmRealizado ? `<span class="status-badge checkout">3km Ok</span>` : `<button class="checkout-btn btn-dist" data-id="${a.id}" data-dist="3km" style="padding: 6px 12px; font-size: 0.9rem;">3 km</button>`;
+          actionBtn = `<div style="display: flex; gap: 5px; flex-wrap: wrap;">${btn1}${btn2}</div>`;
         } else {
-          actionBtn = `<button class="checkout-btn" data-id="${a.id}" style="padding: 6px 12px; font-size: 0.9rem;">Fazer Check-out</button>`;
+          actionBtn = `<button class="checkout-btn btn-dist" data-id="${a.id}" data-dist="" style="padding: 6px 12px; font-size: 0.9rem;">Fazer Check-out</button>`;
         }
 
         div.innerHTML = `
@@ -379,7 +406,8 @@ function setupEventListeners() {
       checkoutResultsContainer.querySelectorAll('.checkout-btn').forEach(btn => {
         btn.addEventListener('click', async (evt) => {
           const id = parseInt(evt.target.getAttribute('data-id'));
-          await performCheckout(id);
+          const dist = evt.target.getAttribute('data-dist');
+          await performCheckout(id, dist || null);
         });
       });
     });
