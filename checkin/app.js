@@ -7,6 +7,9 @@ let stream = null; // Camera stream
 const dashboardTbody = document.getElementById('dashboard-tbody');
 const statTotal = document.getElementById('stat-total');
 const statChecked = document.getElementById('stat-checked');
+const stat1km = document.getElementById('stat-1km');
+const stat3km = document.getElementById('stat-3km');
+const statTodas = document.getElementById('stat-todas');
 const btnStartCheckin = document.getElementById('btn-start-checkin');
 const dashboardSearch = document.getElementById('dashboard-search');
 
@@ -269,12 +272,12 @@ function renderDashboard(filterText = '') {
     }
     
     tr.innerHTML = `
-      <td>#${a.id}</td>
-      <td><strong>${a.nome}</strong></td>
-      <td>${formatCPF(a.cpf)}</td>
-      <td>${a.prova || '-'}</td>
-      <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-      <td>
+      <td data-label="ID">#${a.id}</td>
+      <td data-label="Nome Completo"><strong>${a.nome}</strong></td>
+      <td data-label="CPF">${formatCPF(a.cpf)}</td>
+      <td data-label="Prova">${a.prova || '-'}</td>
+      <td data-label="Status"><span class="status-badge ${statusClass}">${statusText}</span></td>
+      <td data-label="Ações">
         ${a.checkinRealizado 
           ? `<button class="success-btn btn-view-checkin" style="padding: 6px 12px; font-size: 0.8rem; background-color: var(--success-color);" data-id="${a.id}">Ok</button>`
           : `<button class="primary-btn btn-do-checkin" style="padding: 6px 12px; font-size: 0.8rem;" data-id="${a.id}">Check-in</button>`
@@ -287,6 +290,9 @@ function renderDashboard(filterText = '') {
   // Update Stats
   statTotal.innerText = athletes.length;
   statChecked.innerText = athletes.filter(a => a.checkinRealizado).length;
+  stat1km.innerText = athletes.filter(a => a.prova && a.prova.includes('1 km')).length;
+  stat3km.innerText = athletes.filter(a => a.prova && a.prova.includes('3 km')).length;
+  statTodas.innerText = athletes.filter(a => a.prova && a.prova.toUpperCase() === 'TODAS').length;
 
   // Add listeners to new buttons
   document.querySelectorAll('.btn-do-checkin').forEach(btn => {

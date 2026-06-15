@@ -689,3 +689,71 @@ input[type="text"]:focus, select:focus {
   color: #ff9500;
   border: 1px solid rgba(255, 149, 0, 0.3);
 }
+
+/* Otimização Mobile-First */
+.stat-card.info {
+  background: #e8f4fd;
+  color: #005bb5;
+}
+
+@media (max-width: 768px) {
+  /* Arruma os cards de estatísticas em grid para não espremer */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  /* Transforma a tabela clássica em Cartões individuais */
+  .athletes-table, .athletes-table tbody, .athletes-table tr, .athletes-table td {
+    display: block;
+    width: 100%;
+  }
+  
+  .athletes-table thead {
+    display: none; /* Esconde o cabeçalho original */
+  }
+  
+  .athletes-table tr {
+    margin-bottom: 15px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    border: 1px solid #eaeaea;
+    padding: 10px;
+  }
+  
+  .athletes-table td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid #f1f1f1;
+    min-height: 40px;
+  }
+  
+  .athletes-table td:last-child {
+    border-bottom: none;
+    text-align: center;
+    padding-left: 0;
+    margin-top: 10px;
+  }
+  
+  /* Adiciona rótulos antes dos valores na visualização de cartão */
+  .athletes-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 15px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-light);
+  }
+  
+  /* Melhora o grid do Modal */
+  .view-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
