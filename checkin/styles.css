@@ -661,3 +661,31 @@ input[type="text"]:focus, select:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.2);
 }
+
+/* Checkout Button & Badge */
+.checkout-btn {
+  background: #ff9500;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.checkout-btn:hover {
+  background: #e08300;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.4);
+}
+
+.status-badge.checkout {
+  background: #fff5e6;
+  color: #ff9500;
+  border: 1px solid rgba(255, 149, 0, 0.3);
+}

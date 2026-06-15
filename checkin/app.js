@@ -15,6 +15,12 @@ const modalSearch = document.getElementById('modal-search');
 const searchInput = document.getElementById('checkin-search-input');
 const searchResultsContainer = document.getElementById('search-results-container');
 
+// DOM Elements - Checkout Modal
+const btnStartCheckout = document.getElementById('btn-start-checkout');
+const modalCheckoutSearch = document.getElementById('modal-checkout-search');
+const checkoutSearchInput = document.getElementById('checkout-search-input');
+const checkoutResultsContainer = document.getElementById('checkout-results-container');
+
 // DOM Elements - Confirm Modal
 const modalConfirm = document.getElementById('modal-confirm');
 const confirmName = document.getElementById('confirm-name');
@@ -217,6 +223,20 @@ function formatCPF(cpf) {
   return cpf;
 }
 
+// Perform Checkout
+async function performCheckout(id) {
+  const athlete = athletes.find(a => a.id === id);
+  if (!athlete) return;
+  
+  if (confirm(`Confirmar o check-out (término da prova) para o atleta:\n#${athlete.id} - ${athlete.nome}?`)) {
+    athlete.checkoutRealizado = true;
+    await saveData();
+    renderDashboard(dashboardSearch.value);
+    closeModal(modalCheckoutSearch);
+    showToast('Check-out realizado com sucesso!', 'success');
+  }
+}
+
 // Render Dashboard
 function renderDashboard(filterText = '') {
   const normalizedFilter = filterText.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
@@ -237,8 +257,16 @@ function renderDashboard(filterText = '') {
   
   filtered.forEach(a => {
     const tr = document.createElement('tr');
-    const statusClass = a.checkinRealizado ? 'status-done' : 'status-pending';
-    const statusText = a.checkinRealizado ? 'Realizado' : 'Pendente';
+    let statusClass = 'status-pending';
+    let statusText = 'Pendente';
+    
+    if (a.checkoutRealizado) {
+      statusClass = 'checkout';
+      statusText = 'Check-out Finalizado';
+    } else if (a.checkinRealizado) {
+      statusClass = 'status-done';
+      statusText = 'Realizado';
+    }
     
     tr.innerHTML = `
       <td>#${a.id}</td>
@@ -290,6 +318,66 @@ function setupEventListeners() {
     searchResultsContainer.innerHTML = '';
     setTimeout(() => searchInput.focus(), 100);
   });
+
+  // Open Checkout Modal
+  if (btnStartCheckout) {
+    btnStartCheckout.addEventListener('click', () => {
+      openModal(modalCheckoutSearch);
+      checkoutSearchInput.value = '';
+      checkoutResultsContainer.innerHTML = '';
+      setTimeout(() => checkoutSearchInput.focus(), 100);
+    });
+  }
+
+  // Search logic for Checkout
+  if (checkoutSearchInput) {
+    checkoutSearchInput.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      if (val.length < 1) {
+        checkoutResultsContainer.innerHTML = '';
+        return;
+      }
+      
+      // Search strictly by ID
+      const filtered = athletes.filter(a => String(a.id) === val);
+      
+      checkoutResultsContainer.innerHTML = '';
+      if (filtered.length === 0) {
+        checkoutResultsContainer.innerHTML = '<div class="no-results">Nenhum atleta encontrado com este ID.</div>';
+        return;
+      }
+      
+      filtered.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'search-result-item';
+        
+        let actionBtn = '';
+        if (a.checkoutRealizado) {
+          actionBtn = `<span class="status-badge checkout">Check-out Finalizado</span>`;
+        } else if (!a.checkinRealizado) {
+          actionBtn = `<span class="status-badge status-pending">Sem Check-in</span>`;
+        } else {
+          actionBtn = `<button class="checkout-btn" data-id="${a.id}" style="padding: 6px 12px; font-size: 0.9rem;">Fazer Check-out</button>`;
+        }
+
+        div.innerHTML = `
+          <div class="result-info">
+            <strong>#${a.id} - ${a.nome}</strong>
+            <span>${a.prova || ''}</span>
+          </div>
+          ${actionBtn}
+        `;
+        checkoutResultsContainer.appendChild(div);
+      });
+
+      checkoutResultsContainer.querySelectorAll('.checkout-btn').forEach(btn => {
+        btn.addEventListener('click', async (evt) => {
+          const id = parseInt(evt.target.getAttribute('data-id'));
+          await performCheckout(id);
+        });
+      });
+    });
+  }
 
   // Close Modals
   document.querySelectorAll('.close-btn').forEach(btn => {
