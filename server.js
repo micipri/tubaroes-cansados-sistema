@@ -489,13 +489,35 @@ const checkinUploadsDir = path.join(checkinVolumeDir, 'uploads');
 const checkinDataFile = path.join(checkinVolumeDir, 'data.json');
 
 if (!fs.existsSync(checkinUploadsDir)) fs.mkdirSync(checkinUploadsDir, { recursive: true });
-if (!fs.existsSync(checkinDataFile)) {
-    const sourceDataFile = path.join(__dirname, 'checkin', 'public', 'data.json');
-    if (fs.existsSync(sourceDataFile)) {
-        fs.copyFileSync(sourceDataFile, checkinDataFile);
-    } else {
-        fs.writeFileSync(checkinDataFile, '[]');
+
+const sourceDataFile = path.join(__dirname, 'checkin', 'public', 'data.json');
+if (fs.existsSync(sourceDataFile)) {
+    const sourceData = JSON.parse(fs.readFileSync(sourceDataFile, 'utf8'));
+    let currentData = [];
+    if (fs.existsSync(checkinDataFile)) {
+        try { currentData = JSON.parse(fs.readFileSync(checkinDataFile, 'utf8')); } catch(e){}
     }
+    
+    const currentMap = new Map(currentData.map(a => [a.id, a]));
+    let changed = false;
+    for (const a of sourceData) {
+        if (!currentMap.has(a.id)) {
+            currentData.push(a);
+            changed = true;
+        }
+    }
+    
+    if (currentData.length === 0 && sourceData.length > 0) {
+        currentData = sourceData;
+        changed = true;
+    }
+    
+    if (changed) {
+        fs.writeFileSync(checkinDataFile, JSON.stringify(currentData, null, 2));
+        console.log("Banco de dados fundido/restaurado com sucesso do arquivo public/data.json");
+    }
+} else if (!fs.existsSync(checkinDataFile)) {
+    fs.writeFileSync(checkinDataFile, '[]');
 }
 
 // Em vez de restringir a pasta inteira para /checkin (que limitaria requests sem a barra no final), 
