@@ -149,7 +149,6 @@ function loadSectionData(section) {
     else if (section === 'store') { loadStoreSales(); loadStoreProducts(); }
     else if (section === 'costs') { loadCosts('event'); loadCosts('party'); }
     else if (section === 'sponsors') loadSponsors();
-    else if (section === 'survey') loadSurvey();
     else if (section === 'users') loadUsers();
 }
 
@@ -481,37 +480,6 @@ document.getElementById('form-sponsor').addEventListener('submit', async (e) => 
     e.target.reset(); loadSponsors(); loadDashboard();
 });
 
-// ── Survey ────────────────────────────────────────────────────────────
-async function loadSurvey() {
-    const data = await fetchData('survey');
-    const tbody = document.getElementById('table-survey');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    
-    let yesCount = 0;
-    let noCount = 0;
-
-    data.forEach(item => {
-        if (item.will_go) yesCount++; else noCount++;
-        
-        const badgeClass = item.will_go ? 'badge-success' : 'badge-danger';
-        const badgeText = item.will_go ? 'Sim' : 'Não';
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>#${item.id}</td>
-            <td>${item.name}</td>
-            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-            <td>${item.companions}</td>
-            <td><small>${item.suggestion || '-'}</small></td>
-            <td>${formatDate(item.date)}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-
-    document.getElementById('survey-yes-count').innerText = yesCount;
-    document.getElementById('survey-no-count').innerText = noCount;
-}
 
 // ── User Management (Master only) ─────────────────────────────────────────────
 async function loadUsers() {

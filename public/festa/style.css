@@ -1,0 +1,351 @@
+:root {
+    --bg-dark: #0f1115;
+    --card-bg: rgba(25, 28, 35, 0.7);
+    --primary: #f5b301;
+    --primary-glow: rgba(245, 179, 1, 0.5);
+    --secondary: #ff3366;
+    --text-main: #f0f0f0;
+    --text-muted: #a0a5b0;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --whatsapp: #25D366;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(245, 179, 1, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Hero Section */
+.hero {
+    padding: 100px 0 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+}
+
+.subtitle {
+    color: var(--primary);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 8rem;
+    line-height: 1;
+    margin: 0;
+    color: #fff;
+    text-shadow: 0 0 20px var(--primary-glow), 0 0 40px var(--primary-glow);
+}
+
+.group-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 3rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    margin-top: -10px;
+    margin-bottom: 30px;
+}
+
+.hero-date {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--secondary);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.hero-desc {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 15px 40px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #000;
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.btn-primary:hover {
+    background: #ffd000;
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px var(--primary-glow);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+    margin-top: 15px;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-whatsapp {
+    background: var(--whatsapp);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.btn-whatsapp:hover {
+    background: #1ebc5a;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 179, 1, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(245, 179, 1, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 179, 1, 0); }
+}
+
+/* Sections */
+.details-section, .buy-section {
+    padding: 60px 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+/* Cards */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(245, 179, 1, 0.3);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-family: 'Bebas Neue', cursive;
+    letter-spacing: 1px;
+}
+
+/* Band Images */
+.band-images {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.band-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+
+.band-foto {
+    width: calc(100% - 90px);
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+
+/* Timeline */
+.timeline {
+    list-style: none;
+}
+
+.timeline li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 15px;
+    color: var(--text-muted);
+}
+
+.timeline li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    background: var(--secondary);
+    border-radius: 50%;
+}
+
+.timeline li strong {
+    color: var(--text-main);
+}
+
+/* Prices & Promos */
+.price {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 3.5rem;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.promo-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--primary);
+    font-size: 0.95rem;
+}
+
+.promo-box.highlight {
+    border-left-color: var(--secondary);
+    background: rgba(255, 51, 102, 0.1);
+}
+
+/* Buy Section */
+.buy-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.step-card {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 40px 30px;
+    position: relative;
+}
+
+.step-num {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: #000;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.qr-code-wrapper {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+#qrcode {
+    width: 200px;
+    height: 200px;
+    display: block;
+}
+
+.rules {
+    background: rgba(255, 51, 102, 0.1);
+    border: 1px solid rgba(255, 51, 102, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.glow {
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+
+footer {
+    text-align: center;
+    padding: 30px 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--glass-border);
+    margin-top: 40px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .title { font-size: 5rem; }
+    .group-name { font-size: 2rem; }
+    .hero { min-height: 60vh; padding-top: 60px; }
+    .band-images { flex-direction: column; }
+    .band-logo { width: 100%; height: 120px; }
+    .band-foto { width: 100%; height: 200px; }
+}
