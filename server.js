@@ -82,7 +82,7 @@ app.get('/festa', (req, res) => {
     res.sendFile('festa/index.html', { root: path.join(__dirname, 'public') });
 });
 app.get('/festa/', (req, res) => {
-    res.sendFile('festa/index.html', { root: path.join(__dirname, 'public') });
+    res.redirect(301, '/festa');
 });
 
 // ─── Public static assets (CSS, JS, images) ──────────────────────────────────
