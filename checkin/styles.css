@@ -696,6 +696,12 @@ input[type="text"]:focus, select:focus {
   color: #005bb5;
 }
 
+.stat-card.checkout {
+  background: #fff5e6;
+  color: #ff9500;
+  border-bottom: 4px solid #ff9500;
+}
+
 @media (max-width: 768px) {
   /* Arruma os cards de estatísticas em grid para não espremer */
   .stats {

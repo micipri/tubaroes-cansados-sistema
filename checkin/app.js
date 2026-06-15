@@ -10,6 +10,8 @@ const statChecked = document.getElementById('stat-checked');
 const stat1km = document.getElementById('stat-1km');
 const stat3km = document.getElementById('stat-3km');
 const statTodas = document.getElementById('stat-todas');
+const statCheckout1km = document.getElementById('stat-checkout-1km');
+const statCheckout3km = document.getElementById('stat-checkout-3km');
 const btnStartCheckin = document.getElementById('btn-start-checkin');
 const dashboardSearch = document.getElementById('dashboard-search');
 
@@ -319,6 +321,8 @@ function renderDashboard(filterText = '') {
   stat1km.innerText = athletes.filter(a => a.prova && a.prova.includes('1 km')).length;
   stat3km.innerText = athletes.filter(a => a.prova && a.prova.includes('3 km')).length;
   statTodas.innerText = athletes.filter(a => a.prova && a.prova.toUpperCase() === 'TODAS').length;
+  statCheckout1km.innerText = athletes.filter(a => a.checkout1kmRealizado || (a.checkoutRealizado && a.prova && a.prova.includes('1 km'))).length;
+  statCheckout3km.innerText = athletes.filter(a => a.checkout3kmRealizado || (a.checkoutRealizado && a.prova && a.prova.includes('3 km'))).length;
 
   // Add listeners to new buttons
   document.querySelectorAll('.btn-do-checkin').forEach(btn => {
