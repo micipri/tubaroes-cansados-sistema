@@ -493,6 +493,16 @@ if (fs.existsSync(sourceDataFile)) {
         if (!currentMap.has(a.id)) {
             currentData.push(a);
             changed = true;
+        } else {
+            // Update existing athlete data but preserve their checkin status
+            const existing = currentMap.get(a.id);
+            if (existing.nome !== a.nome || existing.cpf !== a.cpf || existing.prova !== a.prova || existing.camisa !== a.camisa) {
+                existing.nome = a.nome;
+                existing.cpf = a.cpf;
+                existing.prova = a.prova;
+                existing.camisa = a.camisa;
+                changed = true;
+            }
         }
     }
     
