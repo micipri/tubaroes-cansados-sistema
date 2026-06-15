@@ -157,6 +157,14 @@
                         <form id="form-party-ticket" class="flex-form">
                             <input type="text" id="ticket-name" placeholder="Nome do Comprador" required>
                             <input type="number" step="0.01" id="ticket-amount" placeholder="Valor (R$)" required>
+                            <div class="checkbox-group" style="display: flex; gap: 1rem; align-items: center;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="ticket-coupon"> Cupom Loja
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="ticket-voucher"> Vale Chopp
+                                </label>
+                            </div>
                             <input type="date" id="ticket-date" required>
                             <button type="submit" class="btn btn-primary">Adicionar</button>
                         </form>
@@ -167,7 +175,7 @@
                             <button type="button" class="btn btn-primary" onclick="exportTableToXLSX('table-party-tickets', 'Ingressos_Festa.xlsx')" style="padding: 0.5rem 1rem; font-size: 0.9rem;"><i class="ri-file-excel-2-line"></i> Exportar Excel</button>
                         </div>
                         <table>
-                            <thead><tr><th>ID</th><th>Nome</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+                            <thead><tr><th>ID</th><th>Nome</th><th>Valor</th><th>Cupom Loja</th><th>Vale Chopp</th><th>Data</th><th>Ação</th></tr></thead>
                             <tbody id="table-party-tickets"></tbody>
                         </table>
                     </div>

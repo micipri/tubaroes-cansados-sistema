@@ -63,8 +63,23 @@ function createTables() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             amount REAL NOT NULL,
+            has_store_coupon BOOLEAN NOT NULL DEFAULT 0,
+            has_beer_voucher BOOLEAN NOT NULL DEFAULT 0,
             date TEXT NOT NULL
-        )`);
+        )`, () => {
+            db.all("PRAGMA table_info(party_tickets)", (err, columns) => {
+                if (!err && columns) {
+                    const hasCoupon = columns.some(col => col.name === 'has_store_coupon');
+                    if (!hasCoupon) {
+                        db.run("ALTER TABLE party_tickets ADD COLUMN has_store_coupon BOOLEAN NOT NULL DEFAULT 0");
+                    }
+                    const hasVoucher = columns.some(col => col.name === 'has_beer_voucher');
+                    if (!hasVoucher) {
+                        db.run("ALTER TABLE party_tickets ADD COLUMN has_beer_voucher BOOLEAN NOT NULL DEFAULT 0");
+                    }
+                }
+            });
+        });
 
         // Store Products
         db.run(`CREATE TABLE IF NOT EXISTS store_products (

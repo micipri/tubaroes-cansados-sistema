@@ -321,8 +321,32 @@ async function loadPartyTickets() {
     tbody.innerHTML = '';
     data.forEach(item => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>#${item.id}</td><td>${item.name}</td><td>${formatCurrency(item.amount)}</td><td>${formatDate(item.date)}</td><td><button type="button" class="btn-icon btn-danger"><i class="ri-delete-bin-line"></i></button></td>`;
+        tr.innerHTML = `
+            <td>#${item.id}</td>
+            <td>${item.name}</td>
+            <td>${formatCurrency(item.amount)}</td>
+            <td><label class="toggle-switch"><input type="checkbox" class="ticket-toggle" data-id="${item.id}" data-field="has_store_coupon" ${item.has_store_coupon ? 'checked' : ''}><span class="slider"></span></label></td>
+            <td><label class="toggle-switch"><input type="checkbox" class="ticket-toggle" data-id="${item.id}" data-field="has_beer_voucher" ${item.has_beer_voucher ? 'checked' : ''}><span class="slider"></span></label></td>
+            <td>${formatDate(item.date)}</td>
+            <td><button type="button" class="btn-icon btn-danger"><i class="ri-delete-bin-line"></i></button></td>
+        `;
         tr.querySelector('button').onclick = deleteHandler('party_tickets', item.id, loadPartyTickets);
+        
+        tr.querySelectorAll('.ticket-toggle').forEach(input => {
+            input.addEventListener('change', async (e) => {
+                const id = e.target.getAttribute('data-id');
+                const field = e.target.getAttribute('data-field');
+                const value = e.target.checked;
+                try {
+                    await fetch(API_URL + '/party_tickets/' + id + '/' + field, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include', body: JSON.stringify({ value })
+                    });
+                    loadDashboard();
+                } catch { alert('Erro ao atualizar.'); e.target.checked = !value; }
+            });
+        });
+
         tbody.appendChild(tr);
     });
 }
@@ -331,6 +355,8 @@ document.getElementById('form-party-ticket').addEventListener('submit', async (e
     await postData('party_tickets', {
         name: document.getElementById('ticket-name').value,
         amount: parseFloat(document.getElementById('ticket-amount').value),
+        has_store_coupon: document.getElementById('ticket-coupon').checked,
+        has_beer_voucher: document.getElementById('ticket-voucher').checked,
         date: document.getElementById('ticket-date').value
     });
     e.target.reset(); loadPartyTickets(); loadDashboard();

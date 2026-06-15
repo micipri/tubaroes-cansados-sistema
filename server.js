@@ -255,10 +255,25 @@ app.get('/api/party_tickets', requireAuth, (req, res) => {
     });
 });
 app.post('/api/party_tickets', requireAuth, (req, res) => {
-    const { name, amount, date } = req.body;
-    db.run("INSERT INTO party_tickets (name, amount, date) VALUES (?, ?, ?)", [name, amount, date], function(err) {
+    const { name, amount, has_store_coupon, has_beer_voucher, date } = req.body;
+    db.run(
+        "INSERT INTO party_tickets (name, amount, has_store_coupon, has_beer_voucher, date) VALUES (?, ?, ?, ?, ?)",
+        [name, amount, has_store_coupon ? 1 : 0, has_beer_voucher ? 1 : 0, date],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id: this.lastID, name, amount, has_store_coupon, has_beer_voucher, date });
+        }
+    );
+});
+app.put('/api/party_tickets/:id/:field', requireAuth, (req, res) => {
+    const allowedFields = ['has_store_coupon', 'has_beer_voucher'];
+    const field = req.params.field;
+    if (!allowedFields.includes(field)) return res.status(400).json({ error: "Invalid field" });
+    
+    const { value } = req.body;
+    db.run(`UPDATE party_tickets SET ${field} = ? WHERE id = ?`, [value ? 1 : 0, req.params.id], function(err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ id: this.lastID, name, amount, date });
+        res.json({ updated: this.changes > 0 });
     });
 });
 app.delete('/api/party_tickets/:id', requireAuth, (req, res) => {
