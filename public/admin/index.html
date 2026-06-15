@@ -188,6 +188,11 @@
                                 </select>
                                 <input type="number" id="sale-quantity" placeholder="Quantidade" required>
                                 <input type="number" step="0.01" id="sale-discount" placeholder="Desconto (R$)">
+                                <select id="sale-payment" required>
+                                    <option value="Pix">Pix</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Cartão">Cartão</option>
+                                </select>
                                 <input type="date" id="sale-date" required>
                                 <button type="submit" class="btn btn-primary">Vender</button>
                             </form>
@@ -195,7 +200,7 @@
                         <div class="card glass-card table-container mt-4">
                             <h3>Histórico de Vendas</h3>
                             <table>
-                                <thead><tr><th>Produto</th><th>Qtd</th><th>Desconto</th><th>Total</th><th>Data</th><th>Ações</th></tr></thead>
+                                <thead><tr><th>Produto</th><th>Qtd</th><th>Desconto</th><th>Pagamento</th><th>Total</th><th>Data</th><th>Ações</th></tr></thead>
                                 <tbody id="table-store-sales"></tbody>
                             </table>
                         </div>

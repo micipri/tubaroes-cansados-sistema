@@ -388,6 +388,7 @@ async function loadStoreSales() {
             <td>${item.product_name}</td>
             <td>${item.quantity} un.</td>
             <td>${formatCurrency(item.discount || 0)}</td>
+            <td>${item.payment_method || 'Não informado'}</td>
             <td><strong>${formatCurrency(item.total_amount)}</strong></td>
             <td>${formatDate(item.date)}</td>
             <td>
@@ -424,6 +425,7 @@ document.getElementById('form-store-sale').addEventListener('submit', async (e) 
         product_id: parseInt(document.getElementById('sale-product-id').value),
         quantity: parseInt(document.getElementById('sale-quantity').value),
         discount: parseFloat(document.getElementById('sale-discount').value) || 0,
+        payment_method: document.getElementById('sale-payment').value,
         date: document.getElementById('sale-date').value
     });
     if (res.error) alert(res.error);

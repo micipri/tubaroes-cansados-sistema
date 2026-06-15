@@ -81,18 +81,26 @@ function createTables() {
             product_id INTEGER NOT NULL,
             quantity INTEGER NOT NULL,
             discount REAL NOT NULL DEFAULT 0,
+            payment_method TEXT DEFAULT 'Não informado',
             total_amount REAL NOT NULL,
             date TEXT NOT NULL,
             FOREIGN KEY (product_id) REFERENCES store_products (id)
         )`, () => {
-            // Migration: Add discount column to existing online databases
+            // Migration: Add discount and payment_method columns to existing online databases
             db.all("PRAGMA table_info(store_sales)", (err, columns) => {
                 if (!err && columns) {
                     const hasDiscount = columns.some(col => col.name === 'discount');
                     if (!hasDiscount) {
                         db.run("ALTER TABLE store_sales ADD COLUMN discount REAL NOT NULL DEFAULT 0", (err) => {
-                            if (err) console.error("Migration Error (store_sales):", err.message);
+                            if (err) console.error("Migration Error (store_sales discount):", err.message);
                             else console.log("Migration: Added 'discount' column to store_sales.");
+                        });
+                    }
+                    const hasPaymentMethod = columns.some(col => col.name === 'payment_method');
+                    if (!hasPaymentMethod) {
+                        db.run("ALTER TABLE store_sales ADD COLUMN payment_method TEXT DEFAULT 'Não informado'", (err) => {
+                            if (err) console.error("Migration Error (store_sales payment_method):", err.message);
+                            else console.log("Migration: Added 'payment_method' column to store_sales.");
                         });
                     }
                 }
