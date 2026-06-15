@@ -194,6 +194,7 @@
                                 <select id="sale-product-id" required>
                                     <option value="" disabled selected>Selecione um Produto</option>
                                 </select>
+                                <input type="text" id="sale-buyer" placeholder="Nome do Comprador">
                                 <input type="number" id="sale-quantity" placeholder="Quantidade" required>
                                 <input type="number" step="0.01" id="sale-discount" placeholder="Desconto (R$)">
                                 <select id="sale-payment" required>
@@ -208,7 +209,7 @@
                         <div class="card glass-card table-container mt-4">
                             <h3>Histórico de Vendas</h3>
                             <table>
-                                <thead><tr><th>Produto</th><th>Qtd</th><th>Desconto</th><th>Pagamento</th><th>Total</th><th>Data</th><th>Ações</th></tr></thead>
+                                <thead><tr><th>Produto</th><th>Comprador</th><th>Qtd</th><th>Desconto</th><th>Pagamento</th><th>Total</th><th>Data</th><th>Ações</th></tr></thead>
                                 <tbody id="table-store-sales"></tbody>
                             </table>
                         </div>

@@ -94,6 +94,7 @@ function createTables() {
         db.run(`CREATE TABLE IF NOT EXISTS store_sales (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             product_id INTEGER NOT NULL,
+            buyer_name TEXT DEFAULT 'Anônimo',
             quantity INTEGER NOT NULL,
             discount REAL NOT NULL DEFAULT 0,
             payment_method TEXT DEFAULT 'Não informado',
@@ -101,7 +102,7 @@ function createTables() {
             date TEXT NOT NULL,
             FOREIGN KEY (product_id) REFERENCES store_products (id)
         )`, () => {
-            // Migration: Add discount and payment_method columns to existing online databases
+            // Migration: Add discount, payment_method, and buyer_name columns to existing online databases
             db.all("PRAGMA table_info(store_sales)", (err, columns) => {
                 if (!err && columns) {
                     const hasDiscount = columns.some(col => col.name === 'discount');
@@ -116,6 +117,13 @@ function createTables() {
                         db.run("ALTER TABLE store_sales ADD COLUMN payment_method TEXT DEFAULT 'Não informado'", (err) => {
                             if (err) console.error("Migration Error (store_sales payment_method):", err.message);
                             else console.log("Migration: Added 'payment_method' column to store_sales.");
+                        });
+                    }
+                    const hasBuyerName = columns.some(col => col.name === 'buyer_name');
+                    if (!hasBuyerName) {
+                        db.run("ALTER TABLE store_sales ADD COLUMN buyer_name TEXT DEFAULT 'Anônimo'", (err) => {
+                            if (err) console.error("Migration Error (store_sales buyer_name):", err.message);
+                            else console.log("Migration: Added 'buyer_name' column to store_sales.");
                         });
                     }
                 }

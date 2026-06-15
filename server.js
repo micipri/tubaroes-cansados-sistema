@@ -325,7 +325,7 @@ app.put('/api/store_products/:id/stock', requireAuth, (req, res) => {
 // --- Store Sales ---
 app.get('/api/store_sales', requireAuth, (req, res) => {
     const query = `
-        SELECT s.id, p.name as product_name, s.quantity, s.discount, s.total_amount, s.date, s.payment_method
+        SELECT s.id, p.name as product_name, s.buyer_name, s.quantity, s.discount, s.total_amount, s.date, s.payment_method
         FROM store_sales s
         JOIN store_products p ON s.product_id = p.id
         ORDER BY s.id DESC
@@ -336,7 +336,7 @@ app.get('/api/store_sales', requireAuth, (req, res) => {
     });
 });
 app.post('/api/store_sales', requireAuth, (req, res) => {
-    const { product_id, quantity, discount, date, payment_method } = req.body;
+    const { product_id, buyer_name, quantity, discount, date, payment_method } = req.body;
     db.get("SELECT sell_price, stock FROM store_products WHERE id = ?", [product_id], (err, product) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!product) return res.status(404).json({ error: "Product not found" });
@@ -344,8 +344,8 @@ app.post('/api/store_sales', requireAuth, (req, res) => {
 
         const total_amount = (product.sell_price * quantity) - (parseFloat(discount) || 0);
         
-        db.run("INSERT INTO store_sales (product_id, quantity, discount, total_amount, date) VALUES (?, ?, ?, ?, ?)", 
-        [product_id, quantity, parseFloat(discount) || 0, total_amount, date], 
+        db.run("INSERT INTO store_sales (product_id, buyer_name, quantity, discount, payment_method, total_amount, date) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+        [product_id, buyer_name || 'Anônimo', quantity, parseFloat(discount) || 0, payment_method || 'Não informado', total_amount, date], 
         function(err) {
             if (err) return res.status(500).json({ error: err.message });
             

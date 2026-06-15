@@ -412,6 +412,7 @@ async function loadStoreSales() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${item.product_name}</td>
+            <td>${item.buyer_name || 'Anônimo'}</td>
             <td>${item.quantity} un.</td>
             <td>${formatCurrency(item.discount || 0)}</td>
             <td>${item.payment_method || 'Não informado'}</td>
@@ -449,6 +450,7 @@ document.getElementById('form-store-sale').addEventListener('submit', async (e) 
     e.preventDefault();
     const res = await postData('store_sales', {
         product_id: parseInt(document.getElementById('sale-product-id').value),
+        buyer_name: document.getElementById('sale-buyer').value,
         quantity: parseInt(document.getElementById('sale-quantity').value),
         discount: parseFloat(document.getElementById('sale-discount').value) || 0,
         payment_method: document.getElementById('sale-payment').value,
