@@ -92,7 +92,10 @@ btnLogin.addEventListener('click', () => {
   const user = loginUser.value.trim().toLowerCase();
   const pass = loginPass.value.trim();
   
-  if (user === 'admin' && pass === 'tubaroes2026') {
+  const isAdmin = user === 'admin' && pass === 'tubaroes2026';
+  const isTest = user === 'teste' && pass === 'teste2026';
+  
+  if (isAdmin || isTest) {
     sessionStorage.setItem('tutubas_auth', 'true');
     loginError.style.display = 'none';
     checkAuth();
