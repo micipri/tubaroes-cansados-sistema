@@ -325,7 +325,7 @@ app.put('/api/store_products/:id/stock', requireAuth, (req, res) => {
 // --- Store Sales ---
 app.get('/api/store_sales', requireAuth, (req, res) => {
     const query = `
-        SELECT s.id, p.name as product_name, s.buyer_name, s.quantity, s.discount, s.total_amount, s.date, s.payment_method
+        SELECT s.id, p.name as product_name, s.buyer_name, s.quantity, s.discount, s.total_amount, s.date, s.payment_method, s.package_id
         FROM store_sales s
         JOIN store_products p ON s.product_id = p.id
         ORDER BY s.id DESC

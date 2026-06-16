@@ -126,9 +126,24 @@ function createTables() {
                             else console.log("Migration: Added 'buyer_name' column to store_sales.");
                         });
                     }
+                    const hasPackageId = columns.some(col => col.name === 'package_id');
+                    if (!hasPackageId) {
+                        db.run("ALTER TABLE store_sales ADD COLUMN package_id INTEGER DEFAULT NULL", (err) => {
+                            if (err) console.error("Migration Error (store_sales package_id):", err.message);
+                            else console.log("Migration: Added 'package_id' column to store_sales.");
+                        });
+                    }
                 }
             });
         });
+
+        // Store Packages
+        db.run(`CREATE TABLE IF NOT EXISTS store_packages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipient_name TEXT NOT NULL,
+            status TEXT DEFAULT 'Pendente',
+            created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+        )`);
 
         // Party Costs
         db.run(`CREATE TABLE IF NOT EXISTS party_costs (

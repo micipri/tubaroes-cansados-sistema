@@ -146,7 +146,7 @@ function loadSectionData(section) {
     else if (section === 'registrations') loadRegistrations();
     else if (section === 'registrations-mod2') loadRegistrationsMod2();
     else if (section === 'party') loadPartyTickets();
-    else if (section === 'store') { loadStoreSales(); loadStoreProducts(); }
+    else if (section === 'store') { loadStoreSales(); loadStoreProducts(); loadStorePackages(); }
     else if (section === 'costs') { loadCosts('event'); loadCosts('party'); }
     else if (section === 'sponsors') loadSponsors();
     else if (section === 'users') loadUsers();
@@ -410,7 +410,11 @@ async function loadStoreSales() {
     tbody.innerHTML = '';
     data.forEach(item => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
+            <td>
+                ${item.package_id 
+                    ? `<span title="No pacote #${item.package_id}">✔️</span>` 
+                    : `<input type="checkbox" class="sale-pkg-checkbox" value="${item.id}">`}
+            </td>
             <td>${item.product_name}</td>
             <td>${item.buyer_name || 'Anônimo'}</td>
             <td>${item.quantity} un.</td>
@@ -464,6 +468,80 @@ document.getElementById('form-store-sale').addEventListener('submit', async (e) 
         loadDashboard(); 
     }
 });
+
+document.getElementById('btn-create-package').addEventListener('click', async () => {
+    const checkboxes = document.querySelectorAll('.sale-pkg-checkbox:checked');
+    const sale_ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+    
+    if (sale_ids.length === 0) {
+        return alert('Selecione pelo menos uma venda para criar um pacote.');
+    }
+    
+    const recipient_name = prompt('Qual o nome do responsável por retirar este pacote no evento?');
+    if (!recipient_name) return; // User cancelled
+    
+    try {
+        const res = await fetch(API_URL + '/store_packages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ recipient_name, sale_ids })
+        });
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+        
+        alert(`Pacote #${result.package_id} criado com sucesso para ${recipient_name}!`);
+        loadStoreSales();
+        loadStorePackages();
+    } catch (err) {
+        alert('Erro ao criar pacote: ' + err.message);
+    }
+});
+
+// ── Store Packages ────────────────────────────────────────────
+async function loadStorePackages() {
+    const data = await fetchData('store_packages');
+    const tbody = document.getElementById('table-store-packages');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    data.forEach(pkg => {
+        const tr = document.createElement('tr');
+        
+        // Formata os itens
+        const itemsHtml = pkg.items ? pkg.items.map(i => `${i.quantity}x ${i.product_name}`).join('<br>') : 'Nenhum item';
+        
+        const isDelivered = pkg.status === 'Entregue';
+        
+        tr.innerHTML = `
+            <td>#${pkg.id}</td>
+            <td><strong>${pkg.recipient_name}</strong></td>
+            <td>${itemsHtml}</td>
+            <td>${formatDate(pkg.created_at)}</td>
+            <td>
+                <label class="toggle-switch">
+                    <input type="checkbox" class="pkg-toggle" data-id="${pkg.id}" ${isDelivered ? 'checked' : ''}>
+                    <span class="slider"></span>
+                </label>
+            </td>
+        `;
+        
+        tr.querySelector('.pkg-toggle').addEventListener('change', async (e) => {
+            const id = e.target.getAttribute('data-id');
+            const newStatus = e.target.checked ? 'Entregue' : 'Pendente';
+            try {
+                await fetch(API_URL + '/store_packages/' + id + '/status', {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include', body: JSON.stringify({ status: newStatus })
+                });
+            } catch { 
+                alert('Erro ao atualizar status.'); 
+                e.target.checked = !e.target.checked; 
+            }
+        });
+
+        tbody.appendChild(tr);
+    });
+}
 
 // ── Costs ─────────────────────────────────────────────────────
 async function loadCosts(type) {

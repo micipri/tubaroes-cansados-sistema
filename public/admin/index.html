@@ -185,6 +185,7 @@
                 <section id="store" class="page-section hidden">
                     <div class="tabs">
                         <button class="tab-btn active" data-tab="tab-store-sales">Vendas</button>
+                        <button class="tab-btn" data-tab="tab-store-packages">Pacotes para Entregar</button>
                         <button class="tab-btn" data-tab="tab-store-products">Produtos & Estoque</button>
                     </div>
                     <div id="tab-store-sales" class="tab-content active">
@@ -207,9 +208,14 @@
                             </form>
                         </div>
                         <div class="card glass-card table-container mt-4">
-                            <h3>Histórico de Vendas</h3>
-                            <table>
-                                <thead><tr><th>Produto</th><th>Comprador</th><th>Qtd</th><th>Desconto</th><th>Pagamento</th><th>Total</th><th>Data</th><th>Ações</th></tr></thead>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3>Histórico de Vendas</h3>
+                                <button type="button" class="btn btn-primary" id="btn-create-package" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                    <i class="ri-box-3-line"></i> Criar Pacote com Selecionados
+                                </button>
+                            </div>
+                            <table class="mt-4">
+                                <thead><tr><th>📦</th><th>Produto</th><th>Comprador</th><th>Qtd</th><th>Desconto</th><th>Pagamento</th><th>Total</th><th>Data</th><th>Ações</th></tr></thead>
                                 <tbody id="table-store-sales"></tbody>
                             </table>
                         </div>
@@ -230,6 +236,15 @@
                             <table>
                                 <thead><tr><th>ID</th><th>Produto</th><th>Estoque</th><th>Custo</th><th>Venda</th><th>Ações</th></tr></thead>
                                 <tbody id="table-store-products"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="tab-store-packages" class="tab-content hidden">
+                        <div class="card glass-card table-container mt-4">
+                            <h3>Pacotes Prontos para Retirada</h3>
+                            <table>
+                                <thead><tr><th>ID</th><th>Responsável pela Retirada</th><th>Itens do Pacote</th><th>Data de Criação</th><th>Entregue?</th></tr></thead>
+                                <tbody id="table-store-packages"></tbody>
                             </table>
                         </div>
                     </div>
