@@ -388,6 +388,58 @@ app.put('/api/store_sales/:id/discount', requireAuth, (req, res) => {
         });
     });
 });
+// --- Store Packages ---
+app.get('/api/store_packages', requireAuth, (req, res) => {
+    db.all("SELECT * FROM store_packages ORDER BY id DESC", [], (err, packages) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        // Fetch items for each package
+        const pkgPromises = packages.map(pkg => {
+            return new Promise((resolve, reject) => {
+                db.all(`
+                    SELECT s.quantity, p.name as product_name 
+                    FROM store_sales s 
+                    JOIN store_products p ON s.product_id = p.id 
+                    WHERE s.package_id = ?
+                `, [pkg.id], (err, items) => {
+                    if (err) reject(err);
+                    else {
+                        pkg.items = items;
+                        resolve(pkg);
+                    }
+                });
+            });
+        });
+
+        Promise.all(pkgPromises)
+            .then(completedPackages => res.json(completedPackages))
+            .catch(err => res.status(500).json({ error: err.message }));
+    });
+});
+
+app.post('/api/store_packages', requireAuth, (req, res) => {
+    const { recipient_name, sale_ids } = req.body;
+    if (!sale_ids || sale_ids.length === 0) return res.status(400).json({ error: "Nenhuma venda selecionada" });
+
+    db.run("INSERT INTO store_packages (recipient_name) VALUES (?)", [recipient_name], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        const packageId = this.lastID;
+        
+        const placeholders = sale_ids.map(() => '?').join(',');
+        db.run(`UPDATE store_sales SET package_id = ? WHERE id IN (${placeholders})`, [packageId, ...sale_ids], function(errUpdate) {
+            if (errUpdate) return res.status(500).json({ error: errUpdate.message });
+            res.json({ success: true, package_id: packageId });
+        });
+    });
+});
+
+app.put('/api/store_packages/:id/status', requireAuth, (req, res) => {
+    const { status } = req.body;
+    db.run("UPDATE store_packages SET status = ? WHERE id = ?", [status, req.params.id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ updated: this.changes > 0 });
+    });
+});
 
 // --- Costs ---
 app.get('/api/costs/:type', requireAuth, (req, res) => {
