@@ -410,6 +410,7 @@ async function loadStoreSales() {
     tbody.innerHTML = '';
     data.forEach(item => {
         const tr = document.createElement('tr');
+        tr.innerHTML = `
             <td>
                 ${item.package_id 
                     ? `<span title="No pacote #${item.package_id}">✔️</span>` 
