@@ -146,7 +146,7 @@ function loadSectionData(section) {
     else if (section === 'registrations') loadRegistrations();
     else if (section === 'registrations-mod2') loadRegistrationsMod2();
     else if (section === 'party') loadPartyTickets();
-    else if (section === 'store') { loadStoreSales(); loadStoreProducts(); loadStorePackages(); }
+    else if (section === 'store') { loadStoreSales(); loadStoreProducts(); loadStorePackages(); loadStoreOnline(); }
     else if (section === 'costs') { loadCosts('event'); loadCosts('party'); }
     else if (section === 'sponsors') loadSponsors();
     else if (section === 'users') loadUsers();
@@ -541,6 +541,122 @@ async function loadStorePackages() {
         });
 
         tbody.appendChild(tr);
+    });
+}
+
+// ── Store Online Orders ─────────────────────────────────────────
+async function loadStoreOnline() {
+    const data = await fetchData('online_orders');
+    const tbody = document.getElementById('table-store-online');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">Nenhum pedido pendente</td></tr>';
+        return;
+    }
+    
+    data.forEach(order => {
+        const tr = document.createElement('tr');
+        
+        tr.innerHTML = `
+            <td>#${order.id}</td>
+            <td><strong>${order.buyer_name}</strong></td>
+            <td>${formatCurrency(order.total_amount)}</td>
+            <td>${formatDate(order.created_at)}</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-approve-online" data-id="${order.id}" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                    Confirmar Venda
+                </button>
+            </td>
+        `;
+        
+        tr.querySelector('.btn-approve-online').addEventListener('click', () => openOnlineOrderModal(order));
+
+        tbody.appendChild(tr);
+    });
+}
+
+function openOnlineOrderModal(order) {
+    const products = JSON.parse(order.selected_products);
+    const itemsHtml = products.map(p => `<li>${p.quantity}x ${p.name} - R$ ${(p.sell_price * p.quantity).toFixed(2).replace('.',',')}</li>`).join('');
+    
+    createModal('Aprovar Venda PIX', `
+        <div style="display:flex; flex-direction:column; gap:1rem;">
+            <div>
+                <strong>Comprador:</strong> ${order.buyer_name}<br>
+                <strong>Valor Declarado:</strong> ${formatCurrency(order.total_amount)}
+            </div>
+            
+            <div style="text-align:center;">
+                <p style="margin-bottom:0.5rem; font-size:0.9rem; color:#aaa;">Imagem do Comprovante Enviada:</p>
+                <img src="${order.receipt_image_path}" style="max-width:100%; max-height:300px; border-radius:8px; border:1px solid #333;" alt="Comprovante">
+            </div>
+            
+            <div>
+                <strong>Produtos Selecionados:</strong>
+                <ul style="margin-left:1.5rem; color:#ccc;">
+                    ${itemsHtml}
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top: 1.5rem; display:flex; gap: 1rem;">
+            <button id="btn-modal-approve" class="btn btn-primary" style="flex: 2;">✅ Conferir e Finalizar Venda</button>
+            <button id="btn-modal-reject" class="btn btn-danger" style="flex: 1;">❌ Rejeitar</button>
+        </div>
+    `, async () => {
+        // We handle custom buttons inside the modal instead of the default confirm
+        return false; // Prevent default close since we do it manually
+    });
+    
+    // Hide default confirm button in modal because we added our own custom ones
+    document.getElementById('modal-confirm-btn').style.display = 'none';
+    
+    document.getElementById('btn-modal-approve').addEventListener('click', async () => {
+        if (!confirm('Deseja aprovar? Isso dará baixa no estoque e criará um pacote.')) return;
+        
+        try {
+            const btn = document.getElementById('btn-modal-approve');
+            btn.disabled = true;
+            btn.innerText = 'Processando...';
+            
+            const res = await fetch(`${API_URL}/online_orders/${order.id}/approve`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const result = await res.json();
+            if(result.error) throw new Error(result.error);
+            
+            alert('Venda processada com sucesso! Pacote criado na aba de Pacotes.');
+            document.getElementById('edit-modal-overlay').remove();
+            
+            loadStoreOnline();
+            loadStoreSales();
+            loadStoreProducts();
+            loadStorePackages();
+        } catch(err) {
+            alert('Erro ao aprovar: ' + err.message);
+            document.getElementById('btn-modal-approve').disabled = false;
+        }
+    });
+    
+    document.getElementById('btn-modal-reject').addEventListener('click', async () => {
+        if (!confirm('Tem certeza que deseja REJEITAR esta venda? Ela será cancelada.')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/online_orders/${order.id}/reject`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const result = await res.json();
+            if(result.error) throw new Error(result.error);
+            
+            alert('Venda rejeitada.');
+            document.getElementById('edit-modal-overlay').remove();
+            loadStoreOnline();
+        } catch(err) {
+            alert('Erro ao rejeitar: ' + err.message);
+        }
     });
 }
 

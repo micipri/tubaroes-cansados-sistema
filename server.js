@@ -5,10 +5,21 @@ const fs = require('fs');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const Tesseract = require('tesseract.js');
 const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Setup Multer
+const uploadDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage });
 
 // ─── Session Setup ────────────────────────────────────────────────────────────
 // Use /app/data/sessions if the volume is mounted, otherwise fall back to app dir
@@ -623,7 +634,115 @@ app.post('/checkin/upload.php', (req, res) => {
     });
 });
 
-// ─── Global error handlers (prevent silent crashes on Railway) ───────────────
+// ─── Online Orders (Public Store) ──────────────────────────────────────────
+app.post('/api/process-receipt', upload.single('receipt'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: "No image provided" });
+    
+    try {
+        const result = await Tesseract.recognize(req.file.path, 'por');
+        const text = result.data.text.toLowerCase();
+        
+        let extractedAmount = 0;
+        // Attempt to find R$ XXX,XX
+        const amountMatch = text.match(/r\$\s*(\d+[.,]\d{2})/);
+        if (amountMatch) {
+            extractedAmount = parseFloat(amountMatch[1].replace(',', '.'));
+        }
+
+        res.json({ 
+            success: true, 
+            text: result.data.text,
+            extractedAmount,
+            imagePath: `/uploads/${req.file.filename}`
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to process image OCR" });
+    }
+});
+
+app.post('/api/online_orders', (req, res) => {
+    const { buyer_name, total_amount, receipt_image_path, selected_products } = req.body;
+    db.run(
+        "INSERT INTO online_orders (buyer_name, total_amount, receipt_image_path, selected_products) VALUES (?, ?, ?, ?)",
+        [buyer_name, total_amount, receipt_image_path, JSON.stringify(selected_products)],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true, id: this.lastID });
+        }
+    );
+});
+
+app.get('/api/online_orders', requireAuth, (req, res) => {
+    db.all("SELECT * FROM online_orders WHERE status = 'Pendente' ORDER BY id ASC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+app.post('/api/online_orders/:id/approve', requireAuth, (req, res) => {
+    db.get("SELECT * FROM online_orders WHERE id = ?", [req.params.id], (err, order) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!order) return res.status(404).json({ error: "Order not found" });
+        if (order.status === 'Aprovado') return res.status(400).json({ error: "Order already approved" });
+
+        const products = JSON.parse(order.selected_products);
+        
+        db.serialize(() => {
+            db.run("BEGIN TRANSACTION");
+            
+            // 1. Create store_package
+            db.run("INSERT INTO store_packages (recipient_name) VALUES (?)", [order.buyer_name], function(err) {
+                if (err) { db.run("ROLLBACK"); return res.status(500).json({ error: err.message }); }
+                const packageId = this.lastID;
+                
+                let completedCount = 0;
+                let hasError = false;
+
+                if (products.length === 0) {
+                    db.run("UPDATE online_orders SET status = 'Aprovado' WHERE id = ?", [order.id]);
+                    db.run("COMMIT");
+                    return res.json({ success: true });
+                }
+
+                products.forEach(prod => {
+                    // 2. Decrement stock
+                    db.run("UPDATE store_products SET stock = stock - ? WHERE id = ?", [prod.quantity, prod.id], (err) => {
+                        if (err) hasError = true;
+                        
+                        // 3. Create store_sales
+                        const total_amount = prod.sell_price * prod.quantity;
+                        db.run("INSERT INTO store_sales (product_id, buyer_name, quantity, payment_method, total_amount, package_id, date) VALUES (?, ?, ?, 'Pix', ?, ?, datetime('now', 'localtime'))",
+                            [prod.id, order.buyer_name, prod.quantity, total_amount, packageId], (err) => {
+                            if (err) hasError = true;
+                            
+                            completedCount++;
+                            if (completedCount === products.length) {
+                                if (hasError) {
+                                    db.run("ROLLBACK");
+                                    return res.status(500).json({ error: "Failed to process items" });
+                                } else {
+                                    // 4. Mark online_orders as Aprovado
+                                    db.run("UPDATE online_orders SET status = 'Aprovado' WHERE id = ?", [order.id], (err) => {
+                                        if (err) { db.run("ROLLBACK"); return res.status(500).json({ error: err.message }); }
+                                        db.run("COMMIT");
+                                        res.json({ success: true, package_id: packageId });
+                                    });
+                                }
+                            }
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+app.post('/api/online_orders/:id/reject', requireAuth, (req, res) => {
+    db.run("UPDATE online_orders SET status = 'Rejeitado' WHERE id = ?", [req.params.id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true });
+    });
+});
 process.on('uncaughtException',  (err)    => console.error('[CRASH] uncaughtException:', err));
 process.on('unhandledRejection', (reason) => console.error('[CRASH] unhandledRejection:', reason));
 

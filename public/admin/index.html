@@ -186,6 +186,7 @@
                     <div class="tabs">
                         <button class="tab-btn active" data-tab="tab-store-sales">Vendas</button>
                         <button class="tab-btn" data-tab="tab-store-packages">Pacotes para Entregar</button>
+                        <button class="tab-btn" data-tab="tab-store-online">Vendas On-line (PIX)</button>
                         <button class="tab-btn" data-tab="tab-store-products">Produtos & Estoque</button>
                     </div>
                     <div id="tab-store-sales" class="tab-content active">
@@ -245,6 +246,16 @@
                             <table>
                                 <thead><tr><th>ID</th><th>Responsável pela Retirada</th><th>Itens do Pacote</th><th>Data de Criação</th><th>Entregue?</th></tr></thead>
                                 <tbody id="table-store-packages"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="tab-store-online" class="tab-content hidden">
+                        <div class="card glass-card table-container mt-4">
+                            <h3>Aprovação de Vendas On-line</h3>
+                            <p style="font-size:0.9rem; color:#aaa; margin-bottom:1rem;">Pedidos aguardando conferência do PIX. Ao aprovar, o estoque será descontado e um Pacote de Retirada será gerado automaticamente.</p>
+                            <table>
+                                <thead><tr><th>ID</th><th>Comprador</th><th>Valor Informado</th><th>Data</th><th>Ações</th></tr></thead>
+                                <tbody id="table-store-online"></tbody>
                             </table>
                         </div>
                     </div>

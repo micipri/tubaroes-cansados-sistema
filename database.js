@@ -153,6 +153,17 @@ function createTables() {
             date TEXT NOT NULL
         )`);
 
+        // Online Orders
+        db.run(`CREATE TABLE IF NOT EXISTS online_orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            buyer_name TEXT NOT NULL,
+            total_amount REAL NOT NULL,
+            receipt_image_path TEXT NOT NULL,
+            selected_products TEXT NOT NULL, 
+            status TEXT DEFAULT 'Pendente',
+            created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+        )`);
+
         // Event Costs
         db.run(`CREATE TABLE IF NOT EXISTS event_costs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
