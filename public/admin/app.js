@@ -518,14 +518,18 @@ async function loadStorePackages() {
             <td><strong>${pkg.recipient_name}</strong></td>
             <td>${itemsHtml}</td>
             <td>${formatDate(pkg.created_at)}</td>
-            <td style="display: flex; gap: 10px; align-items: center;">
-                <label class="toggle-switch" title="Marcar como entregue">
-                    <input type="checkbox" class="pkg-toggle" data-id="${pkg.id}" ${isDelivered ? 'checked' : ''}>
-                    <span class="slider"></span>
-                </label>
-                <button type="button" class="btn-icon btn-danger delete-pkg" data-id="${pkg.id}" title="Cancelar pacote e retornar itens ao estoque">
-                    <i class="ri-delete-bin-line"></i>
-                </button>
+            <td style="white-space: nowrap;">
+                <div style="display: inline-block; vertical-align: middle;">
+                    <label class="toggle-switch" title="Marcar como entregue" style="margin-bottom: 0;">
+                        <input type="checkbox" class="pkg-toggle" data-id="${pkg.id}" ${isDelivered ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div style="display: inline-block; vertical-align: middle; margin-left: 15px;">
+                    <button type="button" class="btn-icon btn-danger delete-pkg" data-id="${pkg.id}" title="Cancelar pacote e retornar itens ao estoque">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
             </td>
         `;
         
