@@ -301,6 +301,12 @@ app.get('/api/store_products', requireAuth, (req, res) => {
         res.json(rows);
     });
 });
+app.get('/api/public/store_products', (req, res) => {
+    db.all("SELECT id, name, stock, sell_price FROM store_products WHERE stock > 0 ORDER BY name ASC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
 app.post('/api/store_products', requireAuth, (req, res) => {
     const { name, stock, cost_price, sell_price } = req.body;
     db.run("INSERT INTO store_products (name, stock, cost_price, sell_price) VALUES (?, ?, ?, ?)", [name, stock, cost_price, sell_price], function(err) {

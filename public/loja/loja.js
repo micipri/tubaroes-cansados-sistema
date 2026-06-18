@@ -5,9 +5,9 @@ let selectedItems = {}; // { product_id: quantity }
 let confirmedAmount = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Carregar produtos
+    // Carregar produtos (público)
     try {
-        const res = await fetch(`${API_URL}/store_products`);
+        const res = await fetch(`${API_URL}/public/store_products`);
         if(res.ok) storeProducts = await res.json();
     } catch(err) {
         console.error("Erro ao carregar produtos:", err);
@@ -23,6 +23,15 @@ const loaderProcess = document.getElementById('loader-process');
 fileInput.addEventListener('change', () => {
     if (fileInput.files.length > 0) {
         btnProcess.style.display = 'flex';
+        // Add visual confirmation
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.innerHTML = `
+            <i class="ri-checkbox-circle-fill" style="color: #00ff88; font-size: 3rem;"></i>
+            <p style="color: #00ff88; font-weight: 600;">Comprovante selecionado:</p>
+            <p style="font-size: 0.9rem;">${fileInput.files[0].name}</p>
+        `;
+        uploadArea.style.borderColor = '#00ff88';
+        uploadArea.style.background = 'rgba(0, 255, 136, 0.05)';
     }
 });
 
