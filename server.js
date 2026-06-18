@@ -457,6 +457,32 @@ app.put('/api/store_packages/:id/status', requireAuth, (req, res) => {
         res.json({ updated: this.changes > 0 });
     });
 });
+app.delete('/api/store_packages/:id', requireAuth, (req, res) => {
+    const pkgId = req.params.id;
+    db.all("SELECT id, product_id, quantity FROM store_sales WHERE package_id = ?", [pkgId], (err, sales) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        db.serialize(() => {
+            db.run("BEGIN TRANSACTION");
+            let hasError = false;
+            
+            db.run("DELETE FROM store_packages WHERE id = ?", [pkgId], (err) => { if (err) hasError = true; });
+            
+            sales.forEach(sale => {
+                db.run("DELETE FROM store_sales WHERE id = ?", [sale.id], (err) => { if (err) hasError = true; });
+                db.run("UPDATE store_products SET stock = stock + ? WHERE id = ?", [sale.quantity, sale.product_id], (err) => { if (err) hasError = true; });
+            });
+            
+            db.run("COMMIT", (err) => {
+                if (err || hasError) {
+                    db.run("ROLLBACK");
+                    return res.status(500).json({ error: "Erro ao excluir o pacote." });
+                }
+                res.json({ success: true });
+            });
+        });
+    });
+});
 
 // --- Costs ---
 app.get('/api/costs/:type', requireAuth, (req, res) => {

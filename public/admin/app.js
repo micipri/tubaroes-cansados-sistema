@@ -518,13 +518,33 @@ async function loadStorePackages() {
             <td><strong>${pkg.recipient_name}</strong></td>
             <td>${itemsHtml}</td>
             <td>${formatDate(pkg.created_at)}</td>
-            <td>
-                <label class="toggle-switch">
+            <td style="display: flex; gap: 10px; align-items: center;">
+                <label class="toggle-switch" title="Marcar como entregue">
                     <input type="checkbox" class="pkg-toggle" data-id="${pkg.id}" ${isDelivered ? 'checked' : ''}>
                     <span class="slider"></span>
                 </label>
+                <button type="button" class="btn-icon btn-danger delete-pkg" data-id="${pkg.id}" title="Cancelar pacote e retornar itens ao estoque">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
             </td>
         `;
+        
+        tr.querySelector('.delete-pkg').addEventListener('click', async (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            if (confirm('Tem certeza que deseja excluir este pacote? Todas as vendas atreladas a ele serão apagadas e os itens retornarão ao estoque!')) {
+                try {
+                    const res = await fetch(`${API_URL}/store_packages/${id}`, { method: 'DELETE', credentials: 'include' });
+                    const result = await res.json();
+                    if(result.error) throw new Error(result.error);
+                    
+                    loadStorePackages();
+                    loadStoreSales();
+                    loadStoreProducts();
+                } catch(err) {
+                    alert('Erro ao excluir pacote: ' + err.message);
+                }
+            }
+        });
         
         tr.querySelector('.pkg-toggle').addEventListener('change', async (e) => {
             const id = e.target.getAttribute('data-id');
