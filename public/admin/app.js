@@ -519,50 +519,52 @@ async function loadStorePackages() {
             <td>${itemsHtml}</td>
             <td>${formatDate(pkg.created_at)}</td>
             <td style="white-space: nowrap;">
-                <div style="display: inline-block; vertical-align: middle;">
-                    <label class="toggle-switch" title="Marcar como entregue" style="margin-bottom: 0;">
-                        <input type="checkbox" class="pkg-toggle" data-id="${pkg.id}" ${isDelivered ? 'checked' : ''}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div style="display: inline-block; vertical-align: middle; margin-left: 15px;">
+                ${isDelivered ? `
+                    <span style="color:#00ff88; font-weight:bold; display:inline-block; padding: 0.4rem 0;"><i class="ri-check-double-line"></i> Entregue</span>
+                ` : `
+                    <button type="button" class="btn btn-primary deliver-pkg" data-id="${pkg.id}" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; margin-right: 10px;">
+                        <i class="ri-check-line"></i> Entregar
+                    </button>
                     <button type="button" class="btn-icon btn-danger delete-pkg" data-id="${pkg.id}" title="Cancelar pacote e retornar itens ao estoque">
                         <i class="ri-delete-bin-line"></i>
                     </button>
-                </div>
+                `}
             </td>
         `;
         
-        tr.querySelector('.delete-pkg').addEventListener('click', async (e) => {
-            const id = e.currentTarget.getAttribute('data-id');
-            if (confirm('Tem certeza que deseja excluir este pacote? Todas as vendas atreladas a ele serão apagadas e os itens retornarão ao estoque!')) {
-                try {
-                    const res = await fetch(`${API_URL}/store_packages/${id}`, { method: 'DELETE', credentials: 'include' });
-                    const result = await res.json();
-                    if(result.error) throw new Error(result.error);
-                    
-                    loadStorePackages();
-                    loadStoreSales();
-                    loadStoreProducts();
-                } catch(err) {
-                    alert('Erro ao excluir pacote: ' + err.message);
+        if (!isDelivered) {
+            tr.querySelector('.delete-pkg').addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                if (confirm('Tem certeza que deseja excluir este pacote? Todas as vendas atreladas a ele serão apagadas e os itens retornarão ao estoque!')) {
+                    try {
+                        const res = await fetch(`${API_URL}/store_packages/${id}`, { method: 'DELETE', credentials: 'include' });
+                        const result = await res.json();
+                        if(result.error) throw new Error(result.error);
+                        
+                        loadStorePackages();
+                        loadStoreSales();
+                        loadStoreProducts();
+                    } catch(err) {
+                        alert('Erro ao excluir pacote: ' + err.message);
+                    }
                 }
-            }
-        });
-        
-        tr.querySelector('.pkg-toggle').addEventListener('change', async (e) => {
-            const id = e.target.getAttribute('data-id');
-            const newStatus = e.target.checked ? 'Entregue' : 'Pendente';
-            try {
-                await fetch(API_URL + '/store_packages/' + id + '/status', {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', body: JSON.stringify({ status: newStatus })
-                });
-            } catch { 
-                alert('Erro ao atualizar status.'); 
-                e.target.checked = !e.target.checked; 
-            }
-        });
+            });
+            
+            tr.querySelector('.deliver-pkg').addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                if (confirm('Confirmar entrega do pacote ao comprador? Uma vez marcado como entregue, não será mais possível excluí-lo do sistema.')) {
+                    try {
+                        await fetch(API_URL + '/store_packages/' + id + '/status', {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include', body: JSON.stringify({ status: 'Entregue' })
+                        });
+                        loadStorePackages();
+                    } catch { 
+                        alert('Erro ao atualizar status.'); 
+                    }
+                }
+            });
+        }
 
         tbody.appendChild(tr);
     });
