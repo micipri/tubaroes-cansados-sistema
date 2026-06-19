@@ -129,11 +129,54 @@
       });
     }
 
-    async function sendSyncToServer(athletes) {
+    async function sendSyncToServer(localAthletes) {
+      // 1. Busca o estado atual do servidor
+      log('📥 Buscando dados atuais do servidor...', 'info');
+      let serverAthletes = [];
+      try {
+        const res = await fetch(SERVER + '/checkin/data.json?t=' + Date.now());
+        if (res.ok) serverAthletes = await res.json();
+        log(`ℹ️ Servidor possui ${serverAthletes.length} atletas.`, 'info');
+      } catch(e) {
+        log('⚠️ Não foi possível buscar dados do servidor. Enviando somente dados locais.', 'err');
+        serverAthletes = [];
+      }
+
+      // 2. Faz fusão: servidor é a base, dados do iPad sobrescrevem check-ins
+      const serverMap = new Map(serverAthletes.map(a => [String(a.id), a]));
+      let merged = 0;
+
+      localAthletes.forEach(local => {
+        const key = String(local.id);
+        if (serverMap.has(key)) {
+          const srv = serverMap.get(key);
+          // Se o iPad tem check-in e o servidor não, atualiza o servidor
+          if (local.checkinRealizado && !srv.checkinRealizado) {
+            srv.checkinRealizado = true;
+            srv.fotoUrl = local.fotoUrl || srv.fotoUrl;
+            srv.telefone = local.telefone || srv.telefone;
+            srv.camisa = local.camisa || srv.camisa;
+            srv.prova = local.prova || srv.prova;
+            srv.kitRetiradoPor = local.kitRetiradoPor || srv.kitRetiradoPor;
+            srv.checkout1kmRealizado = local.checkout1kmRealizado || srv.checkout1kmRealizado;
+            srv.checkout3kmRealizado = local.checkout3kmRealizado || srv.checkout3kmRealizado;
+            srv.checkoutRealizado = local.checkoutRealizado || srv.checkoutRealizado;
+            merged++;
+          }
+        } else {
+          // Atleta que só existe no iPad (adicionado manualmente?) — adiciona no servidor
+          serverAthletes.push(local);
+          merged++;
+        }
+      });
+
+      log(`🔀 ${merged} registros mesclados.`, 'info');
+
+      // 3. Envia a lista mesclada para o servidor
       const res = await fetch(SERVER + '/checkin/data.json', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(athletes)
+        body: JSON.stringify(serverAthletes)
       });
       return res.ok;
     }
