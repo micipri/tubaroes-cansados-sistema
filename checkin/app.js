@@ -456,7 +456,41 @@ function setupEventListeners() {
 
   // Camera Buttons
   btnCapture.addEventListener('click', takePhoto);
-  btnRetake.addEventListener('click', retakePhoto);
+  
+  const btnUpload = document.getElementById('btn-upload');
+  const btnUploadTrigger = document.getElementById('btn-upload-trigger');
+  
+  if (btnUploadTrigger && btnUpload) {
+    btnUploadTrigger.addEventListener('click', () => {
+      btnUpload.click();
+    });
+    
+    btnUpload.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const dataUrl = evt.target.result;
+          photoPreview.src = dataUrl;
+          cameraFeed.style.display = 'none';
+          photoPreview.style.display = 'block';
+          
+          btnCapture.style.display = 'none';
+          btnUploadTrigger.style.display = 'none';
+          btnRetake.style.display = 'inline-flex';
+          btnFinish.style.display = 'inline-flex';
+          
+          currentAthlete.fotoUrl = dataUrl;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    });
+  }
+
+  btnRetake.addEventListener('click', () => {
+    retakePhoto();
+    if (btnUploadTrigger) btnUploadTrigger.style.display = 'inline-flex';
+  });
+  
   btnFinish.addEventListener('click', finalizeCheckin);
 }
 
@@ -597,6 +631,8 @@ async function startCamera() {
   cameraFeed.style.display = 'block';
   photoPreview.style.display = 'none';
   btnCapture.style.display = 'inline-flex';
+  const btnUploadTrigger = document.getElementById('btn-upload-trigger');
+  if (btnUploadTrigger) btnUploadTrigger.style.display = 'inline-flex';
   btnRetake.style.display = 'none';
   btnFinish.style.display = 'none';
 
@@ -611,6 +647,7 @@ async function startCamera() {
     alert("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
     // Fallback: Finalizar sem foto
     btnCapture.style.display = 'none';
+    if (btnUploadTrigger) btnUploadTrigger.style.display = 'inline-flex';
     btnFinish.style.display = 'inline-flex';
   }
 }
@@ -635,6 +672,8 @@ function takePhoto() {
   photoPreview.style.display = 'block';
   
   btnCapture.style.display = 'none';
+  const btnUploadTrigger = document.getElementById('btn-upload-trigger');
+  if (btnUploadTrigger) btnUploadTrigger.style.display = 'none';
   btnRetake.style.display = 'inline-flex';
   btnFinish.style.display = 'inline-flex';
 
@@ -649,6 +688,8 @@ function retakePhoto() {
   btnCapture.style.display = 'inline-flex';
   btnRetake.style.display = 'none';
   btnFinish.style.display = 'none';
+  const btnUploadTrigger = document.getElementById('btn-upload-trigger');
+  if (btnUploadTrigger) btnUploadTrigger.style.display = 'inline-flex';
 }
 
 async function uploadPhotoToServer(athlete) {
