@@ -41,7 +41,7 @@ try {
 
 // Middleware
 app.use(cors({ credentials: true, origin: true }));
-app.use(express.json());
+app.use(express.json({ limit: '200mb' }));
 app.use(session({
     secret: process.env.SESSION_SECRET || 'tubaroes-cansados-secret-2026',
     resave: false,
