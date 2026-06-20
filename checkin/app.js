@@ -156,7 +156,10 @@ async function loadData() {
   try {
     const localData = await getLocalData();
     if (localData) {
-      localAthletes = JSON.parse(localData);
+      const parsed = JSON.parse(localData);
+      if (Array.isArray(parsed)) {
+        localAthletes = parsed;
+      }
     }
   } catch (e) {
     console.warn("IndexedDB not ready", e);
