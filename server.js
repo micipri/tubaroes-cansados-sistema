@@ -584,7 +584,7 @@ if (!fs.existsSync(checkinUploadsDir)) fs.mkdirSync(checkinUploadsDir, { recursi
 const sourceDataFile = path.join(__dirname, 'checkin', 'public', 'data.json');
 if (fs.existsSync(sourceDataFile)) {
     // FORCED RESET - requested by user to clear tests
-    const resetMarker = path.join(checkinVolumeDir, 'reset_v2.txt');
+    const resetMarker = path.join(checkinVolumeDir, 'reset_v3.txt');
     if (!fs.existsSync(resetMarker)) {
         fs.copyFileSync(sourceDataFile, checkinDataFile);
         fs.writeFileSync(resetMarker, 'done');

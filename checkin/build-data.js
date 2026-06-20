@@ -18,21 +18,6 @@ function normalizeKey(key) {
     .replace(/[^a-z0-9]/g, ''); // remove special chars
 }
 
-// Gera um ID fixo e estável baseado no CPF (ou nome se não tiver CPF).
-// Isso garante que o ID NUNCA muda entre recompilações, evitando conflitos
-// com o cache do IndexedDB nos iPads.
-function gerarIdFixo(cpf, nome) {
-  // Usa CPF + nome para garantir unicidade mesmo quando dois atletas compartilham o mesmo CPF
-  const base = (cpf && cpf.length >= 6 ? cpf : '') + '|' + (nome || '');
-  if (!base || base === '|') return Math.floor(Math.random() * 900000) + 100000;
-  let hash = 0;
-  for (let i = 0; i < base.length; i++) {
-    const char = base.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & 0x7FFFFFFF; // força positivo 32-bit
-  }
-  return (hash % 900000) + 100000; // número de 6 dígitos entre 100000-999999
-}
 
 function processAthlete(row, allAthletes, idCounter) {
   // Map common column names variations using normalized keys
@@ -78,9 +63,8 @@ function processAthlete(row, allAthletes, idCounter) {
 
   if (nome && nome.trim() !== "") {
     const cpfLimpo = String(cpf).replace(/\D/g, '');
-    const idFixo = gerarIdFixo(cpfLimpo, String(nome).trim().toLowerCase());
     allAthletes.push({
-      id: idFixo,
+      id: null, // será atribuído após ordenação por CPF
       nome: String(nome).trim(),
       cpf: cpfLimpo,
       telefone: String(telefone).trim(),
@@ -143,8 +127,21 @@ function compileData() {
   if (allAthletes.length === 0) {
     console.log("Nenhum atleta encontrado. Usando dados vazios.");
   } else {
+    // Ordena por CPF (critério estável): garante que o mesmo atleta sempre
+    // recebe o mesmo número, independente da ordem dos arquivos fonte.
+    // Atletas sem CPF ficam no final, ordenados por nome.
+    allAthletes.sort((a, b) => {
+      const aCpf = a.cpf && a.cpf.length >= 6 ? a.cpf : 'z' + a.nome.toLowerCase();
+      const bCpf = b.cpf && b.cpf.length >= 6 ? b.cpf : 'z' + b.nome.toLowerCase();
+      return aCpf.localeCompare(bCpf);
+    });
+
+    // Atribui IDs sequenciais de 3 dígitos (1, 2, 3 ... até 999)
+    allAthletes.forEach((a, i) => { a.id = i + 1; });
+
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(allAthletes, null, 2));
     console.log(`\n✅ Sucesso! ${allAthletes.length} atletas compilados em 'public/data.json'`);
+    console.log(`   IDs de 1 a ${allAthletes.length} (máximo 3 dígitos).`);
   }
 }
 
