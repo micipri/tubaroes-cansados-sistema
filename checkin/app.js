@@ -201,13 +201,19 @@ async function loadData() {
       athletes = localAthletes;
     }
   } catch (error) {
-    console.warn('Failed to load data.json', error);
-    athletes = localAthletes;
+    console.warn('Failed to load data.json or save locally', error);
+    if (athletes.length === 0 && localAthletes.length > 0) {
+      athletes = localAthletes;
+    }
   }
 }
 
 async function saveData() {
-  await saveLocalData(JSON.stringify(athletes));
+  try {
+    await saveLocalData(JSON.stringify(athletes));
+  } catch (err) {
+    console.warn("IndexedDB save failed, continuing anyway:", err);
+  }
   
   // Sincroniza silenciosamente com o servidor principal na nuvem
   try {
