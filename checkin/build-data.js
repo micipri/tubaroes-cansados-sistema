@@ -127,13 +127,10 @@ function compileData() {
   if (allAthletes.length === 0) {
     console.log("Nenhum atleta encontrado. Usando dados vazios.");
   } else {
-    // Ordena por CPF (critério estável): garante que o mesmo atleta sempre
-    // recebe o mesmo número, independente da ordem dos arquivos fonte.
-    // Atletas sem CPF ficam no final, ordenados por nome.
+    // Ordena por Nome (ordem alfabética): garante que o ID 1 seja o primeiro
+    // atleta em ordem alfabética.
     allAthletes.sort((a, b) => {
-      const aCpf = a.cpf && a.cpf.length >= 6 ? a.cpf : 'z' + a.nome.toLowerCase();
-      const bCpf = b.cpf && b.cpf.length >= 6 ? b.cpf : 'z' + b.nome.toLowerCase();
-      return aCpf.localeCompare(bCpf);
+      return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
     });
 
     // Atribui IDs sequenciais de 3 dígitos (1, 2, 3 ... até 999)
