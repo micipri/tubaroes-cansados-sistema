@@ -2,6 +2,7 @@
 let athletes = [];
 let currentAthlete = null;
 let stream = null; // Camera stream
+let currentStatFilter = null; // null, 'checkin', '1km', '3km', 'todas', 'checkout1km', 'checkout3km'
 
 // DOM Elements - Dashboard
 const dashboardTbody = document.getElementById('dashboard-tbody');
@@ -277,6 +278,15 @@ function renderDashboard(filterText = '') {
       return nomeMatch || cpfMatch;
     });
   }
+  
+  if (currentStatFilter) {
+    if (currentStatFilter === 'checkin') filtered = filtered.filter(a => a.checkinRealizado);
+    else if (currentStatFilter === '1km') filtered = filtered.filter(a => a.prova && String(a.prova).includes('1 km'));
+    else if (currentStatFilter === '3km') filtered = filtered.filter(a => a.prova && String(a.prova).includes('3 km'));
+    else if (currentStatFilter === 'todas') filtered = filtered.filter(a => a.prova && String(a.prova).toUpperCase() === 'TODAS');
+    else if (currentStatFilter === 'checkout1km') filtered = filtered.filter(a => a.checkout1kmRealizado || (a.checkoutRealizado && a.prova && String(a.prova).includes('1 km')));
+    else if (currentStatFilter === 'checkout3km') filtered = filtered.filter(a => a.checkout3kmRealizado || (a.checkoutRealizado && a.prova && String(a.prova).includes('3 km')));
+  }
 
   dashboardTbody.innerHTML = '';
   
@@ -342,6 +352,36 @@ function renderDashboard(filterText = '') {
 
 // Setup Listeners
 function setupEventListeners() {
+  // Stat Card Listeners
+  const setFilter = (filterName) => {
+    if (currentStatFilter === filterName) {
+      currentStatFilter = null; // Toggle off if clicked again
+    } else {
+      currentStatFilter = filterName;
+    }
+    // Highlight active card
+    document.querySelectorAll('.stat-card').forEach(card => card.style.opacity = '1');
+    if (currentStatFilter) {
+      document.querySelectorAll('.stat-card').forEach(card => card.style.opacity = '0.5');
+      const activeCard = document.getElementById(
+        filterName === 'checkin' ? 'card-stat-checked' : 
+        filterName === 'checkout1km' ? 'card-stat-checkout-1km' :
+        filterName === 'checkout3km' ? 'card-stat-checkout-3km' :
+        `card-stat-${filterName}`
+      );
+      if (activeCard) activeCard.style.opacity = '1';
+    }
+    renderDashboard(dashboardSearch.value);
+  };
+
+  document.getElementById('card-stat-total').addEventListener('click', () => { currentStatFilter = null; document.querySelectorAll('.stat-card').forEach(card => card.style.opacity = '1'); renderDashboard(dashboardSearch.value); });
+  document.getElementById('card-stat-checked').addEventListener('click', () => setFilter('checkin'));
+  document.getElementById('card-stat-1km').addEventListener('click', () => setFilter('1km'));
+  document.getElementById('card-stat-3km').addEventListener('click', () => setFilter('3km'));
+  document.getElementById('card-stat-todas').addEventListener('click', () => setFilter('todas'));
+  document.getElementById('card-stat-checkout-1km').addEventListener('click', () => setFilter('checkout1km'));
+  document.getElementById('card-stat-checkout-3km').addEventListener('click', () => setFilter('checkout3km'));
+
   // Search on dashboard
   dashboardSearch.addEventListener('input', (e) => {
     renderDashboard(e.target.value);
