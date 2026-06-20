@@ -581,6 +581,31 @@ const checkinDataFile = path.join(checkinVolumeDir, 'data.json');
 
 if (!fs.existsSync(checkinUploadsDir)) fs.mkdirSync(checkinUploadsDir, { recursive: true });
 
+// --- INÍCIO PATCH DE CORREÇÃO (Desfazer check-out da Daniela) ---
+try {
+    if (fs.existsSync(checkinDataFile)) {
+        let liveData = JSON.parse(fs.readFileSync(checkinDataFile, 'utf8'));
+        let fixed = false;
+        for (let a of liveData) {
+            if (a.cpf === '05888502766') {
+                if (a.checkout3kmRealizado || a.checkoutRealizado) {
+                    a.checkout3kmRealizado = false;
+                    a.checkoutRealizado = false;
+                    fixed = true;
+                }
+            }
+        }
+        if (fixed) {
+            fs.writeFileSync(checkinDataFile, JSON.stringify(liveData, null, 2));
+            console.log("Patch executado: check-out da Daniela desfeito com sucesso.");
+        }
+    }
+} catch(e) {
+    console.error("Erro ao rodar patch:", e);
+}
+// --- FIM PATCH ---
+
+
 const sourceDataFile = path.join(__dirname, 'checkin', 'public', 'data.json');
 if (fs.existsSync(sourceDataFile)) {
     // FORCED RESET - requested by user to clear tests
