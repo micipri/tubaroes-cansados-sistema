@@ -639,10 +639,49 @@ app.get('/checkin/data.json', (req, res) => {
 });
 
 app.post('/checkin/data.json', (req, res) => {
-    fs.writeFile(checkinDataFile, JSON.stringify(req.body, null, 2), (err) => {
-        if (err) return res.status(500).json({ error: "Failed to save data" });
-        res.json({ success: true });
-    });
+    try {
+        const incoming = req.body; // array de atletas do iPad
+        if (!Array.isArray(incoming)) return res.status(400).json({ error: "Invalid data" });
+
+        // Lê o estado atual do servidor
+        let current = [];
+        if (fs.existsSync(checkinDataFile)) {
+            try { current = JSON.parse(fs.readFileSync(checkinDataFile, 'utf8')); } catch(e) {}
+        }
+
+        // Merge: mantém servidor como base, aplica check-ins do iPad que o servidor não tem
+        const serverMap = new Map(current.map(a => [String(a.id), a]));
+        let merged = 0;
+
+        incoming.forEach(local => {
+            const key = String(local.id);
+            if (serverMap.has(key)) {
+                const srv = serverMap.get(key);
+                if (local.checkinRealizado && !srv.checkinRealizado) {
+                    srv.checkinRealizado = true;
+                    srv.fotoUrl = local.fotoUrl || srv.fotoUrl;
+                    srv.telefone = local.telefone || srv.telefone;
+                    srv.camisa = local.camisa || srv.camisa;
+                    srv.prova = local.prova || srv.prova;
+                    srv.kitRetiradoPor = local.kitRetiradoPor || srv.kitRetiradoPor;
+                    srv.checkout1kmRealizado = local.checkout1kmRealizado || srv.checkout1kmRealizado;
+                    srv.checkout3kmRealizado = local.checkout3kmRealizado || srv.checkout3kmRealizado;
+                    srv.checkoutRealizado = local.checkoutRealizado || srv.checkoutRealizado;
+                    merged++;
+                }
+            }
+            // Não adiciona IDs desconhecidos para evitar "fantasmas" de caches corrompidos
+        });
+
+        fs.writeFile(checkinDataFile, JSON.stringify(current, null, 2), (err) => {
+            if (err) return res.status(500).json({ error: "Failed to save data" });
+            console.log(`[checkin] Sync recebido: ${merged} check-ins mesclados de ${incoming.length} atletas.`);
+            res.json({ success: true, merged });
+        });
+    } catch(e) {
+        console.error('[checkin] Erro no sync:', e);
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.post('/checkin/upload.php', (req, res) => {

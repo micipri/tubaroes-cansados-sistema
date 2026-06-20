@@ -18,6 +18,22 @@ function normalizeKey(key) {
     .replace(/[^a-z0-9]/g, ''); // remove special chars
 }
 
+// Gera um ID fixo e estável baseado no CPF (ou nome se não tiver CPF).
+// Isso garante que o ID NUNCA muda entre recompilações, evitando conflitos
+// com o cache do IndexedDB nos iPads.
+function gerarIdFixo(cpf, nome) {
+  // Usa CPF + nome para garantir unicidade mesmo quando dois atletas compartilham o mesmo CPF
+  const base = (cpf && cpf.length >= 6 ? cpf : '') + '|' + (nome || '');
+  if (!base || base === '|') return Math.floor(Math.random() * 900000) + 100000;
+  let hash = 0;
+  for (let i = 0; i < base.length; i++) {
+    const char = base.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & 0x7FFFFFFF; // força positivo 32-bit
+  }
+  return (hash % 900000) + 100000; // número de 6 dígitos entre 100000-999999
+}
+
 function processAthlete(row, allAthletes, idCounter) {
   // Map common column names variations using normalized keys
   const mappedRow = {};
@@ -61,24 +77,25 @@ function processAthlete(row, allAthletes, idCounter) {
   const telefone = mappedRow.celular || mappedRow.telefone || mappedRow.whatsapp || row['Celular'] || "";
 
   if (nome && nome.trim() !== "") {
+    const cpfLimpo = String(cpf).replace(/\D/g, '');
+    const idFixo = gerarIdFixo(cpfLimpo, String(nome).trim().toLowerCase());
     allAthletes.push({
-      id: idCounter,
+      id: idFixo,
       nome: String(nome).trim(),
-      cpf: String(cpf).replace(/\D/g, ''), // Keep only numbers for CPF
+      cpf: cpfLimpo,
       telefone: String(telefone).trim(),
       camisa: camisa,
       prova: prova,
       checkinRealizado: false,
       fotoUrl: null
     });
-    return idCounter + 1;
   }
   return idCounter;
 }
 
 function compileData() {
   let allAthletes = [];
-  let idCounter = 1;
+  let idCounter = 1; // mantido por compatibilidade mas não é mais usado como ID
   
   // Folders to check
   const dirs = [LISTAS_DIR, DATA_DIR];
