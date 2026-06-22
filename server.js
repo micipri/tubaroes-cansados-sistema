@@ -682,6 +682,7 @@ app.post('/checkin/data.json', (req, res) => {
             const key = String(local.id);
             if (serverMap.has(key)) {
                 const srv = serverMap.get(key);
+                let changed = false;
                 if (local.checkinRealizado && !srv.checkinRealizado) {
                     srv.checkinRealizado = true;
                     srv.fotoUrl = local.fotoUrl || srv.fotoUrl;
@@ -689,11 +690,26 @@ app.post('/checkin/data.json', (req, res) => {
                     srv.camisa = local.camisa || srv.camisa;
                     srv.prova = local.prova || srv.prova;
                     srv.kitRetiradoPor = local.kitRetiradoPor || srv.kitRetiradoPor;
-                    srv.checkout1kmRealizado = local.checkout1kmRealizado || srv.checkout1kmRealizado;
-                    srv.checkout3kmRealizado = local.checkout3kmRealizado || srv.checkout3kmRealizado;
-                    srv.checkoutRealizado = local.checkoutRealizado || srv.checkoutRealizado;
-                    merged++;
+                    changed = true;
                 }
+                
+                if (local.checkoutRealizado && !srv.checkoutRealizado) {
+                    srv.checkoutRealizado = true;
+                    srv.checkoutProva = local.checkoutProva || srv.checkoutProva;
+                    srv.checkoutTime = local.checkoutTime || srv.checkoutTime;
+                    changed = true;
+                }
+                
+                if (local.checkout1kmRealizado && !srv.checkout1kmRealizado) {
+                    srv.checkout1kmRealizado = true;
+                    changed = true;
+                }
+                if (local.checkout3kmRealizado && !srv.checkout3kmRealizado) {
+                    srv.checkout3kmRealizado = true;
+                    changed = true;
+                }
+                
+                if (changed) merged++;
             }
             // Não adiciona IDs desconhecidos para evitar "fantasmas" de caches corrompidos
         });
