@@ -3,6 +3,10 @@ node_modules/
 
 # Database (dados locais — não subir para o repositório)
 database.sqlite
+database.sqlite.*
+
+# Sessions
+sessions/
 
 # Arquivos de backup legados
 public/index.html.bak
