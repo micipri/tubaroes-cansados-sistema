@@ -3,6 +3,28 @@
 -- Script de Criação do Banco de Dados PostgreSQL / Supabase
 -- ================================================================
 
+-- Funções auxiliares de compatibilidade
+CREATE OR REPLACE FUNCTION public.datetime(arg1 text DEFAULT 'now', arg2 text DEFAULT 'localtime') 
+RETURNS text AS $$
+BEGIN
+    RETURN TO_CHAR(NOW() AT TIME ZONE 'America/Sao_Paulo', 'YYYY-MM-DD HH24:MI:SS');
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public.max(a integer, b integer) 
+RETURNS integer AS $$
+BEGIN
+    RETURN GREATEST(a, b);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public.max(a numeric, b numeric) 
+RETURNS numeric AS $$
+BEGIN
+    RETURN GREATEST(a, b);
+END;
+$$ LANGUAGE plpgsql;
+
 -- 1. Atletas (Inscrições do Evento)
 CREATE TABLE IF NOT EXISTS public.athletes (
     id BIGSERIAL PRIMARY KEY,
