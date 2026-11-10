@@ -651,6 +651,26 @@
                 <span>1. Escolha sua Modalidade</span>
             </div>
 
+            <!-- Banner Informativo do Kit Atleta -->
+            <div style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; gap: 14px; align-items: flex-start;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(2, 132, 199, 0.25); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.4rem; flex-shrink: 0; border: 1px solid rgba(56, 189, 248, 0.4);">
+                    <i class="ri-gift-2-line"></i>
+                </div>
+                <div>
+                    <h4 style="color: #fff; font-size: 1.05rem; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span>Inscrição com Kit Atleta Incluso!</span>
+                        <span style="background: var(--gold); color: #0f172a; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;">Benefício Oficial</span>
+                    </h4>
+                    <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 6px;">
+                        Além do direito de participação na prova, a sua inscrição dá direito ao <strong>Kit Atleta</strong>. Para as provas de <strong>Adulto e PCD</strong>, o kit atleta conta com: <strong>Touca, Camisa oficial do evento, Bolsa e Brindes exclusivos</strong>.
+                    </p>
+                    <p style="font-size: 0.82rem; color: #fbbf24; margin: 0; line-height: 1.4; display: flex; align-items: center; gap: 5px;">
+                        <i class="ri-error-warning-line"></i>
+                        <span><strong>Atenção:</strong> O tamanho da camisa pode ser diferente na entrega devido à disponibilidade de estoque.</span>
+                    </p>
+                </div>
+            </div>
+
             <div class="category-grid" id="category-grid">
                 
                 <div class="category-card selected" data-id="adulto_25k" data-price="149.00" data-name="Travessia de Adultos (2,5 km)">
@@ -658,7 +678,7 @@
                         <div class="cat-radio"></div>
                         <div class="cat-info">
                             <h4>Travessia de Adultos (2,5 km)</h4>
-                            <p>Prova principal para atletas adultos com percurso de 2,5 km em águas abertas.</p>
+                            <p>Prova principal para adultos (2,5 km em águas abertas). <strong>Inclui Kit Atleta (Touca, Camisa, Bolsa e Brindes)</strong>.</p>
                         </div>
                     </div>
                     <div class="cat-price">
@@ -672,7 +692,7 @@
                         <div class="cat-radio"></div>
                         <div class="cat-info">
                             <h4>Travessia de Adultos (2,5 km) — Assessorias</h4>
-                            <p>Desconto exclusivo para alunos de assessorias parceiras com cupom.</p>
+                            <p>Desconto exclusivo para alunos de assessorias com cupom. <strong>Inclui Kit Atleta (Touca, Camisa, Bolsa e Brindes)</strong>.</p>
                         </div>
                     </div>
                     <div class="cat-price">
@@ -686,7 +706,7 @@
                         <div class="cat-radio"></div>
                         <div class="cat-info">
                             <h4>Travessia de Adultos (2,5 km) — Promocional de Largada</h4>
-                            <p>Lote promocional de lançamento com vagas limitadas.</p>
+                            <p>Lote promocional de lançamento com vagas limitadas. <strong>Inclui Kit Atleta (Touca, Camisa, Bolsa e Brindes)</strong>.</p>
                         </div>
                     </div>
                     <div class="cat-price">
@@ -700,7 +720,7 @@
                         <div class="cat-radio"></div>
                         <div class="cat-info">
                             <h4>Travessia de Adultos (2,5 km) — PCD</h4>
-                            <p>Inscrição e apoio especializado para atletas com deficiência.</p>
+                            <p>Inscrição e apoio especializado para atletas com deficiência. <strong>Inclui Kit Atleta (Touca, Camisa, Bolsa e Brindes)</strong>.</p>
                         </div>
                     </div>
                     <div class="cat-price">
@@ -714,7 +734,7 @@
                         <div class="cat-radio"></div>
                         <div class="cat-info">
                             <h4>Travessia Kids</h4>
-                            <p>Percurso adaptado e seguro para as crianças se apaixonarem pelo mar.</p>
+                            <p>Percurso adaptado e seguro para as crianças se apaixonarem pelo mar + Kit infantil.</p>
                         </div>
                     </div>
                     <div class="cat-price">
@@ -808,26 +828,14 @@
                 <div class="form-group">
                     <label for="tshirt_size">Tamanho da Camisa Oficial <span class="req">*</span></label>
                     <select id="tshirt_size" required>
-                        <option value="">Selecione o tamanho...</option>
-                        <optgroup label="Modelo Tradicional (Unissex)">
-                            <option value="Tradicional P">Tradicional P</option>
-                            <option value="Tradicional M" selected>Tradicional M</option>
-                            <option value="Tradicional G">Tradicional G</option>
-                            <option value="Tradicional GG">Tradicional GG</option>
-                            <option value="Tradicional XGG">Tradicional XGG</option>
-                        </optgroup>
-                        <optgroup label="Modelo Babylook Feminina">
-                            <option value="Babylook P">Babylook P</option>
-                            <option value="Babylook M">Babylook M</option>
-                            <option value="Babylook G">Babylook G</option>
-                        </optgroup>
-                        <optgroup label="Infantil (Kids)">
-                            <option value="Kids 6">Kids 6</option>
-                            <option value="Kids 8">Kids 8</option>
-                            <option value="Kids 10">Kids 10</option>
-                            <option value="Kids 12">Kids 12</option>
-                        </optgroup>
+                        <option value="" disabled selected>Selecione o tamanho (M, G ou XG)...</option>
+                        <option value="M">M</option>
+                        <option value="G">G</option>
+                        <option value="XG">XG</option>
                     </select>
+                    <small style="color: #fbbf24; font-size: 0.82rem; margin-top: 4px; display: flex; align-items: center; gap: 5px;">
+                        <i class="ri-information-line"></i> <em>O tamanho da camisa pode ser diferente na entrega devido à disponibilidade de estoque.</em>
+                    </small>
                 </div>
 
                 <div class="form-group">

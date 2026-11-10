@@ -513,9 +513,43 @@
             align-items: center;
             gap: 10px;
         }
+
+        @keyframes popUpIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Pop-up Promocional da Loja -->
+    <div id="promo-popup-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(8px); z-index: 999; align-items: center; justify-content: center; padding: 1.25rem;">
+        <div style="background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%); border: 2px solid var(--gold); border-radius: 20px; max-width: 520px; width: 100%; padding: 2.25rem 2rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7); text-align: center; position: relative; animation: popUpIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);">
+            <button type="button" id="btn-close-promo-x" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1; transition: color 0.2s;" title="Fechar">
+                <i class="ri-close-line"></i>
+            </button>
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); border: 2px solid var(--gold); color: var(--gold-light); display: flex; align-items: center; justify-content: center; font-size: 2.4rem; margin: 0 auto 1.25rem;">
+                <i class="ri-fire-fill"></i>
+            </div>
+            <div style="display: inline-block; background: rgba(245, 158, 11, 0.2); color: var(--gold-light); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 12px; border-radius: 99px; margin-bottom: 12px;">
+                Desconto Especial de Inscrição
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 900; color: #fff; margin-bottom: 12px; line-height: 1.25;">
+                Aproveite a Oportunidade!
+            </h2>
+            <p style="font-size: 1.05rem; font-weight: 600; color: #f8fafc; line-height: 1.5; margin-bottom: 1.5rem;">
+                Aproveite! Os itens dos <strong style="color: var(--gold);">Tubarões Cansados</strong> estão com desconto especial para compra feita agora, junto com a inscrição!
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" id="btn-promo-go-store" class="btn-finalize" style="margin: 0; padding: 14px 20px; font-size: 1.05rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 900; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);">
+                    <i class="ri-shopping-bag-3-line"></i> Quero Ver os Produtos com Desconto
+                </button>
+                <button type="button" id="btn-promo-dismiss" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.15); color: var(--text-muted); padding: 10px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;">
+                    Continuar apenas com a inscrição
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Header -->
     <header>
@@ -840,6 +874,35 @@
             await loadStoreProducts();
             updateTotalCalculations();
             setupPaymentSelection();
+
+            // Exibir Pop-up Promocional da Loja
+            setTimeout(() => {
+                const promoOverlay = document.getElementById('promo-popup-overlay');
+                if (promoOverlay) promoOverlay.style.display = 'flex';
+            }, 350);
+
+            // Ações do Pop-up Promocional
+            const closePromo = () => {
+                const promoOverlay = document.getElementById('promo-popup-overlay');
+                if (promoOverlay) promoOverlay.style.display = 'none';
+            };
+
+            const btnCloseX = document.getElementById('btn-close-promo-x');
+            if (btnCloseX) btnCloseX.onclick = closePromo;
+
+            const btnDismiss = document.getElementById('btn-promo-dismiss');
+            if (btnDismiss) btnDismiss.onclick = closePromo;
+
+            const btnGoStore = document.getElementById('btn-promo-go-store');
+            if (btnGoStore) {
+                btnGoStore.onclick = () => {
+                    closePromo();
+                    const storeSec = document.getElementById('store-products-container');
+                    if (storeSec) {
+                        storeSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                };
+            }
         });
 
         // Render Review Panel

@@ -1133,16 +1133,11 @@ function openManualAthleteModal() {
                     </select>
                 </div>
                 <div>
-                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Camisa *</label>
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Camisa (M, G ou XG) *</label>
                     <select id="man-tshirt" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
-                        <option value="Tradicional P">Tradicional P</option>
-                        <option value="Tradicional M" selected>Tradicional M</option>
-                        <option value="Tradicional G">Tradicional G</option>
-                        <option value="Tradicional GG">Tradicional GG</option>
-                        <option value="Tradicional XGG">Tradicional XGG</option>
-                        <option value="Babylook P">Babylook P</option>
-                        <option value="Babylook M">Babylook M</option>
-                        <option value="Babylook G">Babylook G</option>
+                        <option value="M" selected>M</option>
+                        <option value="G">G</option>
+                        <option value="XG">XG</option>
                     </select>
                 </div>
             </div>
