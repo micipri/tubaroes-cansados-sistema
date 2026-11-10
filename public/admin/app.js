@@ -1057,7 +1057,7 @@ function exportAthletesXLSX() {
         a.birth_date || '',
         a.gender || '',
         a.category,
-        a.distance || '2,5 km',
+        a.distance || '2 km',
         a.price,
         a.payment_status,
         a.payment_method || '',
@@ -1125,11 +1125,20 @@ function openManualAthleteModal() {
                 <div>
                     <label style="font-size: 0.8rem; color: var(--text-secondary);">Modalidade *</label>
                     <select id="man-category" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
-                        <option value="adulto_25k">Travessia Adultos (2,5 km) - R$ 149</option>
-                        <option value="adulto_assessoria">Travessia Assessorias (com cupom) - R$ 119</option>
-                        <option value="promocional">Promocional de Largada - R$ 99</option>
-                        <option value="pcd">Travessia PCD - R$ 79</option>
-                        <option value="kids">Travessia Kids - R$ 79</option>
+                        <optgroup label="Percurso 2 km">
+                            <option value="adulto_2k">Travessia Adultos (2 km) - R$ 149</option>
+                            <option value="adulto_assessoria_2k">Travessia Assessorias (2 km, com cupom) - R$ 119</option>
+                            <option value="promocional_2k">Promocional de Largada (2 km) - R$ 99</option>
+                            <option value="pcd_2k">Travessia PCD (2 km) - R$ 79</option>
+                        </optgroup>
+                        <optgroup label="Percurso 1 km">
+                            <option value="adulto_1k">Travessia Adultos (1 km) - R$ 149</option>
+                            <option value="adulto_assessoria_1k">Travessia Assessorias (1 km, com cupom) - R$ 119</option>
+                            <option value="pcd_1k">Travessia PCD (1 km) - R$ 79</option>
+                        </optgroup>
+                        <optgroup label="Infantil">
+                            <option value="kids">Travessia Kids - R$ 79</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div>

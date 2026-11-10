@@ -199,47 +199,106 @@ app.delete('/api/users/:id', requireAuth, requireMaster, (req, res) => {
 
 // ─── Event Categories & Inscrições ──────────────────────────────────────────
 const EVENT_CATEGORIES = {
-    'adulto_25k': {
-        id: 'adulto_25k',
-        name: 'Travessia de Adultos (2,5 km)',
-        distance: '2,5 km',
+    // ── PROVAS DE 2 KM (Principal) ──
+    'adulto_2k': {
+        id: 'adulto_2k',
+        name: 'Travessia de Adultos (2 km)',
+        distance: '2 km',
         price: 149.00,
-        description: 'Inscrição para a travessia de adultos (2,5 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+        description: 'Prova de 2 km em águas abertas para adultos. Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
     },
-    'adulto_assessoria': {
-        id: 'adulto_assessoria',
-        name: 'Travessia de Adultos (2,5 km) — Alunos de Assessorias (com cupom)',
-        distance: '2,5 km',
+    'adulto_assessoria_2k': {
+        id: 'adulto_assessoria_2k',
+        name: 'Travessia de Adultos (2 km) — Alunos de Assessorias',
+        distance: '2 km',
         price: 119.00,
-        description: 'Valor especial com cupom para alunos de assessorias credenciadas (2,5 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.',
+        description: 'Desconto exclusivo com cupom para alunos de assessorias parceiras (2 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.',
         requires_coupon: true
     },
+    'promocional_2k': {
+        id: 'promocional_2k',
+        name: 'Travessia de Adultos (2 km) — Promocional de Largada',
+        distance: '2 km',
+        price: 99.00,
+        description: 'Lote promocional limitado de largada (2 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+    },
+    'pcd_2k': {
+        id: 'pcd_2k',
+        name: 'Travessia de Adultos (2 km) — PCD',
+        distance: '2 km',
+        price: 79.00,
+        description: 'Inscrição e apoio especializado para atletas com deficiência (2 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+    },
+
+    // ── PROVAS DE 1 KM (Nova Prova) ──
+    'adulto_1k': {
+        id: 'adulto_1k',
+        name: 'Travessia de Adultos (1 km)',
+        distance: '1 km',
+        price: 149.00,
+        description: 'Prova de 1 km em águas abertas para adultos. Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+    },
+    'adulto_assessoria_1k': {
+        id: 'adulto_assessoria_1k',
+        name: 'Travessia de Adultos (1 km) — Alunos de Assessorias',
+        distance: '1 km',
+        price: 119.00,
+        description: 'Desconto exclusivo com cupom para alunos de assessorias parceiras (1 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.',
+        requires_coupon: true
+    },
+    'pcd_1k': {
+        id: 'pcd_1k',
+        name: 'Travessia de Adultos (1 km) — PCD',
+        distance: '1 km',
+        price: 79.00,
+        description: 'Inscrição e apoio especializado para atletas com deficiência (1 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+    },
+
+    // ── PROVA KIDS ──
     'kids': {
         id: 'kids',
         name: 'Travessia Kids',
         distance: 'Kids',
         price: 79.00,
-        description: 'Inscrição para a prova infantil Travessia Kids. Inclui Kit Kids: Bolsa, Touca, Medalha e Brindes.'
+        description: 'Percurso adaptado e seguro para as crianças. Inclui Kit Kids: Bolsa, Touca, Medalha e Brindes.'
+    },
+
+    // ── ALIASES DE COMPATIBILIDADE ──
+    'adulto_25k': {
+        id: 'adulto_2k',
+        name: 'Travessia de Adultos (2 km)',
+        distance: '2 km',
+        price: 149.00,
+        description: 'Prova de 2 km em águas abertas para adultos. Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+    },
+    'adulto_assessoria': {
+        id: 'adulto_assessoria_2k',
+        name: 'Travessia de Adultos (2 km) — Alunos de Assessorias',
+        distance: '2 km',
+        price: 119.00,
+        description: 'Desconto exclusivo com cupom para alunos de assessorias parceiras (2 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.',
+        requires_coupon: true
     },
     'pcd': {
-        id: 'pcd',
-        name: 'Travessia de Adultos (2,5 km) — PCD',
-        distance: '2,5 km',
+        id: 'pcd_2k',
+        name: 'Travessia de Adultos (2 km) — PCD',
+        distance: '2 km',
         price: 79.00,
-        description: 'Valor especial de 2,5 km para atletas PCD. Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+        description: 'Inscrição e apoio especializado para atletas com deficiência (2 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
     },
     'promocional': {
-        id: 'promocional',
-        name: 'Travessia de Adultos (2,5 km) — Promocional de Largada',
-        distance: '2,5 km',
+        id: 'promocional_2k',
+        name: 'Travessia de Adultos (2 km) — Promocional de Largada',
+        distance: '2 km',
         price: 99.00,
-        description: 'Lote promocional limitado de largada (2,5 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+        description: 'Lote promocional limitado de largada (2 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
     }
 };
 
 // Public endpoint: List Categories
 app.get('/api/public/categories', (req, res) => {
-    res.json(Object.values(EVENT_CATEGORIES));
+    const unique = Object.values(EVENT_CATEGORIES).filter((cat, idx, arr) => arr.findIndex(c => c.id === cat.id) === idx);
+    res.json(unique);
 });
 
 // Public endpoint: Validar Cupom de Assessoria (Formato: 5 letras e 2 números)
@@ -332,7 +391,7 @@ app.post('/api/public/complete-registration', (req, res) => {
 
     // 1. Validar cupom caso seja modalidade com assessoria
     const validateCouponPromise = new Promise((resolve, reject) => {
-        if (category_id === 'adulto_assessoria') {
+        if (cat.requires_coupon || category_id.includes('assessoria')) {
             if (!coupon_code) {
                 return reject(new Error('Para a modalidade de assessorias, informe um cupom válido (5 letras e 2 números).'));
             }
@@ -351,7 +410,7 @@ app.post('/api/public/complete-registration', (req, res) => {
                 if (err) return reject(err);
                 if (!row) return reject(new Error('Cupom não encontrado ou inativo.'));
                 resolve({
-                    price: row.discount_price || 119.00,
+                    price: row.discount_price || cat.price || 119.00,
                     assessoria_name: row.assessoria_name,
                     coupon_code: cleanCode
                 });

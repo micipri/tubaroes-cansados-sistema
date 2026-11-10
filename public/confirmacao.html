@@ -864,7 +864,8 @@
             }
 
             // Gating: If Assessoria category, ensure coupon is validated
-            if (athleteDraft.category_id === 'adulto_assessoria' && !athleteDraft.coupon_code) {
+            const isAssessoria = athleteDraft.category_id === 'adulto_assessoria' || (athleteDraft.category_id && athleteDraft.category_id.includes('assessoria'));
+            if (isAssessoria && !athleteDraft.coupon_code) {
                 alert('A modalidade de assessorias requer um cupom de desconto oficial validado.');
                 window.location.href = '/inscricao';
                 return;
@@ -916,7 +917,7 @@
             document.getElementById('rev-category').textContent = athleteDraft.category_name;
             document.getElementById('rev-price').textContent = formatCurrency(athleteDraft.price);
 
-            if (athleteDraft.category_id === 'adulto_assessoria') {
+            if (athleteDraft.category_id === 'adulto_assessoria' || (athleteDraft.category_id && athleteDraft.category_id.includes('assessoria'))) {
                 const assessoriaBox = document.getElementById('rev-assessoria-box');
                 const assessoriaVal = document.getElementById('rev-assessoria-val');
                 assessoriaBox.style.display = 'block';

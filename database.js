@@ -46,7 +46,7 @@ function createTables() {
             birth_date TEXT,
             gender TEXT,
             category TEXT NOT NULL,
-            distance TEXT NOT NULL DEFAULT '2,5 km',
+            distance TEXT NOT NULL DEFAULT '2 km',
             price REAL NOT NULL,
             coupon_code TEXT,
             assessoria_name TEXT,
