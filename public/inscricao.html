@@ -726,17 +726,33 @@
             </div>
 
             <!-- Campos específicos para Assessoria -->
-            <div id="assessoria-fields" style="display: none; margin-bottom: 2rem; background: rgba(2, 132, 199, 0.08); padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(2, 132, 199, 0.2);">
-                <div class="form-grid" style="margin-bottom: 0;">
-                    <div class="form-group">
-                        <label for="assessoria_name">Nome da sua Assessoria <span class="req">*</span></label>
-                        <input type="text" id="assessoria_name" placeholder="Ex: Assessoria X / Equipe Y">
-                    </div>
+            <div id="assessoria-fields" style="display: none; margin-bottom: 2rem; background: rgba(2, 132, 199, 0.08); padding: 1.5rem; border-radius: 14px; border: 1px solid rgba(2, 132, 199, 0.3);">
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="color: #38bdf8; font-size: 1rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                        <i class="ri-coupon-3-fill"></i> Validação do Cupom da sua Assessoria (R$ 119,00)
+                    </h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                        Digite o código de <strong>5 letras e 2 números</strong> (ex: TUBAS01) fornecido pelo seu treinador para liberar sua inscrição com desconto.
+                    </p>
+                </div>
+
+                <div class="form-grid" style="margin-bottom: 0.5rem;">
                     <div class="form-group">
                         <label for="coupon_code">Cupom da Assessoria <span class="req">*</span></label>
-                        <input type="text" id="coupon_code" placeholder="Código do cupom fornecido pelo treinador" style="text-transform: uppercase;">
+                        <div style="position: relative;">
+                            <input type="text" id="coupon_code" placeholder="Ex: TUBAS01 (5 letras + 2 números)" maxlength="7" style="text-transform: uppercase; font-family: monospace; font-weight: 700; letter-spacing: 0.08em; font-size: 1.05rem; padding-right: 40px;" autocomplete="off">
+                            <div id="coupon-spinner" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: none; color: #38bdf8;">
+                                <i class="ri-loader-4-line ri-spin" style="font-size: 1.2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="assessoria_name">Assessoria Vinculada</label>
+                        <input type="text" id="assessoria_name" placeholder="Aparecerá automaticamente após digitar o cupom" readonly style="background: rgba(0,0,0,0.3); color: #34d399; font-weight: 700; border-color: rgba(255,255,255,0.08); cursor: not-allowed;">
                     </div>
                 </div>
+
+                <div id="coupon-feedback" style="font-size: 0.88rem; display: none; padding-top: 4px;"></div>
             </div>
 
             <!-- Etapa 2: Dados Pessoais -->
@@ -850,61 +866,13 @@
 
             <!-- Submit -->
             <button type="submit" class="btn-submit" id="btn-submit">
-                <span>Finalizar Inscrição</span>
+                <span>Prosseguir para Validação dos Dados</span>
                 <i class="ri-arrow-right-line"></i>
             </button>
 
         </form>
 
     </main>
-
-    <!-- Modal de Sucesso & Pagamento -->
-    <div class="modal-overlay" id="modal-success">
-        <div class="modal-card">
-            <div class="success-icon"><i class="ri-check-line"></i></div>
-            <h2 class="modal-title">Inscrição Pré-Confirmada!</h2>
-            <p class="modal-sub">Seus dados foram registrados com sucesso no sistema dos Tubarões Cansados.</p>
-
-            <div class="receipt-card">
-                <div class="receipt-row">
-                    <span>Atleta:</span>
-                    <span id="modal-athlete-name">—</span>
-                </div>
-                <div class="receipt-row">
-                    <span>CPF:</span>
-                    <span id="modal-athlete-cpf">—</span>
-                </div>
-                <div class="receipt-row">
-                    <span>Modalidade:</span>
-                    <span id="modal-athlete-cat">—</span>
-                </div>
-                <div class="receipt-row">
-                    <span>Valor a pagar:</span>
-                    <span id="modal-athlete-val" style="color: var(--gold-light); font-size: 1.1rem;">R$ 0,00</span>
-                </div>
-                <div class="receipt-row">
-                    <span>Status:</span>
-                    <span style="color: #fbbf24;"><i class="ri-time-line"></i> Aguardando Pagamento</span>
-                </div>
-            </div>
-
-            <div class="pix-container">
-                <div class="pix-label"><i class="ri-qr-code-line"></i> Pagamento via PIX</div>
-                <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom: 10px;">Chave PIX oficial para pagamento da inscrição:</p>
-                <div class="pix-key-box">
-                    <span id="pix-key-text" style="flex:1; overflow:hidden; text-overflow:ellipsis;">contato@tubaroescansados.com.br</span>
-                    <button type="button" class="btn-copy-pix" id="btn-copy-pix">Copiar PIX</button>
-                </div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-top: 8px;">Ou pague presencialmente com os organizadores via Cartão de Débito/Crédito.</p>
-            </div>
-
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 1.5rem;">Assim que seu pagamento for identificado ou confirmado pela organização, sua inscrição constará como <strong>Confirmada</strong> para a retirada do kit no check-in.</p>
-
-            <div class="modal-actions">
-                <button type="button" class="btn-modal-close" id="btn-modal-close">Entendido / Concluir</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Scripts -->
     <script>
@@ -915,14 +883,36 @@
             name: 'Travessia de Adultos (2,5 km)'
         };
 
+        let isCouponValid = false;
+        let validatedAssessoriaName = '';
+
         const categoryCards = document.querySelectorAll('.category-card');
         const summaryCatName = document.getElementById('summary-category-name');
         const summaryPriceVal = document.getElementById('summary-price-val');
         const assessoriaFields = document.getElementById('assessoria-fields');
+        const inputCoupon = document.getElementById('coupon_code');
+        const inputAssessoriaName = document.getElementById('assessoria_name');
+        const couponSpinner = document.getElementById('coupon-spinner');
+        const couponFeedback = document.getElementById('coupon-feedback');
         const formInscricao = document.getElementById('form-inscricao');
         const formError = document.getElementById('form-error');
         const formErrorMsg = document.getElementById('form-error-msg');
         const btnSubmit = document.getElementById('btn-submit');
+
+        function updateSubmitButtonState() {
+            if (selectedCategory.id === 'adulto_assessoria') {
+                if (isCouponValid) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = `<span>Prosseguir para Validação dos Dados</span><i class="ri-arrow-right-line"></i>`;
+                } else {
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerHTML = `<span>Digite um Cupom Válido para Prosseguir</span><i class="ri-lock-fill"></i>`;
+                }
+            } else {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<span>Prosseguir para Validação dos Dados</span><i class="ri-arrow-right-line"></i>`;
+            }
+        }
 
         // Selection of category
         categoryCards.forEach(card => {
@@ -941,8 +931,13 @@
 
                 if (selectedCategory.id === 'adulto_assessoria') {
                     assessoriaFields.style.display = 'block';
+                    updateSubmitButtonState();
+                    if (inputCoupon && inputCoupon.value.trim().length === 7) {
+                        validateCouponCode(inputCoupon.value.trim());
+                    }
                 } else {
                     assessoriaFields.style.display = 'none';
+                    updateSubmitButtonState();
                 }
             });
         });
@@ -972,7 +967,119 @@
         const inputEmergPhone = document.getElementById('emergency_phone');
         inputEmergPhone.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
 
-        // Submit Form
+        // Real-time Coupon Validation
+        let couponTimeout = null;
+
+        async function validateCouponCode(rawCode) {
+            const code = String(rawCode).trim().toUpperCase();
+
+            // Regex: exatamente 5 letras e 2 números
+            if (!/^[A-Z]{5}[0-9]{2}$/.test(code)) {
+                isCouponValid = false;
+                validatedAssessoriaName = '';
+                inputAssessoriaName.value = '';
+                couponFeedback.style.display = 'block';
+                couponFeedback.innerHTML = `<span style="color: #fbbf24;"><i class="ri-information-line"></i> O cupom deve conter exatamente 5 letras e 2 números (ex: TUBAS01).</span>`;
+                updateSubmitButtonState();
+                return;
+            }
+
+            couponSpinner.style.display = 'block';
+            couponFeedback.style.display = 'none';
+
+            try {
+                const res = await fetch(`/api/public/validate-coupon?code=${encodeURIComponent(code)}`);
+                const data = await res.json();
+
+                if (res.ok && data.valid) {
+                    isCouponValid = true;
+                    validatedAssessoriaName = data.assessoria_name;
+                    inputAssessoriaName.value = data.assessoria_name;
+                    couponFeedback.style.display = 'block';
+                    couponFeedback.innerHTML = `
+                        <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); padding: 8px 12px; border-radius: 8px; color: #34d399; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                            <i class="ri-checkbox-circle-fill" style="font-size: 1.2rem;"></i>
+                            <span>Cupom validado! Assessoria vinculada: <strong>${data.assessoria_name}</strong> (R$ 119,00)</span>
+                        </div>
+                    `;
+                } else {
+                    isCouponValid = false;
+                    validatedAssessoriaName = '';
+                    inputAssessoriaName.value = '';
+                    couponFeedback.style.display = 'block';
+                    couponFeedback.innerHTML = `
+                        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); padding: 8px 12px; border-radius: 8px; color: #fca5a5; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="ri-close-circle-fill" style="font-size: 1.1rem;"></i>
+                            <span>${data.error || 'Cupom não encontrado ou inativo.'}</span>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                isCouponValid = false;
+                validatedAssessoriaName = '';
+                inputAssessoriaName.value = '';
+                couponFeedback.style.display = 'block';
+                couponFeedback.innerHTML = `<span style="color: #f87171;">Erro de conexão ao validar cupom.</span>`;
+            } finally {
+                couponSpinner.style.display = 'none';
+                updateSubmitButtonState();
+            }
+        }
+
+        if (inputCoupon) {
+            inputCoupon.addEventListener('input', (e) => {
+                let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7);
+                e.target.value = val;
+
+                if (val.length < 7) {
+                    isCouponValid = false;
+                    validatedAssessoriaName = '';
+                    inputAssessoriaName.value = '';
+                    couponFeedback.style.display = 'block';
+                    couponFeedback.innerHTML = `<span style="color: var(--text-muted);"><i class="ri-keyboard-line"></i> Digite 5 letras e 2 números (${val.length}/7 caracteres)</span>`;
+                    updateSubmitButtonState();
+                    return;
+                }
+
+                if (couponTimeout) clearTimeout(couponTimeout);
+                couponTimeout = setTimeout(() => {
+                    validateCouponCode(val);
+                }, 250);
+            });
+        }
+
+        // Restore draft from sessionStorage if returning to edit
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const saved = sessionStorage.getItem('tutubas_athlete_draft');
+                if (saved) {
+                    const d = JSON.parse(saved);
+                    if (d.name) document.getElementById('athlete_name').value = d.name;
+                    if (d.cpf) inputCpf.value = maskCpf(d.cpf);
+                    if (d.phone) inputPhone.value = maskPhone(d.phone);
+                    if (d.email) document.getElementById('athlete_email').value = d.email;
+                    if (d.birth_date) document.getElementById('athlete_birth').value = d.birth_date;
+                    if (d.gender) document.getElementById('athlete_gender').value = d.gender;
+                    if (d.tshirt_size) document.getElementById('tshirt_size').value = d.tshirt_size;
+                    if (d.emergency_contact_name) document.getElementById('emergency_name').value = d.emergency_contact_name;
+                    if (d.emergency_contact_phone) inputEmergPhone.value = maskPhone(d.emergency_contact_phone);
+                    if (d.medical_notes) document.getElementById('medical_notes').value = d.medical_notes;
+
+                    if (d.category_id) {
+                        const targetCard = document.querySelector(`.category-card[data-id="${d.category_id}"]`);
+                        if (targetCard) targetCard.click();
+                        if (d.category_id === 'adulto_assessoria' && d.coupon_code) {
+                            inputCoupon.value = d.coupon_code;
+                            validateCouponCode(d.coupon_code);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Draft load err', err);
+            }
+        });
+
+        // Submit Form -> Redirect to Confirmation Page
         formInscricao.addEventListener('submit', async (e) => {
             e.preventDefault();
             formError.style.display = 'none';
@@ -989,8 +1096,7 @@
             const medical_notes = document.getElementById('medical_notes').value.trim();
             const termsChecked = document.getElementById('terms').checked;
 
-            const assessoria_name = document.getElementById('assessoria_name').value.trim();
-            const coupon_code = document.getElementById('coupon_code').value.trim();
+            const coupon_code = inputCoupon ? inputCoupon.value.trim().toUpperCase() : '';
 
             if (!name || !cpf || !email || !phone || !birth_date || !gender || !tshirt_size || !emergency_name || !emergency_phone) {
                 showError('Por favor, preencha todos os campos obrigatórios marcados com *.');
@@ -1002,61 +1108,42 @@
                 return;
             }
 
-            if (selectedCategory.id === 'adulto_assessoria' && (!assessoria_name || !coupon_code)) {
-                showError('Para a modalidade com assessoria, informe o nome da assessoria e o cupom.');
-                return;
+            if (selectedCategory.id === 'adulto_assessoria') {
+                if (!isCouponValid || !coupon_code) {
+                    showError('Para a modalidade com assessoria, informe um cupom válido (5 letras e 2 números) fornecido pela sua equipe.');
+                    return;
+                }
             }
 
             if (!termsChecked) {
-                showError('Você precisa concordar com o termo de responsabilidade para se inscrever.');
+                showError('Você precisa concordar com o regulamento e termo de responsabilidade para prosseguir.');
                 return;
             }
 
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Registrando Inscrição...`;
+            // Construct Athlete Draft
+            const athleteDraft = {
+                name,
+                cpf,
+                email,
+                phone,
+                birth_date,
+                gender,
+                category_id: selectedCategory.id,
+                category_name: selectedCategory.name,
+                price: selectedCategory.price,
+                coupon_code: selectedCategory.id === 'adulto_assessoria' ? coupon_code : null,
+                assessoria_name: selectedCategory.id === 'adulto_assessoria' ? validatedAssessoriaName : null,
+                tshirt_size,
+                emergency_contact_name: emergency_name,
+                emergency_contact_phone: emergency_phone,
+                medical_notes
+            };
 
-            try {
-                const res = await fetch('/api/public/register-athlete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name,
-                        cpf,
-                        email,
-                        phone,
-                        birth_date,
-                        gender,
-                        category_id: selectedCategory.id,
-                        coupon_code,
-                        assessoria_name,
-                        tshirt_size,
-                        emergency_contact_name: emergency_name,
-                        emergency_contact_phone: emergency_phone,
-                        medical_notes
-                    })
-                });
+            // Save to sessionStorage
+            sessionStorage.setItem('tutubas_athlete_draft', JSON.stringify(athleteDraft));
 
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error || 'Erro ao processar inscrição');
-                }
-
-                // Show Success Modal
-                document.getElementById('modal-athlete-name').textContent = data.athlete.name;
-                document.getElementById('modal-athlete-cpf').textContent = maskCpf(data.athlete.cpf);
-                document.getElementById('modal-athlete-cat').textContent = data.athlete.category;
-                document.getElementById('modal-athlete-val').textContent = `R$ ${data.athlete.price.toFixed(2).replace('.', ',')}`;
-
-                document.getElementById('modal-success').style.display = 'flex';
-                formInscricao.reset();
-
-            } catch (err) {
-                showError(err.message);
-            } finally {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = `<span>Finalizar Inscrição</span><i class="ri-arrow-right-line"></i>`;
-            }
+            // Redirect to Confirmation & Store & Payment Page
+            window.location.href = '/confirmacao-inscricao';
         });
 
         function showError(msg) {
@@ -1064,22 +1151,6 @@
             formError.style.display = 'flex';
             formError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-
-        // Copy Pix
-        document.getElementById('btn-copy-pix').addEventListener('click', () => {
-            const key = document.getElementById('pix-key-text').innerText;
-            navigator.clipboard.writeText(key).then(() => {
-                const btn = document.getElementById('btn-copy-pix');
-                btn.textContent = 'Copiado!';
-                setTimeout(() => btn.textContent = 'Copiar PIX', 2500);
-            });
-        });
-
-        // Close Modal
-        document.getElementById('btn-modal-close').addEventListener('click', () => {
-            document.getElementById('modal-success').style.display = 'none';
-            window.location.href = '/';
-        });
     </script>
 </body>
 </html>

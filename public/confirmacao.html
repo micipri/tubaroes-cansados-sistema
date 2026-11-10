@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validação da Inscrição e Pagamento — Tubarões Cansados</title>
+    <link rel="icon" href="/logodourada.jpg" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0f1e;
+            --bg-card: rgba(15, 23, 42, 0.85);
+            --bg-card-hover: rgba(30, 41, 59, 0.95);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #070b16 0%, #0f172a 50%, #082f49 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .header-brand img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gold);
+        }
+
+        .header-brand span {
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .header-brand span span {
+            color: var(--gold);
+        }
+
+        .btn-edit-back {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit-back:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 960px;
+            margin: 2.5rem auto 4rem;
+            padding: 0 1.5rem;
+            width: 100%;
+        }
+
+        .page-hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .steps-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(2, 132, 199, 0.15);
+            border: 1px solid rgba(2, 132, 199, 0.35);
+            padding: 6px 18px;
+            border-radius: 99px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .page-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title span {
+            color: var(--gold);
+        }
+
+        .page-sub {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        /* Card Section */
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .panel-heading i {
+            color: var(--gold);
+            font-size: 1.35rem;
+        }
+
+        /* Review Grid */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .review-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+        }
+
+        .review-item label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .review-item .val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            word-break: break-word;
+        }
+
+        /* Store Section */
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+        }
+
+        .product-card:hover {
+            border-color: rgba(2, 132, 199, 0.4);
+            background: rgba(2, 132, 199, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .product-info h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--gold-light);
+            margin: 6px 0;
+        }
+
+        .stock-badge {
+            font-size: 0.75rem;
+            color: #38bdf8;
+            background: rgba(2, 132, 199, 0.15);
+            padding: 3px 8px;
+            border-radius: 99px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 4px 8px;
+        }
+
+        .qty-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .qty-btn:hover {
+            background: var(--primary);
+        }
+
+        .qty-val {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #fff;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Payment Selector */
+        .payment-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .payment-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .payment-card:hover {
+            border-color: rgba(2, 132, 199, 0.4);
+            background: rgba(2, 132, 199, 0.08);
+        }
+
+        .payment-card.selected {
+            border-color: #38bdf8;
+            background: rgba(2, 132, 199, 0.18);
+            box-shadow: 0 0 25px rgba(2, 132, 199, 0.25);
+        }
+
+        .payment-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #38bdf8;
+            flex-shrink: 0;
+        }
+
+        .payment-card.selected .payment-icon {
+            background: #0284c7;
+            color: #fff;
+        }
+
+        .payment-text h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .payment-text p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        /* Summary Total Box */
+        .order-summary-box {
+            background: rgba(2, 132, 199, 0.1);
+            border: 1px solid rgba(2, 132, 199, 0.3);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.95rem;
+        }
+
+        .summary-line:last-child {
+            border-bottom: none;
+            padding-top: 12px;
+        }
+
+        .summary-line.total-line {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: var(--gold-light);
+        }
+
+        /* Final Action Button */
+        .btn-finalize {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 900;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.35);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 2rem;
+        }
+
+        .btn-finalize:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(2, 132, 199, 0.5);
+            background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+        }
+
+        .btn-finalize:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Success & Payment View */
+        #final-payment-view {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .success-box {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .success-circle {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            margin: 0 auto 1.25rem;
+            border: 2px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .pix-code-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin: 1rem auto;
+            max-width: 520px;
+        }
+
+        .btn-copy {
+            background: var(--gold);
+            color: #0f172a;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-copy:hover {
+            background: var(--gold-light);
+        }
+
+        .btn-pay-card {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #fff;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1.15rem;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.4);
+            margin-top: 1rem;
+            transition: all 0.25s;
+        }
+
+        .btn-pay-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(2, 132, 199, 0.55);
+            background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="/" class="header-brand">
+            <img src="/logodourada.jpg" alt="Logo Tubarões Cansados">
+            <span>Tubarões <span>Cansados</span></span>
+        </a>
+        <a href="/inscricao" class="btn-edit-back" id="btn-edit-data">
+            <i class="ri-edit-line"></i> Corrigir Dados
+        </a>
+    </header>
+
+    <main class="main-container">
+
+        <!-- INITIAL REVIEW & PAYMENT VIEW -->
+        <div id="review-container">
+            <div class="page-hero">
+                <div class="steps-bar"><i class="ri-checkbox-circle-line"></i> Passo 2 de 2: Validação & Pagamento</div>
+                <h1 class="page-title">Confirme sua <span>Inscrição</span></h1>
+                <p class="page-sub">Verifique seus dados atentamente, aproveite para incluir itens extras da nossa lojinha oficial e escolha como deseja realizar seu pagamento.</p>
+            </div>
+
+            <div class="alert-error" id="review-error">
+                <i class="ri-error-warning-fill"></i>
+                <span id="review-error-msg"></span>
+            </div>
+
+            <!-- 1. DADOS DO ATLETA -->
+            <section class="glass-panel">
+                <div class="panel-heading">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="ri-user-star-fill"></i>
+                        <span>1. Dados Cadastrais do Atleta</span>
+                    </div>
+                    <a href="/inscricao" style="font-size: 0.85rem; color: #38bdf8; text-decoration: none; font-weight: 600;">
+                        <i class="ri-edit-box-line"></i> Editar
+                    </a>
+                </div>
+
+                <div class="review-grid">
+                    <div class="review-item">
+                        <label>Nome Completo</label>
+                        <div class="val" id="rev-name">—</div>
+                    </div>
+                    <div class="review-item">
+                        <label>CPF</label>
+                        <div class="val" id="rev-cpf">—</div>
+                    </div>
+                    <div class="review-item">
+                        <label>WhatsApp / Celular</label>
+                        <div class="val" id="rev-phone">—</div>
+                    </div>
+                    <div class="review-item">
+                        <label>E-mail</label>
+                        <div class="val" id="rev-email">—</div>
+                    </div>
+                    <div class="review-item">
+                        <label>Data de Nasc. / Gênero</label>
+                        <div class="val" id="rev-birth-gender">—</div>
+                    </div>
+                    <div class="review-item">
+                        <label>Camisa Oficial</label>
+                        <div class="val" id="rev-tshirt" style="color: var(--gold-light);">—</div>
+                    </div>
+                    <div class="review-item">
+                        <label>Modalidade da Prova</label>
+                        <div class="val" id="rev-category" style="color: #38bdf8;">—</div>
+                    </div>
+                    <div class="review-item">
+                        <label>Valor da Inscrição</label>
+                        <div class="val" id="rev-price" style="color: var(--gold-light); font-size: 1.2rem;">R$ 0,00</div>
+                    </div>
+                    <div class="review-item" id="rev-assessoria-box" style="display: none; grid-column: 1 / -1; background: rgba(2, 132, 199, 0.1); border-color: rgba(2, 132, 199, 0.3);">
+                        <label style="color: #38bdf8;">Assessoria Esportiva & Cupom Validado</label>
+                        <div class="val" id="rev-assessoria-val" style="color: #34d399;">—</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. LOJINHA OFICIAL -->
+            <section class="glass-panel">
+                <div class="panel-heading">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="ri-store-2-fill"></i>
+                        <span>2. Lojinha Oficial dos Tubarões (Itens Extras Opcionais)</span>
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">Turbine seu kit</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Deseja adicionar produtos extras da prova ao seu pedido? Escolha a quantidade desejada abaixo:
+                </p>
+
+                <div id="store-loading" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
+                    <i class="ri-loader-4-line ri-spin" style="font-size: 1.5rem; color: #38bdf8;"></i>
+                    <p style="margin-top: 6px;">Carregando produtos disponíveis na lojinha...</p>
+                </div>
+
+                <div class="store-grid" id="store-products-container"></div>
+            </section>
+
+            <!-- 3. ESCOLHA DA FORMA DE PAGAMENTO -->
+            <section class="glass-panel">
+                <div class="panel-heading">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="ri-secure-payment-fill"></i>
+                        <span>3. Forma de Pagamento</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Selecione como prefere pagar sua inscrição e produtos adicionais:
+                </p>
+
+                <div class="payment-options-grid">
+                    <div class="payment-card selected" data-method="Pix">
+                        <div class="payment-icon"><i class="ri-qr-code-line"></i></div>
+                        <div class="payment-text">
+                            <h4>PIX Oficial</h4>
+                            <p>Aprovação rápida e segura com QR Code e Chave Copia e Cola.</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-card" data-method="Cartão">
+                        <div class="payment-icon"><i class="ri-bank-card-line"></i></div>
+                        <div class="payment-text">
+                            <h4>Cartão de Crédito</h4>
+                            <p>Pagamento online seguro via Mercado Pago (à vista ou parcelado).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Financeiro Consolidado -->
+                <div class="order-summary-box">
+                    <div class="summary-line">
+                        <span>Inscrição na Prova (<span id="sum-cat-title">—</span>):</span>
+                        <strong id="sum-inscription-val">R$ 0,00</strong>
+                    </div>
+                    <div id="sum-store-items-list"></div>
+                    <div class="summary-line" id="sum-store-total-line" style="display: none; color: #38bdf8;">
+                        <span>Subtotal Lojinha Oficial:</span>
+                        <strong id="sum-store-val">R$ 0,00</strong>
+                    </div>
+                    <div class="summary-line total-line">
+                        <span>VALOR TOTAL A PAGAR:</span>
+                        <strong id="sum-total-val">R$ 0,00</strong>
+                    </div>
+                </div>
+
+                <!-- Botão Finalizar -->
+                <button type="button" class="btn-finalize" id="btn-complete-order">
+                    <span>Confirmar Inscrição e Ir para Pagamento</span>
+                    <i class="ri-arrow-right-line"></i>
+                </button>
+            </section>
+        </div>
+
+        <!-- 4. FINAL PAYMENT VIEW (PÓS-CONFIRMAÇÃO) -->
+        <div id="final-payment-view">
+            <div class="success-box">
+                <div class="success-circle"><i class="ri-check-line"></i></div>
+                <h1 style="font-size: 2.2rem; font-weight: 900; margin-bottom: 6px; color: #fff;">Inscrição Confirmada!</h1>
+                <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 1.5rem;">
+                    Seus dados foram gravados com sucesso. Conclua seu pagamento abaixo para garantir seu kit oficial!
+                </p>
+
+                <!-- Resumo do Pedido -->
+                <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; max-width: 520px; margin: 0 auto 1.5rem; text-align: left;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:var(--text-muted);">Atleta:</span>
+                        <strong id="fin-athlete-name">—</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:var(--text-muted);">Inscrição:</span>
+                        <strong id="fin-athlete-cat">—</strong>
+                    </div>
+                    <div id="fin-store-summary" style="display:none; margin-bottom:6px;">
+                        <span style="color:var(--text-muted);">Produtos Loja:</span>
+                        <span id="fin-store-desc" style="float:right; font-weight:700; color:#38bdf8;">—</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); font-size:1.15rem;">
+                        <span style="font-weight:700;">Total a Pagar:</span>
+                        <strong style="color:var(--gold-light);" id="fin-total-amount">R$ 0,00</strong>
+                    </div>
+                </div>
+
+                <!-- Se Pagamento for PIX -->
+                <div id="payment-pix-box" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px dashed rgba(245, 158, 11, 0.4); border-radius: 14px; padding: 1.75rem; max-width: 540px; margin: 0 auto 1.5rem;">
+                    <div style="font-size: 0.9rem; color: var(--gold); font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
+                        <i class="ri-qr-code-line"></i> Pagamento via PIX Oficial
+                    </div>
+                    <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 12px;">
+                        Utilize a chave PIX abaixo ou escaneie com o app do seu banco:
+                    </p>
+
+                    <div class="pix-code-box">
+                        <span id="fin-pix-key" style="flex: 1; font-family: monospace; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; color: #fff;">contato@tubaroescansados.com.br</span>
+                        <button type="button" class="btn-copy" id="btn-copy-final-pix">Copiar PIX</button>
+                    </div>
+
+                    <div style="margin-top: 1.25rem;">
+                        <img id="fin-pix-qr" src="" alt="QR Code PIX" style="width: 180px; height: 180px; border-radius: 10px; background: #fff; padding: 8px; border: 2px solid var(--gold); margin: 0 auto; display: block;">
+                        <small style="color: var(--text-muted); display: block; margin-top: 8px;">Escaneie o QR Code no seu aplicativo bancário</small>
+                    </div>
+
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.4;">
+                        Após o pagamento, guarde seu comprovante. Assim que compensado, seu check-in para retirada de kit estará liberado.
+                    </p>
+                </div>
+
+                <!-- Se Pagamento for CARTÃO DE CRÉDITO -->
+                <div id="payment-card-box" style="display: none; background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(2, 132, 199, 0.35); border-radius: 14px; padding: 1.75rem; max-width: 540px; margin: 0 auto 1.5rem;">
+                    <div style="font-size: 0.9rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
+                        <i class="ri-bank-card-line"></i> Pagamento com Cartão de Crédito
+                    </div>
+                    <p style="font-size: 0.95rem; color: #cbd5e1; margin-bottom: 14px;">
+                        Clique no botão abaixo para pagar com cartão em ambiente seguro pelo Mercado Pago:
+                    </p>
+
+                    <a id="fin-card-btn" href="#" target="_blank" class="btn-pay-card">
+                        <i class="ri-external-link-line"></i> Pagar com Cartão de Crédito
+                    </a>
+
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 1rem;">
+                        Após concluir a transação na operadora do cartão, sua inscrição é confirmada automaticamente.
+                    </p>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <a href="/" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                        <i class="ri-home-4-line"></i> Voltar à Página Principal dos Tubarões
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // State
+        let athleteDraft = null;
+        let storeProducts = [];
+        let selectedStoreItems = {}; // id -> quantity
+        let selectedPaymentMethod = 'Pix';
+
+        const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+
+        function maskCpf(val) {
+            return String(val || '').replace(/\D/g, '')
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+                .slice(0, 14);
+        }
+
+        function maskPhone(val) {
+            return String(val || '').replace(/\D/g, '')
+                .replace(/(\d{2})(\d)/, '($1) $2')
+                .replace(/(\d{5})(\d)/, '$1-$2')
+                .slice(0, 15);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            try {
+                const [y, m, d] = dateStr.split('-');
+                return `${d}/${m}/${y}`;
+            } catch {
+                return dateStr;
+            }
+        }
+
+        // Initialize Page
+        window.addEventListener('DOMContentLoaded', async () => {
+            // 1. Check draft
+            const rawDraft = sessionStorage.getItem('tutubas_athlete_draft');
+            if (!rawDraft) {
+                alert('Nenhum cadastro de inscrição foi iniciado. Por favor, preencha o formulário.');
+                window.location.href = '/inscricao';
+                return;
+            }
+
+            try {
+                athleteDraft = JSON.parse(rawDraft);
+            } catch (err) {
+                window.location.href = '/inscricao';
+                return;
+            }
+
+            // Gating: If Assessoria category, ensure coupon is validated
+            if (athleteDraft.category_id === 'adulto_assessoria' && !athleteDraft.coupon_code) {
+                alert('A modalidade de assessorias requer um cupom de desconto oficial validado.');
+                window.location.href = '/inscricao';
+                return;
+            }
+
+            renderAthleteReview();
+            await loadStoreProducts();
+            updateTotalCalculations();
+            setupPaymentSelection();
+        });
+
+        // Render Review Panel
+        function renderAthleteReview() {
+            document.getElementById('rev-name').textContent = athleteDraft.name;
+            document.getElementById('rev-cpf').textContent = maskCpf(athleteDraft.cpf);
+            document.getElementById('rev-phone').textContent = maskPhone(athleteDraft.phone);
+            document.getElementById('rev-email').textContent = athleteDraft.email;
+            document.getElementById('rev-birth-gender').textContent = `${formatDate(athleteDraft.birth_date)} (${athleteDraft.gender})`;
+            document.getElementById('rev-tshirt').textContent = athleteDraft.tshirt_size;
+            document.getElementById('rev-category').textContent = athleteDraft.category_name;
+            document.getElementById('rev-price').textContent = formatCurrency(athleteDraft.price);
+
+            if (athleteDraft.category_id === 'adulto_assessoria') {
+                const assessoriaBox = document.getElementById('rev-assessoria-box');
+                const assessoriaVal = document.getElementById('rev-assessoria-val');
+                assessoriaBox.style.display = 'block';
+                assessoriaVal.innerHTML = `<strong>${athleteDraft.assessoria_name || 'Assessoria Parceira'}</strong> — Cupom aplicado: <code style="background:rgba(245,158,11,0.2); padding:2px 6px; border-radius:4px; font-weight:800; color:var(--gold); font-family:monospace;">${athleteDraft.coupon_code}</code>`;
+            }
+
+            document.getElementById('sum-cat-title').textContent = athleteDraft.category_name;
+            document.getElementById('sum-inscription-val').textContent = formatCurrency(athleteDraft.price);
+        }
+
+        // Fetch Store Products
+        async function loadStoreProducts() {
+            const container = document.getElementById('store-products-container');
+            const loading = document.getElementById('store-loading');
+
+            try {
+                const res = await fetch('/api/public/store-products');
+                storeProducts = await res.json();
+                loading.style.display = 'none';
+
+                if (!Array.isArray(storeProducts) || storeProducts.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 12px; color: var(--text-muted); font-size: 0.9rem;">
+                            <i class="ri-shopping-basket-line" style="font-size: 1.5rem; display: block; margin-bottom: 6px;"></i>
+                            Nenhum item adicional disponível no estoque no momento.
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = '';
+                storeProducts.forEach(prod => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <div class="product-info">
+                            <span class="stock-badge"><i class="ri-check-line"></i> ${prod.stock} em estoque</span>
+                            <h4>${prod.name}</h4>
+                            <div class="product-price">${formatCurrency(prod.sell_price)}</div>
+                        </div>
+                        <div class="qty-control">
+                            <button type="button" class="qty-btn" onclick="changeQty(${prod.id}, -1)">-</button>
+                            <span class="qty-val" id="qty-${prod.id}">0</span>
+                            <button type="button" class="qty-btn" onclick="changeQty(${prod.id}, 1)">+</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                loading.style.display = 'none';
+                container.innerHTML = `<div style="grid-column:1/-1; color:#f87171; text-align:center;">Não foi possível carregar os itens da lojinha.</div>`;
+            }
+        }
+
+        // Change Product Quantity
+        window.changeQty = function(prodId, delta) {
+            const prod = storeProducts.find(p => p.id === prodId);
+            if (!prod) return;
+
+            const current = selectedStoreItems[prodId] || 0;
+            const updated = current + delta;
+
+            if (updated < 0) return;
+            if (updated > prod.stock) {
+                alert(`Quantidade máxima disponível em estoque para "${prod.name}" é de ${prod.stock} unidades.`);
+                return;
+            }
+
+            if (updated === 0) {
+                delete selectedStoreItems[prodId];
+            } else {
+                selectedStoreItems[prodId] = updated;
+            }
+
+            const qtyEl = document.getElementById(`qty-${prodId}`);
+            if (qtyEl) qtyEl.textContent = updated;
+
+            updateTotalCalculations();
+        };
+
+        // Recalculate Totals
+        function updateTotalCalculations() {
+            const inscriptionVal = athleteDraft ? athleteDraft.price : 0;
+            let storeVal = 0;
+            const itemsListContainer = document.getElementById('sum-store-items-list');
+            itemsListContainer.innerHTML = '';
+
+            Object.entries(selectedStoreItems).forEach(([pId, qty]) => {
+                const p = storeProducts.find(item => String(item.id) === String(pId));
+                if (p && qty > 0) {
+                    const lineTotal = p.sell_price * qty;
+                    storeVal += lineTotal;
+
+                    const row = document.createElement('div');
+                    row.className = 'summary-line';
+                    row.style.fontSize = '0.9rem';
+                    row.style.color = '#38bdf8';
+                    row.innerHTML = `
+                        <span>+ ${qty}x ${p.name} (${formatCurrency(p.sell_price)} un.):</span>
+                        <strong>${formatCurrency(lineTotal)}</strong>
+                    `;
+                    itemsListContainer.appendChild(row);
+                }
+            });
+
+            const storeTotalLine = document.getElementById('sum-store-total-line');
+            if (storeVal > 0) {
+                storeTotalLine.style.display = 'flex';
+                document.getElementById('sum-store-val').textContent = formatCurrency(storeVal);
+            } else {
+                storeTotalLine.style.display = 'none';
+            }
+
+            const finalTotal = inscriptionVal + storeVal;
+            document.getElementById('sum-total-val').textContent = formatCurrency(finalTotal);
+
+            const btnText = document.getElementById('btn-complete-order');
+            btnText.innerHTML = `<span>Confirmar Inscrição e Ir para Pagamento (${formatCurrency(finalTotal)})</span><i class="ri-arrow-right-line"></i>`;
+        }
+
+        // Setup Payment Selector
+        function setupPaymentSelection() {
+            const cards = document.querySelectorAll('.payment-card');
+            cards.forEach(c => {
+                c.addEventListener('click', () => {
+                    cards.forEach(x => x.classList.remove('selected'));
+                    c.classList.add('selected');
+                    selectedPaymentMethod = c.dataset.method;
+                });
+            });
+        }
+
+        // Complete Registration Submit
+        document.getElementById('btn-complete-order').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-complete-order');
+            const errBox = document.getElementById('review-error');
+            const errMsg = document.getElementById('review-error-msg');
+            errBox.style.display = 'none';
+
+            // Prepare store items array
+            const storePayload = Object.entries(selectedStoreItems).map(([id, quantity]) => ({
+                id: parseInt(id, 10),
+                quantity
+            }));
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Finalizando Inscrição...`;
+
+            try {
+                const res = await fetch('/api/public/complete-registration', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        athlete: athleteDraft,
+                        store_items: storePayload,
+                        payment_method: selectedPaymentMethod
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Erro ao concluir inscrição.');
+                }
+
+                // Render Final Payment Screen
+                document.getElementById('review-container').style.display = 'none';
+                document.getElementById('btn-edit-data').style.display = 'none';
+                document.getElementById('final-payment-view').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                document.getElementById('fin-athlete-name').textContent = data.athlete_name;
+                document.getElementById('fin-athlete-cat').textContent = data.category;
+                document.getElementById('fin-total-amount').textContent = formatCurrency(data.total_amount);
+
+                if (data.store_items && data.store_items.length > 0) {
+                    document.getElementById('fin-store-summary').style.display = 'block';
+                    document.getElementById('fin-store-desc').textContent = `${data.store_items.length} item(ns) (${formatCurrency(data.store_amount)})`;
+                }
+
+                if (data.payment_method === 'Pix') {
+                    document.getElementById('payment-pix-box').style.display = 'block';
+                    document.getElementById('fin-pix-key').textContent = data.pix_key;
+
+                    // Generate Dynamic QR Code image for Pix
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.pix_key)}`;
+                    document.getElementById('fin-pix-qr').src = qrUrl;
+
+                    document.getElementById('btn-copy-final-pix').addEventListener('click', () => {
+                        navigator.clipboard.writeText(data.pix_key).then(() => {
+                            const b = document.getElementById('btn-copy-final-pix');
+                            b.textContent = 'Copiado!';
+                            setTimeout(() => b.textContent = 'Copiar PIX', 2500);
+                        });
+                    });
+
+                } else {
+                    document.getElementById('payment-card-box').style.display = 'block';
+                    const cardBtn = document.getElementById('fin-card-btn');
+                    cardBtn.href = data.card_payment_link || 'https://mpago.la/tubaroescansados';
+                }
+
+                // Inscription concluded - clear session draft
+                sessionStorage.removeItem('tutubas_athlete_draft');
+
+            } catch (err) {
+                errMsg.textContent = err.message;
+                errBox.style.display = 'flex';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                btn.disabled = false;
+                updateTotalCalculations();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -118,6 +118,8 @@ function loadSectionData(section) {
     if (section === 'dashboard') loadDashboard();
     else if (section === 'athletes') loadAthletes();
     else if (section === 'checkin') loadCheckinStation();
+    else if (section === 'assessorias') { loadAssessorias(); loadCoupons(); }
+    else if (section === 'store') loadStoreProducts();
     else if (section === 'costs') loadCosts();
     else if (section === 'sponsors') loadSponsors();
     else if (section === 'users') loadUsers();
@@ -297,6 +299,17 @@ async function openAthleteModal(athleteId) {
 
     const isConfirmed = a.payment_status === 'Confirmado';
 
+    let storeItems = [];
+    try {
+        if (a.store_items) {
+            storeItems = typeof a.store_items === 'string' ? JSON.parse(a.store_items) : a.store_items;
+        }
+    } catch (e) {
+        storeItems = [];
+    }
+
+    const totalToPay = (parseFloat(a.total_amount) > 0 ? parseFloat(a.total_amount) : (parseFloat(a.price) || 0));
+
     const modalHTML = `
         <div class="athlete-modal-container">
             <div class="athlete-modal-header">
@@ -344,11 +357,12 @@ async function openAthleteModal(athleteId) {
                 ${a.assessoria_name ? `
                 <div class="info-field">
                     <label>Assessoria Esportiva</label>
-                    <div class="val">${a.assessoria_name} ${a.coupon_code ? `(Cupom: ${a.coupon_code})` : ''}</div>
+                    <div class="val">${a.assessoria_name} ${a.coupon_code ? `(Cupom: <strong>${a.coupon_code}</strong>)` : ''}</div>
                 </div>` : ''}
                 <div class="info-field">
-                    <label>Valor da Inscrição</label>
-                    <div class="val" style="color: var(--gold); font-size: 1.15rem; font-weight: 800;">${formatCurrency(a.price)}</div>
+                    <label>Valor Inscrição / Total</label>
+                    <div class="val" style="color: var(--gold); font-size: 1.25rem; font-weight: 800;">${formatCurrency(totalToPay)}</div>
+                    ${parseFloat(a.store_amount) > 0 ? `<small style="color: var(--text-secondary); font-size: 0.78rem;">(Inscrição: ${formatCurrency(a.price)} + Loja: ${formatCurrency(a.store_amount)})</small>` : ''}
                 </div>
                 <div class="info-field">
                     <label>Contato de Emergência</label>
@@ -358,6 +372,18 @@ async function openAthleteModal(athleteId) {
                     <label>Check-in da Prova</label>
                     <div class="val">${a.checkin_status === 1 ? `<span style="color:#38bdf8;">✓ Realizado (${formatDate(a.checkin_date)})</span>` : 'Pendente (kit ainda não retirado)'}</div>
                 </div>
+                ${storeItems && storeItems.length > 0 ? `
+                <div class="info-field" style="grid-column: 1 / -1; background: rgba(2, 132, 199, 0.08); padding: 12px; border-radius: 8px; border: 1px solid rgba(2, 132, 199, 0.25);">
+                    <label style="color: #38bdf8;"><i class="ri-shopping-bag-3-fill"></i> Produtos Extras Comprados na Loja (${storeItems.length})</label>
+                    <div class="val" style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+                        ${storeItems.map(it => `
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span>• <strong>${it.quantity}x</strong> ${it.name}</span>
+                                <span style="color: var(--gold);">${formatCurrency(it.subtotal || (it.unit_price * it.quantity))}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>` : ''}
                 ${a.medical_notes ? `
                 <div class="info-field" style="grid-column: 1 / -1;">
                     <label>Observações Médicas / Alergias</label>
@@ -373,14 +399,14 @@ async function openAthleteModal(athleteId) {
                             <i class="ri-secure-payment-line"></i> Confirmar Pagamento do Atleta
                         </h4>
                         <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1rem;">
-                            Ao confirmar o pagamento, a inscrição será validada e o valor de <strong>${formatCurrency(a.price)}</strong> será contabilizado imediatamente no financeiro do evento.
+                            Ao confirmar o pagamento, a inscrição será validada e o valor total de <strong>${formatCurrency(totalToPay)}</strong> será contabilizado imediatamente no financeiro do evento.
                         </p>
                         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                            <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${a.price})" style="padding: 12px 24px; font-size: 1rem;">
-                                <i class="ri-qr-code-line"></i> Confirmar via PIX (${formatCurrency(a.price)})
+                            <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${totalToPay})" style="padding: 12px 24px; font-size: 1rem;">
+                                <i class="ri-qr-code-line"></i> Confirmar via PIX (${formatCurrency(totalToPay)})
                             </button>
-                            <button type="button" class="btn btn-card" onclick="confirmPaymentHandler(${a.id}, 'Cartão', ${a.price})" style="padding: 12px 24px; font-size: 1rem;">
-                                <i class="ri-bank-card-line"></i> Confirmar via CARTÃO (${formatCurrency(a.price)})
+                            <button type="button" class="btn btn-card" onclick="confirmPaymentHandler(${a.id}, 'Cartão', ${totalToPay})" style="padding: 12px 24px; font-size: 1rem;">
+                                <i class="ri-bank-card-line"></i> Confirmar via CARTÃO (${formatCurrency(totalToPay)})
                             </button>
                         </div>
                     </div>
@@ -390,7 +416,7 @@ async function openAthleteModal(athleteId) {
                             <i class="ri-checkbox-circle-fill" style="font-size: 1.4rem;"></i> Pagamento Confirmado via ${a.payment_method ? a.payment_method.toUpperCase() : 'SISTEMA'}
                         </div>
                         <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 12px;">
-                            Confirmado em ${formatDate(a.payment_date)} ${a.confirmed_by ? `por <strong>${a.confirmed_by}</strong>` : ''}.
+                            Confirmado em ${formatDate(a.payment_date)} ${a.confirmed_by ? `por <strong>${a.confirmed_by}</strong>` : ''} • Total: <strong>${formatCurrency(totalToPay)}</strong>.
                         </p>
                         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                             <button type="button" class="btn" onclick="cancelPaymentHandler(${a.id})" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;">
@@ -1065,6 +1091,12 @@ function setupEventListeners() {
     document.getElementById('btn-new-athlete-manual').addEventListener('click', () => {
         openManualAthleteModal();
     });
+
+    // Assessorias & Cupons Listeners
+    setupAssessoriasListeners();
+
+    // Loja Listeners
+    setupStoreListeners();
 }
 
 // Manual Athlete Registration (Admin action)
@@ -1146,3 +1178,331 @@ function openManualAthleteModal() {
         alert('Atleta cadastrado com sucesso!');
     });
 }
+
+
+// ═══════════════════════════════════════════════════════════════
+// 7. ASSESSORIAS & CUPONS DE DESCONTO
+// ═══════════════════════════════════════════════════════════════
+
+// Carregar Assessorias
+async function loadAssessorias() {
+    const data = await fetchData('assessorias');
+    const tbody = document.getElementById('table-assessorias');
+    const select = document.getElementById('coupon-assessoria-select');
+    const countEl = document.getElementById('ass-count-total');
+
+    if (!data || !tbody) return;
+
+    if (countEl) countEl.textContent = data.length;
+
+    // Atualiza Select no formulário de criação de cupom
+    if (select) {
+        const prevVal = select.value;
+        select.innerHTML = '<option value="" disabled selected>Selecione a Assessoria *</option>';
+        data.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a.id;
+            opt.textContent = a.name;
+            if (String(a.id) === String(prevVal)) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    tbody.innerHTML = '';
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhuma assessoria cadastrada até o momento.</td></tr>`;
+        return;
+    }
+
+    data.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>#${a.id}</td>
+            <td><strong>${a.name}</strong></td>
+            <td>${a.responsible_name || '—'}</td>
+            <td>${formatPhone(a.phone)}</td>
+            <td><span class="badge" style="background: rgba(2, 132, 199, 0.15); color: #38bdf8; font-weight: 700; padding: 4px 10px; border-radius: 99px;">${a.coupons_count || 0} cupom(ns)</span></td>
+            <td><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-weight: 700; padding: 4px 10px; border-radius: 99px;">${a.athletes_count || 0} atleta(s)</span></td>
+            <td>
+                <button type="button" class="btn-icon btn-danger" onclick="deleteAssessoriaHandler(${a.id}, '${escapeHtml(a.name)}')" title="Excluir assessoria">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Carregar Cupons
+async function loadCoupons() {
+    const data = await fetchData('coupons');
+    const tbody = document.getElementById('table-coupons');
+    const countEl = document.getElementById('coupons-count-total');
+
+    if (!data || !tbody) return;
+
+    if (countEl) countEl.textContent = data.length;
+
+    tbody.innerHTML = '';
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhum cupom ativo no momento.</td></tr>`;
+        return;
+    }
+
+    data.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <code style="font-size:1.05rem; font-weight:800; color:var(--gold); background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); padding:4px 10px; border-radius:6px; letter-spacing:0.06em; font-family:monospace;">
+                    ${c.code}
+                </code>
+            </td>
+            <td><strong>${c.assessoria_name}</strong></td>
+            <td><span style="color: #34d399; font-weight: 700;">R$ 119,00</span></td>
+            <td><span class="badge-status" style="background: rgba(255, 255, 255, 0.08); font-size:0.85rem;">${c.uses_count || 0} atleta(s)</span></td>
+            <td>${formatDate(c.created_at)}</td>
+            <td>
+                <button type="button" class="btn-icon btn-danger" onclick="deleteCouponHandler(${c.id}, '${c.code}')" title="Excluir cupom">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Excluir Assessoria
+window.deleteAssessoriaHandler = async function(id, name) {
+    if (!confirm(`Tem certeza de que deseja excluir a assessoria "${name}"? Todos os cupons vinculados a ela também serão removidos.`)) return;
+
+    try {
+        await deleteData('assessorias', id);
+        loadAssessorias();
+        loadCoupons();
+    } catch (err) {
+        alert('Erro ao excluir assessoria: ' + err.message);
+    }
+};
+
+// Excluir Cupom
+window.deleteCouponHandler = async function(id, code) {
+    if (!confirm(`Deseja realmente desativar e excluir o cupom "${code}"?`)) return;
+
+    try {
+        await deleteData('coupons', id);
+        loadCoupons();
+        loadAssessorias();
+    } catch (err) {
+        alert('Erro ao excluir cupom: ' + err.message);
+    }
+};
+
+function setupAssessoriasListeners() {
+    const formAssessoria = document.getElementById('form-assessoria');
+    if (formAssessoria) {
+        formAssessoria.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('ass-name').value.trim();
+            const responsible_name = document.getElementById('ass-resp').value.trim();
+            const phone = document.getElementById('ass-phone').value.trim();
+            const email = document.getElementById('ass-email').value.trim();
+
+            if (!name) {
+                alert('Informe o nome da assessoria.');
+                return;
+            }
+
+            const res = await postData('assessorias', { name, responsible_name, phone, email });
+            if (res.error) {
+                alert('Erro: ' + res.error);
+                return;
+            }
+
+            formAssessoria.reset();
+            loadAssessorias();
+            alert('Assessoria cadastrada com sucesso!');
+        });
+    }
+
+    const formCoupon = document.getElementById('form-coupon');
+    const inputCouponCode = document.getElementById('coupon-code-input');
+
+    if (inputCouponCode) {
+        inputCouponCode.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7);
+        });
+    }
+
+    // Botão Gerar Código de Cupom com 5 letras e 2 números
+    const btnGenCode = document.getElementById('btn-generate-code');
+    if (btnGenCode) {
+        btnGenCode.addEventListener('click', () => {
+            const select = document.getElementById('coupon-assessoria-select');
+            let base = 'TUBAS';
+
+            if (select && select.value) {
+                const optText = select.options[select.selectedIndex].text;
+                const clean = optText
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^A-Za-z]/g, '')
+                    .toUpperCase();
+
+                if (clean.length >= 5) {
+                    base = clean.slice(0, 5);
+                } else if (clean.length > 0) {
+                    base = (clean + 'TUBAS').slice(0, 5);
+                }
+            }
+
+            // Garante 5 letras maiúsculas
+            base = (base.replace(/[^A-Z]/g, '') + 'TUBAS').slice(0, 5);
+            // 2 números de 01 a 99
+            const num = String(Math.floor(Math.random() * 90) + 10);
+            const generated = base + num;
+
+            if (inputCouponCode) {
+                inputCouponCode.value = generated;
+            }
+        });
+    }
+
+    if (formCoupon) {
+        formCoupon.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const assessoria_id = document.getElementById('coupon-assessoria-select').value;
+            const code = inputCouponCode ? inputCouponCode.value.trim().toUpperCase() : '';
+
+            if (!assessoria_id) {
+                alert('Selecione uma assessoria para vincular o cupom.');
+                return;
+            }
+
+            if (!/^[A-Z]{5}[0-9]{2}$/.test(code)) {
+                alert('Formato inválido! O cupom deve conter exatamente 5 letras seguidas de 2 números (Exemplo: TUBAS01).');
+                return;
+            }
+
+            const res = await postData('coupons', { assessoria_id, code });
+            if (res.error) {
+                alert('Erro: ' + res.error);
+                return;
+            }
+
+            if (inputCouponCode) inputCouponCode.value = '';
+            loadCoupons();
+            loadAssessorias();
+            alert(`Cupom ${code} criado com sucesso para o valor de R$ 119,00!`);
+        });
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// 8. LOJA & ESTOQUE INTEGRADO
+// ═══════════════════════════════════════════════════════════════
+
+// Carregar Produtos da Loja
+async function loadStoreProducts() {
+    const data = await fetchData('store_products');
+    const tbody = document.getElementById('table-store-products');
+    const countEl = document.getElementById('prod-count-total');
+
+    if (!data || !tbody) return;
+
+    if (countEl) countEl.textContent = data.length;
+
+    tbody.innerHTML = '';
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhum produto cadastrado na loja.</td></tr>`;
+        return;
+    }
+
+    data.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>#${p.id}</td>
+            <td><strong>${p.name}</strong></td>
+            <td>
+                <div style="display:inline-flex; align-items:center; gap:8px;">
+                    <button type="button" class="btn" style="padding:2px 8px; font-size:0.85rem;" onclick="quickAdjustStock(${p.id}, -1)" title="Diminuir 1">-</button>
+                    <span style="font-weight:800; font-size:1.05rem; min-width:32px; text-align:center; color:${p.stock > 0 ? '#38bdf8' : '#f87171'}">${p.stock}</span>
+                    <button type="button" class="btn" style="padding:2px 8px; font-size:0.85rem;" onclick="quickAdjustStock(${p.id}, 1)" title="Aumentar 1">+</button>
+                </div>
+            </td>
+            <td><strong style="color:var(--gold); font-size:1.05rem;">${formatCurrency(p.sell_price)}</strong></td>
+            <td>
+                <button type="button" class="btn-icon btn-danger" onclick="deleteProductHandler(${p.id}, '${escapeHtml(p.name)}')" title="Excluir produto">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Ajuste rápido de estoque (+1 / -1)
+window.quickAdjustStock = async function(id, delta) {
+    try {
+        await putData(`store_products/${id}/stock`, { stock: delta });
+        loadStoreProducts();
+    } catch (err) {
+        alert('Erro ao ajustar estoque: ' + err.message);
+    }
+};
+
+// Excluir Produto
+window.deleteProductHandler = async function(id, name) {
+    if (!confirm(`Deseja realmente excluir o produto "${name}" da loja?`)) return;
+
+    try {
+        await deleteData('store_products', id);
+        loadStoreProducts();
+    } catch (err) {
+        alert('Erro ao excluir produto: ' + err.message);
+    }
+};
+
+function setupStoreListeners() {
+    const formProduct = document.getElementById('form-product');
+    if (formProduct) {
+        formProduct.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('prod-name').value.trim();
+            const stock = parseInt(document.getElementById('prod-stock').value, 10);
+            const sell_price = parseFloat(document.getElementById('prod-price').value);
+
+            if (!name || isNaN(stock) || isNaN(sell_price)) {
+                alert('Preencha todos os campos do produto corretamente.');
+                return;
+            }
+
+            const res = await postData('store_products', {
+                name,
+                stock: Math.max(0, stock),
+                cost_price: 0,
+                sell_price: Math.max(0, sell_price)
+            });
+
+            if (res.error) {
+                alert('Erro: ' + res.error);
+                return;
+            }
+
+            formProduct.reset();
+            loadStoreProducts();
+            alert('Produto cadastrado com sucesso!');
+        });
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/'/g, '&#39;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+

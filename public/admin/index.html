@@ -27,6 +27,8 @@
                 <li class="active" data-target="dashboard"><i class="ri-dashboard-fill"></i> Financeiro & Métricas</li>
                 <li data-target="athletes"><i class="ri-user-star-fill"></i> Atletas Inscritos</li>
                 <li data-target="checkin"><i class="ri-qr-scan-2-line"></i> Check-in dos Atletas</li>
+                <li data-target="assessorias"><i class="ri-community-line"></i> Assessorias</li>
+                <li data-target="store"><i class="ri-store-2-line"></i> Loja</li>
                 <li data-target="costs"><i class="ri-wallet-3-fill"></i> Custos do Evento</li>
                 <li data-target="sponsors"><i class="ri-hand-heart-fill"></i> Patrocínios</li>
                 <li id="nav-users" data-target="users" style="display:none;"><i class="ri-team-fill"></i> Usuários</li>
@@ -278,7 +280,130 @@
                 </section>
 
 
-                <!-- ── 4. CUSTOS DO EVENTO ── -->
+                <!-- ── 4. ASSESSORIAS & CUPONS ── -->
+                <section id="assessorias" class="page-section hidden">
+                    <div class="dashboard-details grid-2" style="margin-bottom: 1.5rem;">
+                        <!-- Form Cadastrar Assessoria -->
+                        <div class="card glass-card form-container">
+                            <h3><i class="ri-community-line"></i> Cadastrar Assessoria</h3>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">Cadastre assessorias esportivas parceiras do evento.</p>
+                            <form id="form-assessoria" class="grid-form">
+                                <input type="text" id="ass-name" placeholder="Nome da Assessoria *" required style="grid-column: 1 / -1;">
+                                <input type="text" id="ass-resp" placeholder="Nome do Treinador / Responsável">
+                                <input type="tel" id="ass-phone" placeholder="WhatsApp / Telefone">
+                                <input type="email" id="ass-email" placeholder="E-mail de Contato" style="grid-column: 1 / -1;">
+                                <button type="submit" class="btn btn-primary" style="grid-column: 1 / -1;">Cadastrar Assessoria</button>
+                            </form>
+                        </div>
+
+                        <!-- Form Cadastrar Cupom de Desconto -->
+                        <div class="card glass-card form-container">
+                            <h3><i class="ri-coupon-3-line"></i> Criar Cupom de Desconto</h3>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.75rem;">
+                                O cupom dá direito ao valor exclusivo de <strong>R$ 119,00</strong>. Deve conter <strong>5 letras e 2 números</strong>.
+                            </p>
+                            <form id="form-coupon" class="grid-form">
+                                <select id="coupon-assessoria-select" required style="grid-column: 1 / -1;">
+                                    <option value="" disabled selected>Selecione a Assessoria *</option>
+                                </select>
+                                <div style="display: flex; gap: 8px; grid-column: 1 / -1;">
+                                    <input type="text" id="coupon-code-input" placeholder="Ex: TUBAS01 (5 letras + 2 números) *" maxlength="7" style="text-transform: uppercase; font-family: monospace; font-weight: 700; letter-spacing: 0.05em;" required>
+                                    <button type="button" class="btn" id="btn-generate-code" style="background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(2, 132, 199, 0.4); white-space: nowrap; font-size: 0.85rem;">
+                                        <i class="ri-magic-line"></i> Gerar Código
+                                    </button>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="grid-column: 1 / -1;">Salvar Cupom</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Assessorias Table -->
+                    <div class="card glass-card table-container" style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;"><i class="ri-community-fill"></i> Assessorias Cadastradas (<span id="ass-count-total">0</span>)</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Assessoria</th>
+                                    <th>Treinador / Responsável</th>
+                                    <th>Telefone</th>
+                                    <th>Cupons Vinculados</th>
+                                    <th>Atletas Inscritos</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-assessorias">
+                                <tr><td colspan="7" style="text-align: center; padding: 2rem;">Carregando assessorias...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Cupons Table -->
+                    <div class="card glass-card table-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;"><i class="ri-coupon-3-fill"></i> Todos os Cupons Ativos (<span id="coupons-count-total">0</span>)</h3>
+                            <small style="color: var(--text-secondary);">Regra: 5 letras seguidas de 2 números (R$ 119,00)</small>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código do Cupom</th>
+                                    <th>Assessoria Vinculada</th>
+                                    <th>Valor Inscrição</th>
+                                    <th>Inscrições Realizadas</th>
+                                    <th>Criado em</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-coupons">
+                                <tr><td colspan="6" style="text-align: center; padding: 2rem;">Nenhum cupom cadastrado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+
+                <!-- ── 5. LOJA & ESTOQUE ── -->
+                <section id="store" class="page-section hidden">
+                    <div class="card glass-card form-container" style="margin-bottom: 1.5rem;">
+                        <h3><i class="ri-store-2-line"></i> Cadastrar Produto na Loja</h3>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
+                            Os produtos cadastrados aqui com estoque disponível aparecem automaticamente como itens opcionais na página de validação de inscrição dos atletas.
+                        </p>
+                        <form id="form-product" class="flex-form">
+                            <input type="text" id="prod-name" placeholder="Nome do Produto (Ex: Touca Extra de Silicone, Camisa Especial)" required style="flex: 2; min-width: 260px;">
+                            <input type="number" id="prod-stock" placeholder="Quantidade em Estoque" min="0" required style="flex: 1; min-width: 140px;">
+                            <input type="number" step="0.01" id="prod-price" placeholder="Preço de Venda (R$)" min="0" required style="flex: 1; min-width: 140px;">
+                            <button type="submit" class="btn btn-primary">Cadastrar Produto</button>
+                        </form>
+                    </div>
+
+                    <div class="card glass-card table-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;"><i class="ri-box-3-fill"></i> Produtos Cadastrados & Estoque (<span id="prod-count-total">0</span>)</h3>
+                            <button type="button" class="btn btn-primary" onclick="loadStoreProducts()" style="padding: 6px 12px; font-size: 0.85rem;"><i class="ri-refresh-line"></i> Atualizar</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Produto</th>
+                                    <th>Estoque Atual</th>
+                                    <th>Valor de Venda</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-store-products">
+                                <tr><td colspan="5" style="text-align: center; padding: 2rem;">Carregando produtos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+
+                <!-- ── 6. CUSTOS DO EVENTO ── -->
                 <section id="costs" class="page-section hidden">
                     <div class="card glass-card form-container">
                         <h3><i class="ri-add-circle-line"></i> Cadastrar Novo Custo / Despesa do Evento</h3>

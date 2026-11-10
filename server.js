@@ -84,13 +84,17 @@ app.get('/debug-fs', (req, res) => {
     });
 });
 
-// ─── Landing page & Inscrição ────────────────────────────────────────────────
+// ─── Landing page, Inscrição & Confirmação ──────────────────────────────────
 app.get('/', (req, res) => {
     res.sendFile('landing.html', { root: path.join(__dirname, 'public') });
 });
 
 app.get('/inscricao', (req, res) => {
     res.sendFile('inscricao.html', { root: path.join(__dirname, 'public') });
+});
+
+app.get('/confirmacao-inscricao', (req, res) => {
+    res.sendFile('confirmacao.html', { root: path.join(__dirname, 'public') });
 });
 
 
@@ -236,6 +240,255 @@ const EVENT_CATEGORIES = {
 // Public endpoint: List Categories
 app.get('/api/public/categories', (req, res) => {
     res.json(Object.values(EVENT_CATEGORIES));
+});
+
+// Public endpoint: Validar Cupom de Assessoria (Formato: 5 letras e 2 números)
+app.get('/api/public/validate-coupon', (req, res) => {
+    const rawCode = req.query.code;
+    if (!rawCode) {
+        return res.status(400).json({ valid: false, error: 'Código do cupom não informado.' });
+    }
+
+    const code = String(rawCode).trim().toUpperCase();
+
+    // Validação estrita: 5 letras seguidas de 2 números
+    if (!/^[A-Z]{5}[0-9]{2}$/.test(code)) {
+        return res.status(400).json({
+            valid: false,
+            error: 'O cupom deve conter exatamente 5 letras e 2 números (Exemplo: TUBAS01).'
+        });
+    }
+
+    const sql = `
+        SELECT c.id, c.code, c.discount_price, c.active, a.id as assessoria_id, a.name as assessoria_name
+        FROM coupons c
+        JOIN assessorias a ON c.assessoria_id = a.id
+        WHERE c.code = ? AND c.active = 1
+    `;
+
+    db.get(sql, [code], (err, row) => {
+        if (err) return res.status(500).json({ valid: false, error: err.message });
+        if (!row) {
+            return res.status(404).json({ valid: false, error: 'Cupom não encontrado ou inativo.' });
+        }
+        res.json({
+            valid: true,
+            code: row.code,
+            assessoria_name: row.assessoria_name,
+            assessoria_id: row.assessoria_id,
+            discount_price: row.discount_price || 119.00
+        });
+    });
+});
+
+// Public endpoint: Listar Produtos da Loja com Estoque Disponível
+app.get('/api/public/store-products', (req, res) => {
+    db.all("SELECT id, name, stock, sell_price FROM store_products WHERE stock > 0 ORDER BY name ASC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows || []);
+    });
+});
+
+// Public endpoint: Concluir Inscrição com Validação, Produtos da Loja e Escolha de Pagamento
+app.post('/api/public/complete-registration', (req, res) => {
+    const { athlete, store_items = [], payment_method } = req.body;
+
+    if (!athlete) {
+        return res.status(400).json({ error: 'Dados do atleta não fornecidos.' });
+    }
+
+    const {
+        name,
+        cpf,
+        email,
+        phone,
+        birth_date,
+        gender,
+        category_id,
+        coupon_code,
+        tshirt_size,
+        emergency_contact_name,
+        emergency_contact_phone,
+        medical_notes
+    } = athlete;
+
+    if (!name || !cpf || !email || !phone || !category_id) {
+        return res.status(400).json({ error: 'Preencha todos os campos obrigatórios (Nome, CPF, E-mail, Celular e Modalidade).' });
+    }
+
+    const cleanCpf = String(cpf).replace(/\D/g, '');
+    if (cleanCpf.length !== 11) {
+        return res.status(400).json({ error: 'CPF inválido. Deve conter 11 dígitos numéricos.' });
+    }
+
+    const cat = EVENT_CATEGORIES[category_id];
+    if (!cat) {
+        return res.status(400).json({ error: 'Modalidade de prova inválida selecionada.' });
+    }
+
+    if (!payment_method || (payment_method !== 'Pix' && payment_method !== 'Cartão')) {
+        return res.status(400).json({ error: 'Selecione uma forma de pagamento válida (Pix ou Cartão).' });
+    }
+
+    // 1. Validar cupom caso seja modalidade com assessoria
+    const validateCouponPromise = new Promise((resolve, reject) => {
+        if (category_id === 'adulto_assessoria') {
+            if (!coupon_code) {
+                return reject(new Error('Para a modalidade de assessorias, informe um cupom válido (5 letras e 2 números).'));
+            }
+            const cleanCode = String(coupon_code).trim().toUpperCase();
+            if (!/^[A-Z]{5}[0-9]{2}$/.test(cleanCode)) {
+                return reject(new Error('O cupom deve conter exatamente 5 letras e 2 números (Ex: TUBAS01).'));
+            }
+
+            const sql = `
+                SELECT c.id, c.code, c.discount_price, a.name as assessoria_name
+                FROM coupons c
+                JOIN assessorias a ON c.assessoria_id = a.id
+                WHERE c.code = ? AND c.active = 1
+            `;
+            db.get(sql, [cleanCode], (err, row) => {
+                if (err) return reject(err);
+                if (!row) return reject(new Error('Cupom não encontrado ou inativo.'));
+                resolve({
+                    price: row.discount_price || 119.00,
+                    assessoria_name: row.assessoria_name,
+                    coupon_code: cleanCode
+                });
+            });
+        } else {
+            resolve({
+                price: cat.price,
+                assessoria_name: null,
+                coupon_code: null
+            });
+        }
+    });
+
+    validateCouponPromise.then(catResult => {
+        // 2. Verificar se já existe atleta com CPF confirmado
+        db.get("SELECT id, name, payment_status FROM athletes WHERE cpf = ?", [cleanCpf], (err, existing) => {
+            if (err) return res.status(500).json({ error: err.message });
+            if (existing && existing.payment_status === 'Confirmado') {
+                return res.status(400).json({ error: `O CPF informado já possui uma inscrição confirmada (${existing.name}).` });
+            }
+
+            // 3. Processar produtos da loja
+            db.all("SELECT * FROM store_products", [], (err2, allProducts) => {
+                if (err2) return res.status(500).json({ error: err2.message });
+
+                const prodMap = new Map((allProducts || []).map(p => [p.id, p]));
+                let storeAmount = 0;
+                const purchasedItems = [];
+
+                if (Array.isArray(store_items)) {
+                    for (const item of store_items) {
+                        const qty = parseInt(item.quantity, 10);
+                        if (qty > 0) {
+                            const p = prodMap.get(parseInt(item.id, 10));
+                            if (!p) {
+                                return res.status(400).json({ error: `Produto #${item.id} não encontrado na loja.` });
+                            }
+                            if (p.stock < qty) {
+                                return res.status(400).json({ error: `Estoque insuficiente para o produto "${p.name}". Restam ${p.stock} unidades.` });
+                            }
+                            const itemTotal = p.sell_price * qty;
+                            storeAmount += itemTotal;
+                            purchasedItems.push({
+                                id: p.id,
+                                name: p.name,
+                                unit_price: p.sell_price,
+                                quantity: qty,
+                                subtotal: itemTotal
+                            });
+                        }
+                    }
+                }
+
+                // Decrementar estoque dos produtos comprados
+                purchasedItems.forEach(pItem => {
+                    db.run("UPDATE store_products SET stock = MAX(0, stock - ?) WHERE id = ?", [pItem.quantity, pItem.id]);
+                });
+
+                const inscriptionPrice = catResult.price;
+                const totalAmount = inscriptionPrice + storeAmount;
+                const storeItemsJson = JSON.stringify(purchasedItems);
+
+                const defaultPixKey = 'contato@tubaroescansados.com.br';
+                const defaultCardLink = 'https://mpago.la/tubaroescansados';
+
+                if (existing) {
+                    const sqlUpdate = `UPDATE athletes SET
+                        name = ?, email = ?, phone = ?, birth_date = ?, gender = ?,
+                        category = ?, distance = ?, price = ?, coupon_code = ?, assessoria_name = ?,
+                        tshirt_size = ?, emergency_contact_name = ?, emergency_contact_phone = ?,
+                        medical_notes = ?, payment_method = ?, store_items = ?, store_amount = ?, total_amount = ?
+                        WHERE id = ?`;
+                    db.run(sqlUpdate, [
+                        name.trim(), email.trim(), phone.trim(), birth_date || null, gender || null,
+                        cat.name, cat.distance, inscriptionPrice, catResult.coupon_code,
+                        catResult.assessoria_name, tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                        emergency_contact_phone ? emergency_contact_phone.trim() : null,
+                        medical_notes ? medical_notes.trim() : null, payment_method,
+                        storeItemsJson, storeAmount, totalAmount, existing.id
+                    ], function(err3) {
+                        if (err3) return res.status(500).json({ error: err3.message });
+                        return res.json({
+                            success: true,
+                            athlete_id: existing.id,
+                            athlete_name: name.trim(),
+                            cpf: cleanCpf,
+                            category: cat.name,
+                            inscription_price: inscriptionPrice,
+                            store_items: purchasedItems,
+                            store_amount: storeAmount,
+                            total_amount: totalAmount,
+                            payment_method,
+                            pix_key: defaultPixKey,
+                            card_payment_link: defaultCardLink,
+                            message: 'Inscrição confirmada com sucesso!'
+                        });
+                    });
+                } else {
+                    const sqlInsert = `INSERT INTO athletes (
+                        name, cpf, email, phone, birth_date, gender,
+                        category, distance, price, coupon_code, assessoria_name,
+                        tshirt_size, emergency_contact_name, emergency_contact_phone,
+                        medical_notes, payment_status, payment_method, store_items, store_amount, total_amount
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente', ?, ?, ?, ?)`;
+
+                    db.run(sqlInsert, [
+                        name.trim(), cleanCpf, email.trim(), phone.trim(), birth_date || null, gender || null,
+                        cat.name, cat.distance, inscriptionPrice, catResult.coupon_code,
+                        catResult.assessoria_name, tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                        emergency_contact_phone ? emergency_contact_phone.trim() : null,
+                        medical_notes ? medical_notes.trim() : null, payment_method,
+                        storeItemsJson, storeAmount, totalAmount
+                    ], function(err3) {
+                        if (err3) return res.status(500).json({ error: err3.message });
+                        const newId = this.lastID;
+                        return res.json({
+                            success: true,
+                            athlete_id: newId,
+                            athlete_name: name.trim(),
+                            cpf: cleanCpf,
+                            category: cat.name,
+                            inscription_price: inscriptionPrice,
+                            store_items: purchasedItems,
+                            store_amount: storeAmount,
+                            total_amount: totalAmount,
+                            payment_method,
+                            pix_key: defaultPixKey,
+                            card_payment_link: defaultCardLink,
+                            message: 'Inscrição confirmada com sucesso!'
+                        });
+                    });
+                }
+            });
+        });
+    }).catch(err => {
+        return res.status(400).json({ error: err.message });
+    });
 });
 
 // Public endpoint: Register Athlete
@@ -405,8 +658,8 @@ app.put('/api/athletes/:id/confirm-payment', requireAuth, (req, res) => {
     const params = [payment_method, confirmedBy];
 
     if (price !== undefined && price !== null && !isNaN(price)) {
-        sql += `, price = ?`;
-        params.push(parseFloat(price));
+        sql += `, price = ?, total_amount = COALESCE(total_amount, ?)`;
+        params.push(parseFloat(price), parseFloat(price));
     }
 
     sql += ` WHERE id = ?`;
@@ -628,6 +881,109 @@ app.put('/api/party_tickets/:id/:field', requireAuth, (req, res) => {
 });
 app.delete('/api/party_tickets/:id', requireAuth, (req, res) => {
     db.run("DELETE FROM party_tickets WHERE id = ?", req.params.id, function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ deleted: this.changes > 0 });
+    });
+});
+
+// ─── Assessorias & Cupons (Área Administrativa) ────────────────────────────
+
+// Listar todas as Assessorias com contagem de cupons e atletas inscritos
+app.get('/api/assessorias', requireAuth, (req, res) => {
+    const sql = `
+        SELECT a.*, 
+            (SELECT COUNT(*) FROM coupons c WHERE c.assessoria_id = a.id) as coupons_count,
+            (SELECT COUNT(*) FROM athletes ath WHERE ath.assessoria_name = a.name) as athletes_count
+        FROM assessorias a 
+        ORDER BY a.name ASC
+    `;
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows || []);
+    });
+});
+
+// Cadastrar Assessoria
+app.post('/api/assessorias', requireAuth, (req, res) => {
+    const { name, responsible_name, phone, email } = req.body;
+    if (!name || !name.trim()) {
+        return res.status(400).json({ error: 'O nome da assessoria é obrigatório.' });
+    }
+
+    db.run(
+        "INSERT INTO assessorias (name, responsible_name, phone, email) VALUES (?, ?, ?, ?)",
+        [name.trim(), responsible_name ? responsible_name.trim() : null, phone ? phone.trim() : null, email ? email.trim() : null],
+        function(err) {
+            if (err) {
+                if (err.message && err.message.includes('UNIQUE')) {
+                    return res.status(400).json({ error: 'Já existe uma assessoria cadastrada com este nome.' });
+                }
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ id: this.lastID, name: name.trim(), responsible_name, phone, email });
+        }
+    );
+});
+
+// Excluir Assessoria (e seus cupons)
+app.delete('/api/assessorias/:id', requireAuth, (req, res) => {
+    db.run("DELETE FROM coupons WHERE assessoria_id = ?", [req.params.id], () => {
+        db.run("DELETE FROM assessorias WHERE id = ?", [req.params.id], function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ deleted: this.changes > 0 });
+        });
+    });
+});
+
+// Listar Cupons com Nome da Assessoria e Quantidade de Usos
+app.get('/api/coupons', requireAuth, (req, res) => {
+    const sql = `
+        SELECT c.*, a.name as assessoria_name,
+            (SELECT COUNT(*) FROM athletes ath WHERE ath.coupon_code = c.code) as uses_count
+        FROM coupons c
+        JOIN assessorias a ON c.assessoria_id = a.id
+        ORDER BY c.id DESC
+    `;
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows || []);
+    });
+});
+
+// Cadastrar Cupom (Validação: 5 letras seguidas de 2 números)
+app.post('/api/coupons', requireAuth, (req, res) => {
+    const { assessoria_id, code } = req.body;
+    if (!assessoria_id || !code) {
+        return res.status(400).json({ error: 'Selecione a assessoria e informe o código do cupom.' });
+    }
+
+    const cleanCode = String(code).trim().toUpperCase();
+
+    // Validação estrita: 5 letras e 2 números (ex: TUBAS01)
+    if (!/^[A-Z]{5}[0-9]{2}$/.test(cleanCode)) {
+        return res.status(400).json({
+            error: 'O código do cupom deve conter exatamente 5 letras seguidas de 2 números (Exemplo: TUBAS01, RUNVV26).'
+        });
+    }
+
+    db.run(
+        "INSERT INTO coupons (code, assessoria_id, discount_price) VALUES (?, ?, 119.00)",
+        [cleanCode, assessoria_id],
+        function(err) {
+            if (err) {
+                if (err.message && err.message.includes('UNIQUE')) {
+                    return res.status(400).json({ error: `O cupom "${cleanCode}" já foi cadastrado no sistema.` });
+                }
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ id: this.lastID, code: cleanCode, assessoria_id, discount_price: 119.00 });
+        }
+    );
+});
+
+// Excluir Cupom
+app.delete('/api/coupons/:id', requireAuth, (req, res) => {
+    db.run("DELETE FROM coupons WHERE id = ?", [req.params.id], function(err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ deleted: this.changes > 0 });
     });
@@ -916,11 +1272,11 @@ app.get('/api/summary', requireAuth, (req, res) => {
     };
 
     const qAthletes = new Promise((resolve) => {
-        db.all("SELECT category, payment_status, payment_method, price, checkin_status FROM athletes", (err, rows) => {
+        db.all("SELECT category, payment_status, payment_method, price, total_amount, checkin_status FROM athletes", (err, rows) => {
             if (!err && rows) {
                 summary.athletes.total_count = rows.length;
                 rows.forEach(r => {
-                    const price = parseFloat(r.price) || 0;
+                    const price = (parseFloat(r.total_amount) > 0 ? parseFloat(r.total_amount) : (parseFloat(r.price) || 0));
                     const catName = r.category || 'Não categorizado';
                     if (!summary.athletes.categories[catName]) {
                         summary.athletes.categories[catName] = { total: 0, confirmed: 0, revenue: 0 };

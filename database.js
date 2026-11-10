@@ -70,6 +70,43 @@ function createTables() {
         db.run(`CREATE INDEX IF NOT EXISTS idx_athletes_cpf ON athletes(cpf)`);
         db.run(`CREATE INDEX IF NOT EXISTS idx_athletes_status ON athletes(payment_status)`);
 
+        // Migration: add store_items, store_amount, total_amount to athletes
+        db.all("PRAGMA table_info(athletes)", (err, columns) => {
+            if (!err && columns) {
+                if (!columns.some(c => c.name === 'store_items')) {
+                    db.run("ALTER TABLE athletes ADD COLUMN store_items TEXT DEFAULT '[]'");
+                }
+                if (!columns.some(c => c.name === 'store_amount')) {
+                    db.run("ALTER TABLE athletes ADD COLUMN store_amount REAL DEFAULT 0");
+                }
+                if (!columns.some(c => c.name === 'total_amount')) {
+                    db.run("ALTER TABLE athletes ADD COLUMN total_amount REAL DEFAULT 0");
+                }
+            }
+        });
+
+        // Assessorias
+        db.run(`CREATE TABLE IF NOT EXISTS assessorias (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            responsible_name TEXT,
+            phone TEXT,
+            email TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+        )`);
+
+        // Cupons vinculados às Assessorias (Formato: 5 letras e 2 números)
+        db.run(`CREATE TABLE IF NOT EXISTS coupons (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code TEXT NOT NULL UNIQUE,
+            assessoria_id INTEGER NOT NULL,
+            discount_price REAL NOT NULL DEFAULT 119.00,
+            active INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+            FOREIGN KEY (assessoria_id) REFERENCES assessorias (id) ON DELETE CASCADE
+        )`);
+        db.run(`CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code)`);
+
         // Registrations (Batches) - mantido para retrocompatibilidade
         db.run(`CREATE TABLE IF NOT EXISTS registrations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
