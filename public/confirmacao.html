@@ -701,26 +701,52 @@
                 </div>
 
                 <!-- Se Pagamento for PIX -->
-                <div id="payment-pix-box" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px dashed rgba(245, 158, 11, 0.4); border-radius: 14px; padding: 1.75rem; max-width: 540px; margin: 0 auto 1.5rem;">
-                    <div style="font-size: 0.9rem; color: var(--gold); font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
-                        <i class="ri-qr-code-line"></i> Pagamento via PIX Oficial
+                <div id="payment-pix-box" style="display: none; background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.45); border-radius: 16px; padding: 1.75rem; max-width: 560px; margin: 0 auto 1.5rem;">
+                    <div style="font-size: 0.95rem; color: var(--gold); font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
+                        <i class="ri-qr-code-line"></i> Pagamento Oficial via PIX
                     </div>
-                    <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 12px;">
-                        Utilize a chave PIX abaixo ou escaneie com o app do seu banco:
+                    <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 14px;">
+                        Escaneie o QR Code abaixo no app do seu banco ou utilize as opções Copia e Cola:
                     </p>
 
-                    <div class="pix-code-box">
-                        <span id="fin-pix-key" style="flex: 1; font-family: monospace; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; color: #fff;">contato@tubaroescansados.com.br</span>
-                        <button type="button" class="btn-copy" id="btn-copy-final-pix">Copiar PIX</button>
+                    <!-- QR Code Oficial -->
+                    <div style="margin: 1.25rem 0;">
+                        <img id="fin-pix-qr" src="/pix_qrcode.jpg" alt="QR Code PIX Tubarões Cansados" style="width: 210px; height: 210px; border-radius: 12px; background: #fff; padding: 10px; border: 3px solid var(--gold); margin: 0 auto; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+                        <small style="color: #fbbf24; font-weight: 700; display: block; margin-top: 10px; font-size: 0.85rem;">
+                            <i class="ri-qr-scan-2-line"></i> Aponte a câmera do aplicativo do seu banco para o QR Code
+                        </small>
                     </div>
 
-                    <div style="margin-top: 1.25rem;">
-                        <img id="fin-pix-qr" src="" alt="QR Code PIX" style="width: 180px; height: 180px; border-radius: 10px; background: #fff; padding: 8px; border: 2px solid var(--gold); margin: 0 auto; display: block;">
-                        <small style="color: var(--text-muted); display: block; margin-top: 8px;">Escaneie o QR Code no seu aplicativo bancário</small>
+                    <!-- Dados do Favorecido -->
+                    <div style="background: rgba(0, 0, 0, 0.4); border-radius: 10px; padding: 10px 14px; margin: 14px 0; text-align: left; font-size: 0.85rem; border: 1px solid rgba(255, 255, 255, 0.08);">
+                        <div style="color: var(--text-muted); margin-bottom: 3px;">Favorecido: <strong style="color: #fff;" id="fin-pix-receiver">Michel C. M. Alves</strong></div>
+                        <div style="color: var(--text-muted);">Descrição: <strong style="color: #38bdf8;">Pagamento aos Tubarões Cansados</strong></div>
+                    </div>
+
+                    <!-- Opção 1: Código PIX Copia e Cola -->
+                    <div style="margin-top: 14px; text-align: left;">
+                        <label style="font-size: 0.8rem; color: var(--gold); font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+                            <i class="ri-file-copy-2-line"></i> Opção 1: Código Pix Copia e Cola
+                        </label>
+                        <div class="pix-code-box" style="margin: 6px 0 12px 0;">
+                            <input type="text" id="fin-pix-payload" readonly value="00020126850014br.gov.bcb.pix0128ostubaroescansados@gmail.com0231Pagamento aos Tubarões Cansados5204000053039865802BR5918Michel C. M. Alves6002NA62070503***6304E5D9" style="flex: 1; background: transparent; border: none; font-family: monospace; font-size: 0.82rem; color: #fff; outline: none;" onclick="this.select()">
+                            <button type="button" class="btn-copy" id="btn-copy-payload"><i class="ri-file-copy-line"></i> Copiar Código</button>
+                        </div>
+                    </div>
+
+                    <!-- Opção 2: Chave E-mail -->
+                    <div style="margin-top: 8px; text-align: left;">
+                        <label style="font-size: 0.8rem; color: #38bdf8; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+                            <i class="ri-mail-line"></i> Opção 2: Chave PIX (E-mail)
+                        </label>
+                        <div class="pix-code-box" style="margin: 6px 0 12px 0;">
+                            <span id="fin-pix-key" style="flex: 1; font-family: monospace; font-size: 0.95rem; color: #fff; font-weight: 700;">ostubaroescansados@gmail.com</span>
+                            <button type="button" class="btn-copy" id="btn-copy-final-pix" style="background: rgba(2, 132, 199, 0.25); color: #38bdf8; border: 1px solid rgba(2, 132, 199, 0.5);"><i class="ri-file-copy-line"></i> Copiar E-mail</button>
+                        </div>
                     </div>
 
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.4;">
-                        Após o pagamento, guarde seu comprovante. Assim que compensado, seu check-in para retirada de kit estará liberado.
+                        Após o pagamento, guarde o comprovante. Assim que identificado, sua inscrição estará confirmada para retirada do kit oficial.
                     </p>
                 </div>
 
@@ -1011,19 +1037,36 @@
 
                 if (data.payment_method === 'Pix') {
                     document.getElementById('payment-pix-box').style.display = 'block';
-                    document.getElementById('fin-pix-key').textContent = data.pix_key;
+                    if (data.pix_key) document.getElementById('fin-pix-key').textContent = data.pix_key;
+                    if (data.pix_payload) document.getElementById('fin-pix-payload').value = data.pix_payload;
+                    if (data.pix_receiver) document.getElementById('fin-pix-receiver').textContent = data.pix_receiver;
 
-                    // Generate Dynamic QR Code image for Pix
-                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.pix_key)}`;
-                    document.getElementById('fin-pix-qr').src = qrUrl;
+                    const qrImg = document.getElementById('fin-pix-qr');
+                    qrImg.src = data.pix_qr_image || '/pix_qrcode.jpg';
 
-                    document.getElementById('btn-copy-final-pix').addEventListener('click', () => {
-                        navigator.clipboard.writeText(data.pix_key).then(() => {
-                            const b = document.getElementById('btn-copy-final-pix');
-                            b.textContent = 'Copiado!';
-                            setTimeout(() => b.textContent = 'Copiar PIX', 2500);
-                        });
-                    });
+                    // Botão Copiar Código Copia e Cola
+                    const btnCopyPayload = document.getElementById('btn-copy-payload');
+                    if (btnCopyPayload) {
+                        btnCopyPayload.onclick = () => {
+                            const payload = document.getElementById('fin-pix-payload').value;
+                            navigator.clipboard.writeText(payload).then(() => {
+                                btnCopyPayload.innerHTML = '<i class="ri-check-line"></i> Copiado!';
+                                setTimeout(() => btnCopyPayload.innerHTML = '<i class="ri-file-copy-line"></i> Copiar Código', 2500);
+                            });
+                        };
+                    }
+
+                    // Botão Copiar Chave E-mail
+                    const btnCopyKey = document.getElementById('btn-copy-final-pix');
+                    if (btnCopyKey) {
+                        btnCopyKey.onclick = () => {
+                            const key = document.getElementById('fin-pix-key').textContent.trim();
+                            navigator.clipboard.writeText(key).then(() => {
+                                btnCopyKey.innerHTML = '<i class="ri-check-line"></i> Copiado!';
+                                setTimeout(() => btnCopyKey.innerHTML = '<i class="ri-file-copy-line"></i> Copiar E-mail', 2500);
+                            });
+                        };
+                    }
 
                 } else {
                     document.getElementById('payment-card-box').style.display = 'block';

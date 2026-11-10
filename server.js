@@ -414,7 +414,10 @@ app.post('/api/public/complete-registration', (req, res) => {
                 const totalAmount = inscriptionPrice + storeAmount;
                 const storeItemsJson = JSON.stringify(purchasedItems);
 
-                const defaultPixKey = 'contato@tubaroescansados.com.br';
+                const defaultPixKey = 'ostubaroescansados@gmail.com';
+                const defaultPixPayload = '00020126850014br.gov.bcb.pix0128ostubaroescansados@gmail.com0231Pagamento aos Tubarões Cansados5204000053039865802BR5918Michel C. M. Alves6002NA62070503***6304E5D9';
+                const defaultPixReceiver = 'Michel C. M. Alves';
+                const defaultPixQrImage = '/pix_qrcode.jpg';
                 const defaultCardLink = 'https://mpago.la/tubaroescansados';
 
                 if (existing) {
@@ -445,6 +448,9 @@ app.post('/api/public/complete-registration', (req, res) => {
                             total_amount: totalAmount,
                             payment_method,
                             pix_key: defaultPixKey,
+                            pix_payload: defaultPixPayload,
+                            pix_receiver: defaultPixReceiver,
+                            pix_qr_image: defaultPixQrImage,
                             card_payment_link: defaultCardLink,
                             message: 'Inscrição confirmada com sucesso!'
                         });
@@ -479,6 +485,9 @@ app.post('/api/public/complete-registration', (req, res) => {
                             total_amount: totalAmount,
                             payment_method,
                             pix_key: defaultPixKey,
+                            pix_payload: defaultPixPayload,
+                            pix_receiver: defaultPixReceiver,
+                            pix_qr_image: defaultPixQrImage,
                             card_payment_link: defaultCardLink,
                             message: 'Inscrição confirmada com sucesso!'
                         });
