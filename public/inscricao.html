@@ -676,9 +676,14 @@
             </div>
 
             <!-- PROVAS DE 2 KM (PRINCIPAL) -->
-            <div style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
-                <span style="background: rgba(2, 132, 199, 0.2); color: #38bdf8; font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; border: 1px solid rgba(2, 132, 199, 0.4);">Percurso 2 km</span>
-                <span style="font-size: 0.88rem; color: var(--text-muted);">Travessia Principal</span>
+            <div style="margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: rgba(2, 132, 199, 0.2); color: #38bdf8; font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; border: 1px solid rgba(2, 132, 199, 0.4);">Percurso 2 km</span>
+                    <span style="font-size: 0.88rem; color: var(--text-muted);">Travessia Principal</span>
+                </div>
+                <span id="vac-badge-2k" style="font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 99px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">
+                    <i class="ri-user-line"></i> Vagas: Carregando...
+                </span>
             </div>
 
             <div class="category-grid" style="margin-bottom: 1.5rem;">
@@ -742,9 +747,14 @@
             </div>
 
             <!-- PROVAS DE 1 KM (NOVA PROVA) -->
-            <div style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
-                <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; border: 1px solid rgba(16, 185, 129, 0.4);">Percurso 1 km</span>
-                <span style="font-size: 0.88rem; color: var(--text-muted);">Nova Modalidade</span>
+            <div style="margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; border: 1px solid rgba(16, 185, 129, 0.4);">Percurso 1 km</span>
+                    <span style="font-size: 0.88rem; color: var(--text-muted);">Nova Modalidade</span>
+                </div>
+                <span id="vac-badge-1k" style="font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 99px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <i class="ri-user-line"></i> Vagas: Carregando...
+                </span>
             </div>
 
             <div class="category-grid" style="margin-bottom: 1.5rem;">
@@ -897,15 +907,15 @@
             </div>
 
             <div class="form-grid">
-                <div class="form-group">
+                <div class="form-group" id="tshirt-group-container">
                     <label for="tshirt_size">Tamanho da Camisa Oficial <span class="req">*</span></label>
                     <select id="tshirt_size" required>
-                        <option value="" disabled selected>Selecione o tamanho (M, G ou XG)...</option>
+                        <option value="" disabled selected>Consultando estoque de camisas...</option>
                         <option value="M">M</option>
                         <option value="G">G</option>
                         <option value="XG">XG</option>
                     </select>
-                    <small style="color: #fbbf24; font-size: 0.82rem; margin-top: 4px; display: flex; align-items: center; gap: 5px;">
+                    <small id="tshirt-stock-feedback" style="color: #fbbf24; font-size: 0.82rem; margin-top: 4px; display: flex; align-items: center; gap: 5px;">
                         <i class="ri-information-line"></i> <em>O tamanho da camisa pode ser diferente na entrega devido à disponibilidade de estoque.</em>
                     </small>
                 </div>
@@ -998,6 +1008,11 @@
         // Selection of category
         categoryCards.forEach(card => {
             card.addEventListener('click', () => {
+                if (card.classList.contains('category-sold-out')) {
+                    alert('As vagas para esta modalidade estão esgotadas (limite máximo de 50 vagas preenchido).');
+                    return;
+                }
+
                 categoryCards.forEach(c => c.classList.remove('selected'));
                 card.classList.add('selected');
 
@@ -1010,6 +1025,23 @@
 
                 summaryCatName.textContent = selectedCategory.name;
                 summaryPriceVal.textContent = `R$ ${selectedCategory.price.toFixed(2).replace('.', ',')}`;
+
+                // Visibilidade do tamanho de camisa (Kit Kids não inclui camisa)
+                const tshirtGroup = document.getElementById('tshirt-group-container');
+                const tshirtSelect = document.getElementById('tshirt_size');
+                if (selectedCategory.id === 'kids') {
+                    if (tshirtGroup) tshirtGroup.style.display = 'none';
+                    if (tshirtSelect) {
+                        tshirtSelect.required = false;
+                        tshirtSelect.value = 'Kids';
+                    }
+                } else {
+                    if (tshirtGroup) tshirtGroup.style.display = 'block';
+                    if (tshirtSelect) {
+                        tshirtSelect.required = true;
+                        if (tshirtSelect.value === 'Kids') tshirtSelect.value = '';
+                    }
+                }
 
                 if (selectedCategory.requiresCoupon) {
                     assessoriaFields.style.display = 'block';
@@ -1130,8 +1162,120 @@
             });
         }
 
+        // Carregar limites de vagas (50 por percurso)
+        async function loadRaceVacancies() {
+            try {
+                const res = await fetch('/api/public/race-vacancies');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                // 2 km
+                const vac2k = data['2 km'];
+                const badge2k = document.getElementById('vac-badge-2k');
+                if (vac2k && badge2k) {
+                    if (vac2k.is_sold_out) {
+                        badge2k.style.background = 'rgba(239, 68, 68, 0.2)';
+                        badge2k.style.color = '#f87171';
+                        badge2k.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        badge2k.innerHTML = '<i class="ri-error-warning-line"></i> ESGOTADO (50/50 vagas)';
+                        categoryCards.forEach(card => {
+                            if (card.dataset.id.includes('2k') || card.dataset.id.includes('25k') || card.dataset.id === 'adulto_assessoria' || card.dataset.id === 'promocional' || card.dataset.id === 'pcd') {
+                                card.classList.add('category-sold-out');
+                                card.style.opacity = '0.4';
+                                card.style.cursor = 'not-allowed';
+                                card.style.filter = 'grayscale(1)';
+                                const h4 = card.querySelector('h4');
+                                if (h4 && !h4.querySelector('.badge-sold-out')) {
+                                    h4.insertAdjacentHTML('beforeend', ' <span class="badge-sold-out" style="background:#ef4444; color:#fff; font-size:0.68rem; font-weight:800; padding:2px 6px; border-radius:4px; text-transform:uppercase;">Esgotado</span>');
+                                }
+                            }
+                        });
+                        if (selectedCategory.id.includes('2k') || selectedCategory.id.includes('25k')) {
+                            const firstAvail = Array.from(categoryCards).find(c => !c.classList.contains('category-sold-out'));
+                            if (firstAvail) firstAvail.click();
+                        }
+                    } else {
+                        badge2k.innerHTML = `<i class="ri-user-line"></i> ${vac2k.available} de ${vac2k.limit} vagas restantes`;
+                    }
+                }
+
+                // 1 km
+                const vac1k = data['1 km'];
+                const badge1k = document.getElementById('vac-badge-1k');
+                if (vac1k && badge1k) {
+                    if (vac1k.is_sold_out) {
+                        badge1k.style.background = 'rgba(239, 68, 68, 0.2)';
+                        badge1k.style.color = '#f87171';
+                        badge1k.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        badge1k.innerHTML = '<i class="ri-error-warning-line"></i> ESGOTADO (50/50 vagas)';
+                        categoryCards.forEach(card => {
+                            if (card.dataset.id.includes('1k')) {
+                                card.classList.add('category-sold-out');
+                                card.style.opacity = '0.4';
+                                card.style.cursor = 'not-allowed';
+                                card.style.filter = 'grayscale(1)';
+                                const h4 = card.querySelector('h4');
+                                if (h4 && !h4.querySelector('.badge-sold-out')) {
+                                    h4.insertAdjacentHTML('beforeend', ' <span class="badge-sold-out" style="background:#ef4444; color:#fff; font-size:0.68rem; font-weight:800; padding:2px 6px; border-radius:4px; text-transform:uppercase;">Esgotado</span>');
+                                }
+                            }
+                        });
+                        if (selectedCategory.id.includes('1k')) {
+                            const firstAvail = Array.from(categoryCards).find(c => !c.classList.contains('category-sold-out'));
+                            if (firstAvail) firstAvail.click();
+                        }
+                    } else {
+                        badge1k.innerHTML = `<i class="ri-user-line"></i> ${vac1k.available} de ${vac1k.limit} vagas restantes`;
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar vagas:', e);
+            }
+        }
+
+        // Carregar estoque de camisas (M, G, XG)
+        async function loadTshirtStock() {
+            try {
+                const res = await fetch('/api/public/tshirt-stock');
+                if (!res.ok) return;
+                const stock = await res.json();
+                const sel = document.getElementById('tshirt_size');
+                const feedback = document.getElementById('tshirt-stock-feedback');
+                if (!sel) return;
+
+                const prevVal = sel.value;
+                sel.innerHTML = '<option value="" disabled selected>Selecione o tamanho disponível...</option>';
+
+                ['M', 'G', 'XG'].forEach(sz => {
+                    const item = stock[sz];
+                    const opt = document.createElement('option');
+                    opt.value = sz;
+                    if (item && item.stock > 0) {
+                        opt.textContent = `${sz} (${item.stock} disponível${item.stock > 1 ? 'is' : ''})`;
+                    } else {
+                        opt.textContent = `${sz} (Esgotado)`;
+                        opt.disabled = true;
+                    }
+                    if (sz === prevVal && item && item.stock > 0) {
+                        opt.selected = true;
+                    }
+                    sel.appendChild(opt);
+                });
+
+                const allOut = ['M', 'G', 'XG'].every(sz => !stock[sz] || stock[sz].stock <= 0);
+                if (allOut && feedback) {
+                    feedback.innerHTML = '<span style="color:#f87171; font-weight:bold;"><i class="ri-error-warning-line"></i> Atenção: Camisas esgotadas temporariamente.</span>';
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar estoque de camisas:', e);
+            }
+        }
+
         // Restore draft from sessionStorage if returning to edit
         window.addEventListener('DOMContentLoaded', () => {
+            loadRaceVacancies();
+            loadTshirtStock();
+
             try {
                 const saved = sessionStorage.getItem('tutubas_athlete_draft');
                 if (saved) {

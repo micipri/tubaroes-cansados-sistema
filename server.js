@@ -340,13 +340,150 @@ app.get('/api/public/validate-coupon', (req, res) => {
     });
 });
 
-// Public endpoint: Listar Produtos da Loja com Estoque Disponível
+// Helper: Obter contagem de vagas e limites das provas (50 vagas para 1 km e 50 vagas para 2 km)
+function getRaceVacancies(callback) {
+    const LIMIT = 50;
+    db.all(`
+        SELECT 
+            CASE 
+                WHEN distance LIKE '%2%' OR category LIKE '%2%' THEN '2 km'
+                WHEN distance LIKE '%1%' OR category LIKE '%1%' THEN '1 km'
+                ELSE 'outros'
+            END as dist_group,
+            COUNT(*) as count
+        FROM athletes
+        WHERE payment_status != 'Cancelado'
+        GROUP BY dist_group
+    `, [], (err, rows) => {
+        if (err) return callback(err);
+        const counts = { '1 km': 0, '2 km': 0 };
+        (rows || []).forEach(r => {
+            if (r.dist_group === '1 km') counts['1 km'] = r.count;
+            if (r.dist_group === '2 km') counts['2 km'] = r.count;
+        });
+        callback(null, {
+            '1 km': {
+                limit: LIMIT,
+                registered: counts['1 km'],
+                available: Math.max(0, LIMIT - counts['1 km']),
+                is_sold_out: counts['1 km'] >= LIMIT
+            },
+            '2 km': {
+                limit: LIMIT,
+                registered: counts['2 km'],
+                available: Math.max(0, LIMIT - counts['2 km']),
+                is_sold_out: counts['2 km'] >= LIMIT
+            }
+        });
+    });
+}
+
+// Public endpoint: Vagas Disponíveis nas Provas (Limite de 50 para 1 km e 2 km)
+app.get('/api/public/race-vacancies', (req, res) => {
+    getRaceVacancies((err, vacancies) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(vacancies);
+    });
+});
+
+// Public endpoint: Estoque das Camisas Oficiais (M, G, XG)
+app.get('/api/public/tshirt-stock', (req, res) => {
+    db.all("SELECT id, name, stock, tshirt_size FROM store_products WHERE tshirt_size IN ('M', 'G', 'XG')", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const stockMap = {
+            M: { stock: 0, available: false },
+            G: { stock: 0, available: false },
+            XG: { stock: 0, available: false }
+        };
+        (rows || []).forEach(r => {
+            if (r.tshirt_size) {
+                stockMap[r.tshirt_size] = {
+                    id: r.id,
+                    name: r.name,
+                    stock: r.stock,
+                    available: r.stock > 0
+                };
+            }
+        });
+        res.json(stockMap);
+    });
+});
+
+// Public endpoint: Listar Produtos da Loja com Estoque Disponível para Compra Adicional
 app.get('/api/public/store-products', (req, res) => {
-    db.all("SELECT id, name, stock, sell_price FROM store_products WHERE stock > 0 ORDER BY name ASC", [], (err, rows) => {
+    db.all("SELECT id, name, stock, sell_price FROM store_products WHERE stock > 0 AND (is_system = 0 OR is_system IS NULL OR sell_price > 0) ORDER BY name ASC", [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows || []);
     });
 });
+
+// Helper: Validar limite de 50 vagas (1 km e 2 km) e disponibilidade do estoque de camisas
+function validateVacanciesAndTshirt(cat, cleanTshirt, existingAthlete, callback) {
+    const dist = cat.distance;
+
+    // 1. Verificação de Limite de 50 Vagas por Prova (1 km e 2 km)
+    const checkVac = (cbVac) => {
+        if (dist === '1 km' || dist === '2 km') {
+            const excludeClause = existingAthlete ? 'AND id != ' + existingAthlete.id : '';
+            const pattern = `%${dist}%`;
+            db.get(`
+                SELECT COUNT(*) as count 
+                FROM athletes 
+                WHERE payment_status != 'Cancelado' 
+                AND (distance = ? OR category LIKE ?)
+                ${excludeClause}
+            `, [dist, pattern], (errVac, rowVac) => {
+                if (errVac) return cbVac(errVac);
+                if (rowVac && rowVac.count >= 50) {
+                    return cbVac(new Error(`As inscrições para a prova de ${dist} estão esgotadas (limite máximo de 50 vagas preenchido).`));
+                }
+                cbVac(null);
+            });
+        } else {
+            cbVac(null);
+        }
+    };
+
+    // 2. Verificação de Estoque da Camisa
+    const checkTshirt = (cbTshirt) => {
+        const isAdultOrPcd = cat.id !== 'kids' && dist !== 'Kids';
+        const size = (cleanTshirt || '').trim().toUpperCase();
+        if (isAdultOrPcd && ['M', 'G', 'XG'].includes(size)) {
+            db.get("SELECT id, name, stock FROM store_products WHERE tshirt_size = ?", [size], (errT, rowT) => {
+                if (errT) return cbTshirt(errT);
+                const isSameSize = existingAthlete && existingAthlete.tshirt_size === size;
+                if (!isSameSize && (!rowT || rowT.stock <= 0)) {
+                    return cbTshirt(new Error(`A camisa oficial no tamanho "${size}" está esgotada no estoque. Por favor, escolha outro tamanho.`));
+                }
+                cbTshirt(null, { size, isSameSize });
+            });
+        } else {
+            cbTshirt(null, null);
+        }
+    };
+
+    checkVac((errVac) => {
+        if (errVac) return callback(errVac);
+        checkTshirt((errT, tResult) => {
+            if (errT) return callback(errT);
+            callback(null, tResult);
+        });
+    });
+}
+
+// Helper: Ajustar estoque da camisa oficial após confirmação de inscrição
+function adjustTshirtStock(cleanTshirt, existingAthlete) {
+    const size = (cleanTshirt || '').trim().toUpperCase();
+    if (['M', 'G', 'XG'].includes(size)) {
+        const isSameSize = existingAthlete && existingAthlete.tshirt_size === size;
+        if (!isSameSize) {
+            db.run("UPDATE store_products SET stock = MAX(0, stock - 1) WHERE tshirt_size = ?", [size]);
+            if (existingAthlete && existingAthlete.tshirt_size && existingAthlete.tshirt_size !== size) {
+                db.run("UPDATE store_products SET stock = stock + 1 WHERE tshirt_size = ?", [existingAthlete.tshirt_size]);
+            }
+        }
+    }
+}
 
 // Public endpoint: Concluir Inscrição com Validação, Produtos da Loja e Escolha de Pagamento
 app.post('/api/public/complete-registration', (req, res) => {
@@ -426,48 +563,57 @@ app.post('/api/public/complete-registration', (req, res) => {
 
     validateCouponPromise.then(catResult => {
         // 2. Verificar se já existe atleta com CPF confirmado
-        db.get("SELECT id, name, payment_status FROM athletes WHERE cpf = ?", [cleanCpf], (err, existing) => {
+        db.get("SELECT id, name, payment_status, tshirt_size FROM athletes WHERE cpf = ?", [cleanCpf], (err, existing) => {
             if (err) return res.status(500).json({ error: err.message });
             if (existing && existing.payment_status === 'Confirmado') {
                 return res.status(400).json({ error: `O CPF informado já possui uma inscrição confirmada (${existing.name}).` });
             }
 
-            // 3. Processar produtos da loja
-            db.all("SELECT * FROM store_products", [], (err2, allProducts) => {
-                if (err2) return res.status(500).json({ error: err2.message });
-
-                const prodMap = new Map((allProducts || []).map(p => [p.id, p]));
-                let storeAmount = 0;
-                const purchasedItems = [];
-
-                if (Array.isArray(store_items)) {
-                    for (const item of store_items) {
-                        const qty = parseInt(item.quantity, 10);
-                        if (qty > 0) {
-                            const p = prodMap.get(parseInt(item.id, 10));
-                            if (!p) {
-                                return res.status(400).json({ error: `Produto #${item.id} não encontrado na loja.` });
-                            }
-                            if (p.stock < qty) {
-                                return res.status(400).json({ error: `Estoque insuficiente para o produto "${p.name}". Restam ${p.stock} unidades.` });
-                            }
-                            const itemTotal = p.sell_price * qty;
-                            storeAmount += itemTotal;
-                            purchasedItems.push({
-                                id: p.id,
-                                name: p.name,
-                                unit_price: p.sell_price,
-                                quantity: qty,
-                                subtotal: itemTotal
-                            });
-                        }
-                    }
+            // Validar limite de 50 vagas e estoque da camisa
+            validateVacanciesAndTshirt(cat, tshirt_size, existing, (valErr) => {
+                if (valErr) {
+                    return res.status(400).json({ error: valErr.message });
                 }
 
-                // Decrementar estoque dos produtos comprados
-                purchasedItems.forEach(pItem => {
-                    db.run("UPDATE store_products SET stock = MAX(0, stock - ?) WHERE id = ?", [pItem.quantity, pItem.id]);
-                });
+                // 3. Processar produtos da loja
+                db.all("SELECT * FROM store_products", [], (err2, allProducts) => {
+                    if (err2) return res.status(500).json({ error: err2.message });
+
+                    const prodMap = new Map((allProducts || []).map(p => [p.id, p]));
+                    let storeAmount = 0;
+                    const purchasedItems = [];
+
+                    if (Array.isArray(store_items)) {
+                        for (const item of store_items) {
+                            const qty = parseInt(item.quantity, 10);
+                            if (qty > 0) {
+                                const p = prodMap.get(parseInt(item.id, 10));
+                                if (!p) {
+                                    return res.status(400).json({ error: `Produto #${item.id} não encontrado na loja.` });
+                                }
+                                if (p.stock < qty) {
+                                    return res.status(400).json({ error: `Estoque insuficiente para o produto "${p.name}". Restam ${p.stock} unidades.` });
+                                }
+                                const itemTotal = p.sell_price * qty;
+                                storeAmount += itemTotal;
+                                purchasedItems.push({
+                                    id: p.id,
+                                    name: p.name,
+                                    unit_price: p.sell_price,
+                                    quantity: qty,
+                                    subtotal: itemTotal
+                                });
+                            }
+                        }
+                    }
+
+                    // Decrementar estoque dos produtos comprados
+                    purchasedItems.forEach(pItem => {
+                        db.run("UPDATE store_products SET stock = MAX(0, stock - ?) WHERE id = ?", [pItem.quantity, pItem.id]);
+                    });
+
+                    // Decrementar estoque da camisa do evento
+                    adjustTshirtStock(tshirt_size, existing);
 
                 const inscriptionPrice = catResult.price;
                 const totalAmount = inscriptionPrice + storeAmount;
@@ -554,6 +700,7 @@ app.post('/api/public/complete-registration', (req, res) => {
                 }
             });
         });
+        });
     }).catch(err => {
         return res.status(400).json({ error: err.message });
     });
@@ -592,85 +739,95 @@ app.post('/api/public/register-athlete', (req, res) => {
     }
 
     // Check if athlete already registered
-    db.get("SELECT id, name, payment_status FROM athletes WHERE cpf = ?", [cleanCpf], (err, existing) => {
+    db.get("SELECT id, name, payment_status, tshirt_size FROM athletes WHERE cpf = ?", [cleanCpf], (err, existing) => {
         if (err) return res.status(500).json({ error: err.message });
         if (existing && existing.payment_status === 'Confirmado') {
             return res.status(400).json({ error: `O CPF informado já possui uma inscrição confirmada (${existing.name}). Em caso de dúvidas, contate os organizadores.` });
         }
 
-        const categoryName = cat.name;
-        const distance = cat.distance;
-        const price = cat.price;
+        // Validar limite de 50 vagas e estoque da camisa
+        validateVacanciesAndTshirt(cat, tshirt_size, existing, (valErr) => {
+            if (valErr) {
+                return res.status(400).json({ error: valErr.message });
+            }
 
-        if (existing) {
-            // Update existing pending registration
-            const sqlUpdate = `UPDATE athletes SET
-                name = ?, email = ?, phone = ?, birth_date = ?, gender = ?,
-                category = ?, distance = ?, price = ?, coupon_code = ?, assessoria_name = ?,
-                tshirt_size = ?, emergency_contact_name = ?, emergency_contact_phone = ?,
-                medical_notes = ?
-                WHERE id = ?`;
-            db.run(sqlUpdate, [
-                name.trim(), email.trim(), phone.trim(), birth_date || null, gender || null,
-                categoryName, distance, price, coupon_code ? coupon_code.trim().toUpperCase() : null,
-                assessoria_name ? assessoria_name.trim() : null,
-                tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
-                emergency_contact_phone ? emergency_contact_phone.trim() : null,
-                medical_notes ? medical_notes.trim() : null,
-                existing.id
-            ], function(err2) {
-                if (err2) return res.status(500).json({ error: err2.message });
-                return res.json({
-                    success: true,
-                    athlete_id: existing.id,
-                    updated: true,
-                    message: 'Inscrição atualizada com sucesso!',
-                    athlete: {
-                        id: existing.id,
-                        name: name.trim(),
-                        cpf: cleanCpf,
-                        category: categoryName,
-                        distance,
-                        price,
-                        payment_status: 'Pendente'
-                    }
-                });
-            });
-        } else {
-            // Insert new athlete
-            const sqlInsert = `INSERT INTO athletes (
-                name, cpf, email, phone, birth_date, gender,
-                category, distance, price, coupon_code, assessoria_name,
-                tshirt_size, emergency_contact_name, emergency_contact_phone,
-                medical_notes, payment_status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente')`;
+            const categoryName = cat.name;
+            const distance = cat.distance;
+            const price = cat.price;
 
-            db.run(sqlInsert, [
-                name.trim(), cleanCpf, email.trim(), phone.trim(), birth_date || null, gender || null,
-                categoryName, distance, price, coupon_code ? coupon_code.trim().toUpperCase() : null,
-                assessoria_name ? assessoria_name.trim() : null,
-                tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
-                emergency_contact_phone ? emergency_contact_phone.trim() : null,
-                medical_notes ? medical_notes.trim() : null
-            ], function(err2) {
-                if (err2) return res.status(500).json({ error: err2.message });
-                const newId = this.lastID;
-                return res.json({
-                    success: true,
-                    athlete_id: newId,
-                    message: 'Inscrição realizada com sucesso!',
-                    athlete: {
-                        id: newId,
-                        name: name.trim(),
-                        cpf: cleanCpf,
-                        category: categoryName,
-                        distance,
-                        price,
-                        payment_status: 'Pendente'
-                    }
+            // Ajustar estoque da camisa oficial
+            adjustTshirtStock(tshirt_size, existing);
+
+            if (existing) {
+                // Update existing pending registration
+                const sqlUpdate = `UPDATE athletes SET
+                    name = ?, email = ?, phone = ?, birth_date = ?, gender = ?,
+                    category = ?, distance = ?, price = ?, coupon_code = ?, assessoria_name = ?,
+                    tshirt_size = ?, emergency_contact_name = ?, emergency_contact_phone = ?,
+                    medical_notes = ?
+                    WHERE id = ?`;
+                db.run(sqlUpdate, [
+                    name.trim(), email.trim(), phone.trim(), birth_date || null, gender || null,
+                    categoryName, distance, price, coupon_code ? coupon_code.trim().toUpperCase() : null,
+                    assessoria_name ? assessoria_name.trim() : null,
+                    tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                    emergency_contact_phone ? emergency_contact_phone.trim() : null,
+                    medical_notes ? medical_notes.trim() : null,
+                    existing.id
+                ], function(err2) {
+                    if (err2) return res.status(500).json({ error: err2.message });
+                    return res.json({
+                        success: true,
+                        athlete_id: existing.id,
+                        updated: true,
+                        message: 'Inscrição atualizada com sucesso!',
+                        athlete: {
+                            id: existing.id,
+                            name: name.trim(),
+                            cpf: cleanCpf,
+                            category: categoryName,
+                            distance,
+                            price,
+                            payment_status: 'Pendente'
+                        }
+                    });
                 });
-            });
-        }
+            } else {
+                // Insert new athlete
+                const sqlInsert = `INSERT INTO athletes (
+                    name, cpf, email, phone, birth_date, gender,
+                    category, distance, price, coupon_code, assessoria_name,
+                    tshirt_size, emergency_contact_name, emergency_contact_phone,
+                    medical_notes, payment_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente')`;
+
+                db.run(sqlInsert, [
+                    name.trim(), cleanCpf, email.trim(), phone.trim(), birth_date || null, gender || null,
+                    categoryName, distance, price, coupon_code ? coupon_code.trim().toUpperCase() : null,
+                    assessoria_name ? assessoria_name.trim() : null,
+                    tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                    emergency_contact_phone ? emergency_contact_phone.trim() : null,
+                    medical_notes ? medical_notes.trim() : null
+                ], function(err2) {
+                    if (err2) return res.status(500).json({ error: err2.message });
+                    const newId = this.lastID;
+                    return res.json({
+                        success: true,
+                        athlete_id: newId,
+                        message: 'Inscrição realizada com sucesso!',
+                        athlete: {
+                            id: newId,
+                            name: name.trim(),
+                            cpf: cleanCpf,
+                            category: categoryName,
+                            distance,
+                            price,
+                            payment_status: 'Pendente'
+                        }
+                    });
+                });
+            }
+        });
     });
 });
 
@@ -814,12 +971,33 @@ app.put('/api/athletes/:id', requireAuth, (req, res) => {
     );
 });
 
-// Delete Athlete Registration
+// Delete Athlete Registration (Restores allocated t-shirt and store items)
 app.delete('/api/athletes/:id', requireAuth, (req, res) => {
-    db.run("DELETE FROM athletes WHERE id = ?", [req.params.id], function(err) {
+    db.get("SELECT id, tshirt_size, store_items FROM athletes WHERE id = ?", [req.params.id], (err, athlete) => {
         if (err) return res.status(500).json({ error: err.message });
-        if (this.changes === 0) return res.status(404).json({ error: 'Atleta não encontrado.' });
-        res.json({ deleted: true });
+        if (!athlete) return res.status(404).json({ error: 'Atleta não encontrado.' });
+
+        // Devolver camisa ao estoque
+        if (athlete.tshirt_size && ['M', 'G', 'XG'].includes(athlete.tshirt_size.trim().toUpperCase())) {
+            db.run("UPDATE store_products SET stock = stock + 1 WHERE tshirt_size = ?", [athlete.tshirt_size.trim().toUpperCase()]);
+        }
+
+        // Devolver produtos comprados da loja
+        if (athlete.store_items) {
+            try {
+                const items = JSON.parse(athlete.store_items);
+                if (Array.isArray(items)) {
+                    items.forEach(it => {
+                        db.run("UPDATE store_products SET stock = stock + ? WHERE id = ?", [it.quantity, it.id]);
+                    });
+                }
+            } catch (e) {}
+        }
+
+        db.run("DELETE FROM athletes WHERE id = ?", [req.params.id], function(err2) {
+            if (err2) return res.status(500).json({ error: err2.message });
+            res.json({ deleted: true });
+        });
     });
 });
 
@@ -1078,21 +1256,37 @@ app.post('/api/store_products', requireAuth, (req, res) => {
     });
 });
 app.delete('/api/store_products/:id', requireAuth, (req, res) => {
-    db.run("DELETE FROM store_products WHERE id = ?", req.params.id, function(err) {
+    db.get("SELECT id, name, is_system, tshirt_size FROM store_products WHERE id = ?", [req.params.id], (err, prod) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ deleted: this.changes > 0 });
+        if (!prod) return res.status(404).json({ error: "Produto não encontrado." });
+        if (prod.is_system === 1 || prod.tshirt_size) {
+            return res.status(400).json({ error: "Este produto é um item fixo do estoque (camisa oficial do evento) e não pode ser excluído." });
+        }
+        db.run("DELETE FROM store_products WHERE id = ?", [req.params.id], function(err2) {
+            if (err2) return res.status(500).json({ error: err2.message });
+            res.json({ deleted: this.changes > 0 });
+        });
     });
 });
 app.put('/api/store_products/:id', requireAuth, (req, res) => {
-    const { name, stock, cost_price, sell_price } = req.body;
-    db.run(
-        "UPDATE store_products SET name = ?, stock = ?, cost_price = ?, sell_price = ? WHERE id = ?",
-        [name, stock, cost_price, sell_price, req.params.id],
-        function(err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ updated: this.changes > 0 });
-        }
-    );
+    db.get("SELECT * FROM store_products WHERE id = ?", [req.params.id], (err, current) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!current) return res.status(404).json({ error: "Produto não encontrado." });
+
+        const name = req.body.name !== undefined ? req.body.name : current.name;
+        const stock = req.body.stock !== undefined ? parseInt(req.body.stock, 10) : current.stock;
+        const cost_price = req.body.cost_price !== undefined ? parseFloat(req.body.cost_price) : current.cost_price;
+        const sell_price = req.body.sell_price !== undefined ? parseFloat(req.body.sell_price) : current.sell_price;
+
+        db.run(
+            "UPDATE store_products SET name = ?, stock = ?, cost_price = ?, sell_price = ? WHERE id = ?",
+            [name, Math.max(0, stock), cost_price, sell_price, req.params.id],
+            function(err2) {
+                if (err2) return res.status(500).json({ error: err2.message });
+                res.json({ updated: this.changes > 0, id: req.params.id, name, stock: Math.max(0, stock), sell_price });
+            }
+        );
+    });
 });
 app.put('/api/store_products/:id/stock', requireAuth, (req, res) => {
     const { stock } = req.body;

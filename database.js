@@ -158,8 +158,45 @@ function createTables() {
             name TEXT NOT NULL,
             stock INTEGER NOT NULL DEFAULT 0,
             cost_price REAL NOT NULL,
-            sell_price REAL NOT NULL
-        )`);
+            sell_price REAL NOT NULL,
+            tshirt_size TEXT DEFAULT NULL,
+            is_system INTEGER DEFAULT 0
+        )`, () => {
+            db.all("PRAGMA table_info(store_products)", (err, columns) => {
+                if (!err && columns) {
+                    const hasTshirtSize = columns.some(c => c.name === 'tshirt_size');
+                    if (!hasTshirtSize) {
+                        db.run("ALTER TABLE store_products ADD COLUMN tshirt_size TEXT DEFAULT NULL");
+                    }
+                    const hasIsSystem = columns.some(c => c.name === 'is_system');
+                    if (!hasIsSystem) {
+                        db.run("ALTER TABLE store_products ADD COLUMN is_system INTEGER DEFAULT 0");
+                    }
+                }
+
+                // Seed the 3 event t-shirts with 30 units each if not already present
+                const defaultShirts = [
+                    { size: 'M', name: 'Camisa Oficial do Evento (Tamanho M)', stock: 30 },
+                    { size: 'G', name: 'Camisa Oficial do Evento (Tamanho G)', stock: 30 },
+                    { size: 'XG', name: 'Camisa Oficial do Evento (Tamanho XG)', stock: 30 }
+                ];
+
+                defaultShirts.forEach(shirt => {
+                    db.get("SELECT id FROM store_products WHERE tshirt_size = ? OR name = ?", [shirt.size, shirt.name], (err, row) => {
+                        if (!err && !row) {
+                            db.run(
+                                "INSERT INTO store_products (name, stock, cost_price, sell_price, tshirt_size, is_system) VALUES (?, ?, 0, 0, ?, 1)",
+                                [shirt.name, shirt.stock, shirt.size],
+                                (insertErr) => {
+                                    if (insertErr) console.error(`Error inserting shirt ${shirt.size}:`, insertErr.message);
+                                    else console.log(`Seeded shirt ${shirt.size} with stock ${shirt.stock}`);
+                                }
+                            );
+                        }
+                    });
+                });
+            });
+        });
 
         // Store Sales
         db.run(`CREATE TABLE IF NOT EXISTS store_sales (

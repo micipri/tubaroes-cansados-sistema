@@ -221,6 +221,56 @@ async function loadDashboard() {
     document.getElementById('fb-sponsors').textContent = formatCurrency(data.sponsors.total_amount);
     document.getElementById('fb-expenses').textContent = `- ${formatCurrency(data.total_expenses)}`;
     document.getElementById('fb-balance').textContent = formatCurrency(data.total_balance);
+
+    // Carregar Indicadores de Vagas (50 por prova)
+    try {
+        const vacRes = await fetch('/api/public/race-vacancies');
+        if (vacRes.ok) {
+            const vacData = await vacRes.json();
+            if (vacData['2 km']) {
+                const reg2k = vacData['2 km'].registered;
+                const lim2k = vacData['2 km'].limit;
+                const pct2k = Math.min(100, Math.round((reg2k / lim2k) * 100));
+                const badge2k = document.getElementById('admin-vac-badge-2k');
+                const bar2k = document.getElementById('admin-vac-bar-2k');
+                if (badge2k) {
+                    badge2k.textContent = `${reg2k} / ${lim2k} vagas (${Math.max(0, lim2k - reg2k)} restantes)`;
+                    if (reg2k >= lim2k) {
+                        badge2k.style.background = 'rgba(239, 68, 68, 0.2)';
+                        badge2k.style.color = '#f87171';
+                        badge2k.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        badge2k.textContent = `ESGOTADO (${reg2k}/${lim2k})`;
+                    }
+                }
+                if (bar2k) {
+                    bar2k.style.width = `${pct2k}%`;
+                    if (reg2k >= lim2k) bar2k.style.background = '#ef4444';
+                }
+            }
+            if (vacData['1 km']) {
+                const reg1k = vacData['1 km'].registered;
+                const lim1k = vacData['1 km'].limit;
+                const pct1k = Math.min(100, Math.round((reg1k / lim1k) * 100));
+                const badge1k = document.getElementById('admin-vac-badge-1k');
+                const bar1k = document.getElementById('admin-vac-bar-1k');
+                if (badge1k) {
+                    badge1k.textContent = `${reg1k} / ${lim1k} vagas (${Math.max(0, lim1k - reg1k)} restantes)`;
+                    if (reg1k >= lim1k) {
+                        badge1k.style.background = 'rgba(239, 68, 68, 0.2)';
+                        badge1k.style.color = '#f87171';
+                        badge1k.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        badge1k.textContent = `ESGOTADO (${reg1k}/${lim1k})`;
+                    }
+                }
+                if (bar1k) {
+                    bar1k.style.width = `${pct1k}%`;
+                    if (reg1k >= lim1k) bar1k.style.background = '#ef4444';
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('Erro ao carregar dados de vagas:', e);
+    }
 }
 
 
@@ -1423,27 +1473,55 @@ async function loadStoreProducts() {
     }
 
     data.forEach(p => {
+        const isSystemShirt = p.is_system === 1 || p.tshirt_size || (p.name && p.name.includes('Camisa Oficial do Evento'));
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>#${p.id}</td>
-            <td><strong>${p.name}</strong></td>
+            <td>
+                <strong>${escapeHtml(p.name)}</strong>
+                ${isSystemShirt ? `<br><small style="color:#38bdf8; font-weight:700;"><i class="ri-shirt-line"></i> Item Fixo do Kit Atleta (${p.tshirt_size ? 'Tam ' + p.tshirt_size : 'Inscrições'})</small>` : ''}
+            </td>
             <td>
                 <div style="display:inline-flex; align-items:center; gap:8px;">
                     <button type="button" class="btn" style="padding:2px 8px; font-size:0.85rem;" onclick="quickAdjustStock(${p.id}, -1)" title="Diminuir 1">-</button>
-                    <span style="font-weight:800; font-size:1.05rem; min-width:32px; text-align:center; color:${p.stock > 0 ? '#38bdf8' : '#f87171'}">${p.stock}</span>
+                    <span style="font-weight:800; font-size:1.05rem; min-width:36px; text-align:center; color:${p.stock > 0 ? '#38bdf8' : '#f87171'}; cursor:pointer; text-decoration:underline dashed;" onclick="setExactStock(${p.id}, '${escapeHtml(p.name)}', ${p.stock})" title="Clique para alterar a quantidade">${p.stock}</span>
                     <button type="button" class="btn" style="padding:2px 8px; font-size:0.85rem;" onclick="quickAdjustStock(${p.id}, 1)" title="Aumentar 1">+</button>
+                    <button type="button" class="btn" style="padding:2px 6px; font-size:0.75rem; background:rgba(255,255,255,0.08);" onclick="setExactStock(${p.id}, '${escapeHtml(p.name)}', ${p.stock})" title="Definir quantidade exata"><i class="ri-edit-line"></i></button>
                 </div>
             </td>
             <td><strong style="color:var(--gold); font-size:1.05rem;">${formatCurrency(p.sell_price)}</strong></td>
             <td>
-                <button type="button" class="btn-icon btn-danger" onclick="deleteProductHandler(${p.id}, '${escapeHtml(p.name)}')" title="Excluir produto">
-                    <i class="ri-delete-bin-line"></i>
-                </button>
+                ${isSystemShirt ? `
+                    <span title="Item fixo do kit atleta vinculado às inscrições. Não pode ser excluído do estoque." style="display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; color:#38bdf8; background:rgba(56,189,248,0.12); padding:5px 10px; border-radius:6px; font-weight:700; border:1px solid rgba(56,189,248,0.25);">
+                        <i class="ri-lock-line"></i> Item do Kit (Fixo)
+                    </span>
+                ` : `
+                    <button type="button" class="btn-icon btn-danger" onclick="deleteProductHandler(${p.id}, '${escapeHtml(p.name)}')" title="Excluir produto">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                `}
             </td>
         `;
         tbody.appendChild(tr);
     });
 }
+
+// Definir quantidade exata de estoque (para o organizador corrigir facilmente)
+window.setExactStock = async function(id, name, currentStock) {
+    const input = prompt(`Definir estoque exato para:\n"${name}"\n\nQuantidade atual: ${currentStock}\nDigite o novo valor do estoque:`, currentStock);
+    if (input === null) return;
+    const val = parseInt(input.trim(), 10);
+    if (isNaN(val) || val < 0) {
+        alert('Por favor, informe uma quantidade válida (número inteiro igual ou maior que zero).');
+        return;
+    }
+    try {
+        await putData(`store_products/${id}`, { stock: val });
+        loadStoreProducts();
+    } catch (err) {
+        alert('Erro ao atualizar estoque: ' + err.message);
+    }
+};
 
 // Ajuste rápido de estoque (+1 / -1)
 window.quickAdjustStock = async function(id, delta) {
