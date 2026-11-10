@@ -164,6 +164,24 @@ async function loadDashboard() {
     const data = await fetchData('summary');
     if (!data) return;
 
+    // Database Status Badge
+    if (data.database_label) {
+        const badge = document.getElementById('db-status-badge');
+        const badgeText = document.getElementById('db-status-text');
+        if (badge && badgeText) {
+            badgeText.textContent = data.database_label;
+            if (data.database_type === 'supabase') {
+                badge.style.background = 'rgba(34, 197, 94, 0.15)';
+                badge.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+                badge.style.color = '#4ade80';
+            } else {
+                badge.style.background = 'rgba(56, 189, 248, 0.12)';
+                badge.style.borderColor = 'rgba(56, 189, 248, 0.3)';
+                badge.style.color = '#38bdf8';
+            }
+        }
+    }
+
     // Top Cards
     document.getElementById('total-income').textContent = formatCurrency(data.total_income);
     document.getElementById('stat-pix-amount').textContent = formatCurrency(data.athletes.pix_amount);

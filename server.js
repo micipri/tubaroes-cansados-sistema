@@ -1704,6 +1704,8 @@ app.get('/api/summary', requireAuth, (req, res) => {
         summary.total_income = summary.income.athletes + summary.income.sponsors;
         summary.total_expenses = summary.expenses.event_costs + summary.expenses.party_costs;
         summary.total_balance = summary.total_income - summary.total_expenses;
+        summary.database_type = db.isPostgres ? 'supabase' : 'sqlite';
+        summary.database_label = db.isPostgres ? '☁️ Supabase (PostgreSQL)' : '💾 SQLite Local';
         res.json(summary);
     }).catch(err => {
         res.status(500).json({ error: err.message });
