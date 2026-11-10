@@ -36,7 +36,41 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 function createTables() {
     db.serialize(() => {
-        // Registrations (Batches)
+        // Athletes (Inscrições do Novo Evento)
+        db.run(`CREATE TABLE IF NOT EXISTS athletes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            cpf TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            birth_date TEXT,
+            gender TEXT,
+            category TEXT NOT NULL,
+            distance TEXT NOT NULL DEFAULT '2,5 km',
+            price REAL NOT NULL,
+            coupon_code TEXT,
+            assessoria_name TEXT,
+            tshirt_size TEXT,
+            emergency_contact_name TEXT,
+            emergency_contact_phone TEXT,
+            medical_notes TEXT,
+            payment_status TEXT NOT NULL DEFAULT 'Pendente',
+            payment_method TEXT,
+            payment_date TEXT,
+            confirmed_by TEXT,
+            checkin_status INTEGER NOT NULL DEFAULT 0,
+            checkin_date TEXT,
+            checkin_photo TEXT,
+            kit_retrieved_by TEXT,
+            cap_number TEXT,
+            notes TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+        )`);
+
+        db.run(`CREATE INDEX IF NOT EXISTS idx_athletes_cpf ON athletes(cpf)`);
+        db.run(`CREATE INDEX IF NOT EXISTS idx_athletes_status ON athletes(payment_status)`);
+
+        // Registrations (Batches) - mantido para retrocompatibilidade
         db.run(`CREATE TABLE IF NOT EXISTS registrations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,

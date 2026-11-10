@@ -484,3 +484,204 @@ tbody tr:hover { background-color: rgba(255,255,255,0.02); }
     .stat-card { gap: 1rem; }
     .btn { font-size: 0.9rem; padding: 0.65rem 1rem; }
 }
+
+/* ═══════════════════════════════════════════════════════
+   NOVO SISTEMA — ESTILOS DE ATLETAS, PAGAMENTOS E CHECK-IN
+═══════════════════════════════════════════════════════ */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.badge-status.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badge-status.confirmed {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.badge-checkin-ok {
+    background: rgba(2, 132, 199, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(2, 132, 199, 0.4);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.badge-checkin-no {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+.athlete-name-btn {
+    background: none;
+    border: none;
+    color: #38bdf8;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-align: left;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+}
+
+.athlete-name-btn:hover {
+    color: #7dd3fc;
+}
+
+.btn-pix {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+}
+
+.btn-pix:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-card {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+}
+
+.btn-card:hover {
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Modal Detalhes Atleta */
+.athlete-modal-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.athlete-modal-header {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.athlete-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+}
+
+@media (max-width: 600px) {
+    .athlete-info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.info-field label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.info-field .val {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f8fafc;
+    word-break: break-word;
+}
+
+.payment-action-box {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.payment-confirmed-box {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+/* Checkin Area */
+.checkin-station-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-athlete-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1.1rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.search-athlete-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+.camera-feed {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 12px;
+    border: 2px solid var(--border-glass);
+    background: #000;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+}

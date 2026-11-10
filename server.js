@@ -84,9 +84,13 @@ app.get('/debug-fs', (req, res) => {
     });
 });
 
-// ─── Landing page ────────────────────────────────────────────────────────────
+// ─── Landing page & Inscrição ────────────────────────────────────────────────
 app.get('/', (req, res) => {
     res.sendFile('landing.html', { root: path.join(__dirname, 'public') });
+});
+
+app.get('/inscricao', (req, res) => {
+    res.sendFile('inscricao.html', { root: path.join(__dirname, 'public') });
 });
 
 
@@ -186,6 +190,346 @@ app.delete('/api/users/:id', requireAuth, requireMaster, (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         if (this.changes === 0) return res.status(400).json({ error: 'Usuário não encontrado ou não pode ser excluído.' });
         res.json({ deleted: true });
+    });
+});
+
+// ─── Event Categories & Inscrições ──────────────────────────────────────────
+const EVENT_CATEGORIES = {
+    'adulto_25k': {
+        id: 'adulto_25k',
+        name: 'Travessia de Adultos (2,5 km)',
+        distance: '2,5 km',
+        price: 149.00,
+        description: 'Inscrição para a travessia de adultos com percurso de 2,5 km.'
+    },
+    'adulto_assessoria': {
+        id: 'adulto_assessoria',
+        name: 'Travessia de Adultos (2,5 km) — Alunos de Assessorias (com cupom)',
+        distance: '2,5 km',
+        price: 119.00,
+        description: 'Valor especial com cupom para alunos de assessorias credenciadas.',
+        requires_coupon: true
+    },
+    'kids': {
+        id: 'kids',
+        name: 'Travessia Kids',
+        distance: 'Kids',
+        price: 79.00,
+        description: 'Inscrição para a prova infantil Travessia Kids.'
+    },
+    'pcd': {
+        id: 'pcd',
+        name: 'Travessia de Adultos (2,5 km) — PCD',
+        distance: '2,5 km',
+        price: 79.00,
+        description: 'Valor especial de 2,5 km para atletas PCD.'
+    },
+    'promocional': {
+        id: 'promocional',
+        name: 'Travessia de Adultos (2,5 km) — Promocional de Largada',
+        distance: '2,5 km',
+        price: 99.00,
+        description: 'Lote promocional limitado de largada.'
+    }
+};
+
+// Public endpoint: List Categories
+app.get('/api/public/categories', (req, res) => {
+    res.json(Object.values(EVENT_CATEGORIES));
+});
+
+// Public endpoint: Register Athlete
+app.post('/api/public/register-athlete', (req, res) => {
+    const {
+        name,
+        cpf,
+        email,
+        phone,
+        birth_date,
+        gender,
+        category_id,
+        coupon_code,
+        assessoria_name,
+        tshirt_size,
+        emergency_contact_name,
+        emergency_contact_phone,
+        medical_notes
+    } = req.body;
+
+    if (!name || !cpf || !email || !phone || !category_id) {
+        return res.status(400).json({ error: 'Preencha todos os campos obrigatórios (Nome, CPF, E-mail, Celular e Modalidade).' });
+    }
+
+    const cleanCpf = String(cpf).replace(/\D/g, '');
+    if (cleanCpf.length !== 11) {
+        return res.status(400).json({ error: 'CPF inválido. Deve conter 11 dígitos numéricos.' });
+    }
+
+    const cat = EVENT_CATEGORIES[category_id];
+    if (!cat) {
+        return res.status(400).json({ error: 'Modalidade de prova inválida selecionada.' });
+    }
+
+    // Check if athlete already registered
+    db.get("SELECT id, name, payment_status FROM athletes WHERE cpf = ?", [cleanCpf], (err, existing) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (existing && existing.payment_status === 'Confirmado') {
+            return res.status(400).json({ error: `O CPF informado já possui uma inscrição confirmada (${existing.name}). Em caso de dúvidas, contate os organizadores.` });
+        }
+
+        const categoryName = cat.name;
+        const distance = cat.distance;
+        const price = cat.price;
+
+        if (existing) {
+            // Update existing pending registration
+            const sqlUpdate = `UPDATE athletes SET
+                name = ?, email = ?, phone = ?, birth_date = ?, gender = ?,
+                category = ?, distance = ?, price = ?, coupon_code = ?, assessoria_name = ?,
+                tshirt_size = ?, emergency_contact_name = ?, emergency_contact_phone = ?,
+                medical_notes = ?
+                WHERE id = ?`;
+            db.run(sqlUpdate, [
+                name.trim(), email.trim(), phone.trim(), birth_date || null, gender || null,
+                categoryName, distance, price, coupon_code ? coupon_code.trim().toUpperCase() : null,
+                assessoria_name ? assessoria_name.trim() : null,
+                tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                emergency_contact_phone ? emergency_contact_phone.trim() : null,
+                medical_notes ? medical_notes.trim() : null,
+                existing.id
+            ], function(err2) {
+                if (err2) return res.status(500).json({ error: err2.message });
+                return res.json({
+                    success: true,
+                    athlete_id: existing.id,
+                    updated: true,
+                    message: 'Inscrição atualizada com sucesso!',
+                    athlete: {
+                        id: existing.id,
+                        name: name.trim(),
+                        cpf: cleanCpf,
+                        category: categoryName,
+                        distance,
+                        price,
+                        payment_status: 'Pendente'
+                    }
+                });
+            });
+        } else {
+            // Insert new athlete
+            const sqlInsert = `INSERT INTO athletes (
+                name, cpf, email, phone, birth_date, gender,
+                category, distance, price, coupon_code, assessoria_name,
+                tshirt_size, emergency_contact_name, emergency_contact_phone,
+                medical_notes, payment_status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente')`;
+
+            db.run(sqlInsert, [
+                name.trim(), cleanCpf, email.trim(), phone.trim(), birth_date || null, gender || null,
+                categoryName, distance, price, coupon_code ? coupon_code.trim().toUpperCase() : null,
+                assessoria_name ? assessoria_name.trim() : null,
+                tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                emergency_contact_phone ? emergency_contact_phone.trim() : null,
+                medical_notes ? medical_notes.trim() : null
+            ], function(err2) {
+                if (err2) return res.status(500).json({ error: err2.message });
+                const newId = this.lastID;
+                return res.json({
+                    success: true,
+                    athlete_id: newId,
+                    message: 'Inscrição realizada com sucesso!',
+                    athlete: {
+                        id: newId,
+                        name: name.trim(),
+                        cpf: cleanCpf,
+                        category: categoryName,
+                        distance,
+                        price,
+                        payment_status: 'Pendente'
+                    }
+                });
+            });
+        }
+    });
+});
+
+// ─── Protected Athlete Management Routes (Área dos Organizadores) ───────────
+app.get('/api/athletes', requireAuth, (req, res) => {
+    let sql = "SELECT * FROM athletes WHERE 1=1";
+    const params = [];
+
+    if (req.query.status && req.query.status !== 'all') {
+        sql += " AND payment_status = ?";
+        params.push(req.query.status);
+    }
+    if (req.query.checkin !== undefined && req.query.checkin !== 'all' && req.query.checkin !== '') {
+        sql += " AND checkin_status = ?";
+        params.push(parseInt(req.query.checkin, 10));
+    }
+    if (req.query.search) {
+        sql += " AND (name LIKE ? OR cpf LIKE ? OR email LIKE ? OR assessoria_name LIKE ?)";
+        const term = `%${req.query.search.trim()}%`;
+        params.push(term, term, term, term);
+    }
+
+    sql += " ORDER BY id DESC";
+
+    db.all(sql, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+app.get('/api/athletes/:id', requireAuth, (req, res) => {
+    db.get("SELECT * FROM athletes WHERE id = ?", [req.params.id], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: 'Atleta não encontrado.' });
+        res.json(row);
+    });
+});
+
+// Confirm Payment (Cartão ou Pix)
+app.put('/api/athletes/:id/confirm-payment', requireAuth, (req, res) => {
+    const { payment_method, price } = req.body;
+    if (!payment_method || (payment_method !== 'Pix' && payment_method !== 'Cartão')) {
+        return res.status(400).json({ error: 'Forma de confirmação inválida. Escolha "Pix" ou "Cartão".' });
+    }
+
+    const confirmedBy = req.session && req.session.userId ? (req.session.username || 'Organizador') : 'Organizador';
+
+    let sql = `UPDATE athletes SET
+        payment_status = 'Confirmado',
+        payment_method = ?,
+        payment_date = datetime('now', 'localtime'),
+        confirmed_by = ?`;
+    const params = [payment_method, confirmedBy];
+
+    if (price !== undefined && price !== null && !isNaN(price)) {
+        sql += `, price = ?`;
+        params.push(parseFloat(price));
+    }
+
+    sql += ` WHERE id = ?`;
+    params.push(req.params.id);
+
+    db.run(sql, params, function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Atleta não encontrado.' });
+
+        db.get("SELECT * FROM athletes WHERE id = ?", [req.params.id], (err2, updated) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+            res.json({ success: true, message: `Pagamento via ${payment_method} confirmado com sucesso!`, athlete: updated });
+        });
+    });
+});
+
+// Revert Payment to Pending
+app.put('/api/athletes/:id/cancel-payment', requireAuth, (req, res) => {
+    db.run(`UPDATE athletes SET
+        payment_status = 'Pendente',
+        payment_method = NULL,
+        payment_date = NULL,
+        confirmed_by = NULL
+        WHERE id = ?`, [req.params.id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Atleta não encontrado.' });
+        res.json({ success: true, message: 'Status de pagamento revertido para Pendente.' });
+    });
+});
+
+// Check-in Athlete
+app.put('/api/athletes/:id/checkin', requireAuth, (req, res) => {
+    const { kit_retrieved_by, cap_number, tshirt_size, checkin_photo } = req.body;
+    db.run(`UPDATE athletes SET
+        checkin_status = 1,
+        checkin_date = datetime('now', 'localtime'),
+        kit_retrieved_by = COALESCE(?, kit_retrieved_by, 'Próprio atleta'),
+        cap_number = COALESCE(?, cap_number),
+        tshirt_size = COALESCE(?, tshirt_size),
+        checkin_photo = COALESCE(?, checkin_photo)
+        WHERE id = ?`,
+        [kit_retrieved_by || null, cap_number || null, tshirt_size || null, checkin_photo || null, req.params.id],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            if (this.changes === 0) return res.status(404).json({ error: 'Atleta não encontrado.' });
+            res.json({ success: true, message: 'Check-in realizado com sucesso!' });
+        }
+    );
+});
+
+// Undo Check-in
+app.put('/api/athletes/:id/undo-checkin', requireAuth, (req, res) => {
+    db.run(`UPDATE athletes SET
+        checkin_status = 0,
+        checkin_date = NULL,
+        cap_number = NULL,
+        kit_retrieved_by = NULL
+        WHERE id = ?`, [req.params.id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Atleta não encontrado.' });
+        res.json({ success: true, message: 'Check-in cancelado.' });
+    });
+});
+
+// Update Athlete Details
+app.put('/api/athletes/:id', requireAuth, (req, res) => {
+    const { name, email, phone, tshirt_size, category, price, cap_number, notes } = req.body;
+    db.run(`UPDATE athletes SET
+        name = COALESCE(?, name),
+        email = COALESCE(?, email),
+        phone = COALESCE(?, phone),
+        tshirt_size = COALESCE(?, tshirt_size),
+        category = COALESCE(?, category),
+        price = COALESCE(?, price),
+        cap_number = COALESCE(?, cap_number),
+        notes = COALESCE(?, notes)
+        WHERE id = ?`,
+        [name, email, phone, tshirt_size, category, price, cap_number, notes, req.params.id],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            if (this.changes === 0) return res.status(404).json({ error: 'Atleta não encontrado.' });
+            res.json({ success: true, message: 'Cadastro do atleta atualizado com sucesso!' });
+        }
+    );
+});
+
+// Delete Athlete Registration
+app.delete('/api/athletes/:id', requireAuth, (req, res) => {
+    db.run("DELETE FROM athletes WHERE id = ?", [req.params.id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Atleta não encontrado.' });
+        res.json({ deleted: true });
+    });
+});
+
+// Upload Check-in Photo
+app.post('/api/athletes/:id/photo', requireAuth, (req, res) => {
+    const { photo } = req.body;
+    if (!photo) return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
+
+    const photoDir = path.join(__dirname, 'public', 'uploads', 'checkin');
+    if (!fs.existsSync(photoDir)) fs.mkdirSync(photoDir, { recursive: true });
+
+    const matches = photo.match(/^data:image\/([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+        return res.status(400).json({ error: 'Formato de imagem base64 inválido.' });
+    }
+
+    const ext = matches[1].includes('png') ? 'png' : 'jpg';
+    const buffer = Buffer.from(matches[2], 'base64');
+    const fileName = `atleta_${req.params.id}_${Date.now()}.${ext}`;
+    const filePath = path.join(photoDir, fileName);
+    const photoUrl = `/uploads/checkin/${fileName}`;
+
+    fs.writeFile(filePath, buffer, (err) => {
+        if (err) {
+            console.error('Erro ao salvar foto de check-in:', err);
+            return res.status(500).json({ error: 'Erro ao salvar arquivo da foto.' });
+        }
+        db.run("UPDATE athletes SET checkin_photo = ? WHERE id = ?", [photoUrl, req.params.id], (err2) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+            res.json({ success: true, photoUrl });
+        });
     });
 });
 
@@ -538,34 +882,109 @@ app.delete('/api/sponsors/:id', requireAuth, (req, res) => {
 
 
 
-// --- Dashboard Summary ---
+// --- Dashboard Summary Integrado ---
 app.get('/api/summary', requireAuth, (req, res) => {
     const summary = {
-        income: { registrations: 0, registrations_mod2: 0, party_tickets: 0, store_sales: 0, sponsors: 0 },
-        expenses: { event_costs: 0, party_costs: 0, store_costs: 0 }
+        athletes: {
+            total_count: 0,
+            confirmed_count: 0,
+            confirmed_amount: 0,
+            pix_count: 0,
+            pix_amount: 0,
+            card_count: 0,
+            card_amount: 0,
+            pending_count: 0,
+            pending_amount: 0,
+            checkin_count: 0,
+            categories: {}
+        },
+        income: {
+            athletes: 0,
+            athletes_pix: 0,
+            athletes_card: 0,
+            sponsors: 0,
+            store_sales: 0
+        },
+        expenses: {
+            event_costs: 0,
+            party_costs: 0,
+            store_costs: 0
+        },
+        total_income: 0,
+        total_expenses: 0,
+        total_balance: 0
     };
 
-    const queries = [
-        new Promise(resolve => db.get("SELECT sum(total_amount) as s FROM registrations", (e, r) => resolve({ k: ['income', 'registrations'], r }))),
-        new Promise(resolve => db.get("SELECT sum(amount) as s FROM registrations_mod2", (e, r) => resolve({ k: ['income', 'registrations_mod2'], r }))),
-        new Promise(resolve => db.get("SELECT sum(amount) as s FROM party_tickets", (e, r) => resolve({ k: ['income', 'party_tickets'], r }))),
-        new Promise(resolve => db.get("SELECT sum(total_amount) as s FROM store_sales", (e, r) => resolve({ k: ['income', 'store_sales'], r }))),
-        new Promise(resolve => db.get("SELECT sum(amount) as s FROM sponsors", (e, r) => resolve({ k: ['income', 'sponsors'], r }))),
-        new Promise(resolve => db.get("SELECT sum(amount) as s FROM event_costs", (e, r) => resolve({ k: ['expenses', 'event_costs'], r }))),
-        new Promise(resolve => db.get("SELECT sum(amount) as s FROM party_costs", (e, r) => resolve({ k: ['expenses', 'party_costs'], r }))),
-        new Promise(resolve => db.get("SELECT sum(stock * cost_price) as s FROM store_products", (e, r) => resolve({ k: ['expenses', 'store_costs'], r })))
-    ];
+    const qAthletes = new Promise((resolve) => {
+        db.all("SELECT category, payment_status, payment_method, price, checkin_status FROM athletes", (err, rows) => {
+            if (!err && rows) {
+                summary.athletes.total_count = rows.length;
+                rows.forEach(r => {
+                    const price = parseFloat(r.price) || 0;
+                    const catName = r.category || 'Não categorizado';
+                    if (!summary.athletes.categories[catName]) {
+                        summary.athletes.categories[catName] = { total: 0, confirmed: 0, revenue: 0 };
+                    }
+                    summary.athletes.categories[catName].total++;
 
-    Promise.all(queries).then(results => {
-        results.forEach(result => {
-            if (result.r && result.r.s) {
-                summary[result.k[0]][result.k[1]] = result.r.s;
+                    if (r.payment_status === 'Confirmado') {
+                        summary.athletes.confirmed_count++;
+                        summary.athletes.confirmed_amount += price;
+                        summary.athletes.categories[catName].confirmed++;
+                        summary.athletes.categories[catName].revenue += price;
+
+                        if (r.payment_method === 'Pix') {
+                            summary.athletes.pix_count++;
+                            summary.athletes.pix_amount += price;
+                        } else if (r.payment_method === 'Cartão') {
+                            summary.athletes.card_count++;
+                            summary.athletes.card_amount += price;
+                        }
+                    } else {
+                        summary.athletes.pending_count++;
+                        summary.athletes.pending_amount += price;
+                    }
+
+                    if (r.checkin_status === 1) {
+                        summary.athletes.checkin_count++;
+                    }
+                });
             }
+            summary.income.athletes = summary.athletes.confirmed_amount;
+            summary.income.athletes_pix = summary.athletes.pix_amount;
+            summary.income.athletes_card = summary.athletes.card_amount;
+            resolve();
         });
-        const total_income = Object.values(summary.income).reduce((a, b) => a + b, 0);
-        const total_expenses = Object.values(summary.expenses).reduce((a, b) => a + b, 0);
-        summary.total_balance = total_income - total_expenses;
+    });
+
+    const qSponsors = new Promise((resolve) => {
+        db.get("SELECT COALESCE(SUM(amount), 0) as s FROM sponsors", (e, r) => {
+            if (r) summary.income.sponsors = r.s || 0;
+            resolve();
+        });
+    });
+
+    const qEventCosts = new Promise((resolve) => {
+        db.get("SELECT COALESCE(SUM(amount), 0) as s FROM event_costs", (e, r) => {
+            if (r) summary.expenses.event_costs = r.s || 0;
+            resolve();
+        });
+    });
+
+    const qPartyCosts = new Promise((resolve) => {
+        db.get("SELECT COALESCE(SUM(amount), 0) as s FROM party_costs", (e, r) => {
+            if (r) summary.expenses.party_costs = r.s || 0;
+            resolve();
+        });
+    });
+
+    Promise.all([qAthletes, qSponsors, qEventCosts, qPartyCosts]).then(() => {
+        summary.total_income = summary.income.athletes + summary.income.sponsors;
+        summary.total_expenses = summary.expenses.event_costs + summary.expenses.party_costs;
+        summary.total_balance = summary.total_income - summary.total_expenses;
         res.json(summary);
+    }).catch(err => {
+        res.status(500).json({ error: err.message });
     });
 });
 
@@ -655,7 +1074,25 @@ app.use('/checkin', express.static(path.join(__dirname, 'checkin')));
 app.use('/checkin/uploads', express.static(checkinUploadsDir));
 
 app.get('/checkin/data.json', (req, res) => {
-    res.sendFile(checkinDataFile);
+    db.all("SELECT * FROM athletes ORDER BY name ASC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const formatted = rows.map(a => ({
+            id: a.id,
+            nome: a.name,
+            cpf: a.cpf,
+            telefone: a.phone || '',
+            camisa: a.tshirt_size || 'M',
+            prova: a.distance || a.category,
+            categoria: a.category,
+            pagamentoStatus: a.payment_status,
+            pagamentoMetodo: a.payment_method,
+            checkinRealizado: a.checkin_status === 1,
+            fotoUrl: a.checkin_photo || null,
+            kitRetiradoPor: a.kit_retrieved_by || null,
+            numeroTouca: a.cap_number || null
+        }));
+        res.json(formatted);
+    });
 });
 
 app.post('/checkin/data.json', (req, res) => {

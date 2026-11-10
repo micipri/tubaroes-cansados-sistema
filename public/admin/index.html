@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10 Anos - Gestão Financeira</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Painel dos Organizadores — Tubarões Cansados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="icon" href="/logodourada.jpg" type="image/jpeg">
     <link rel="stylesheet" href="style.css">
@@ -21,21 +21,18 @@
         <!-- Sidebar Navigation -->
         <nav class="sidebar">
             <div class="sidebar-header" style="justify-content: center; padding: 1rem 0;">
-                <img src="logodourada.jpg" alt="Logo Evento 10 Anos" style="max-width: 100%; max-height: 120px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <img src="/logodourada.jpg" alt="Logo Tubarões Cansados" style="max-width: 100%; max-height: 110px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
             </div>
             <ul class="nav-links">
-                <li class="active" data-target="dashboard"><i class="ri-dashboard-fill"></i> Dashboard</li>
-                <li data-target="registrations"><i class="ri-user-star-fill"></i> Inscrições Lotes</li>
-                <li data-target="registrations-mod2"><i class="ri-user-add-line"></i> Inscrições Mod. 2</li>
-                <li data-target="party"><i class="ri-coupon-3-fill"></i> Ingressos Festa</li>
-                <li data-target="store"><i class="ri-store-2-fill"></i> Lojinha</li>
-                <li data-target="costs"><i class="ri-wallet-3-fill"></i> Custos</li>
+                <li class="active" data-target="dashboard"><i class="ri-dashboard-fill"></i> Financeiro & Métricas</li>
+                <li data-target="athletes"><i class="ri-user-star-fill"></i> Atletas Inscritos</li>
+                <li data-target="checkin"><i class="ri-qr-scan-2-line"></i> Check-in dos Atletas</li>
+                <li data-target="costs"><i class="ri-wallet-3-fill"></i> Custos do Evento</li>
                 <li data-target="sponsors"><i class="ri-hand-heart-fill"></i> Patrocínios</li>
-                <li data-target="survey"><i class="ri-spy-fill"></i> Pesquisa Secreta</li>
                 <li id="nav-users" data-target="users" style="display:none;"><i class="ri-team-fill"></i> Usuários</li>
             </ul>
             <div style="padding: 1rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.08);">
-                <div id="user-info" style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-bottom:0.75rem; text-align:center;"></div>
+                <div id="user-info" style="font-size:0.85rem; color:#38bdf8; margin-bottom:0.75rem; text-align:center; font-weight:700;"></div>
                 <button id="btn-logout" class="btn btn-primary" style="width:100%; padding:0.5rem; font-size:0.85rem; background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);">
                     <i class="ri-logout-circle-line"></i> Sair
                 </button>
@@ -46,274 +43,274 @@
         <main class="main-content">
             <header class="topbar">
                 <div class="header-title">
-                    <h1 id="page-title">Dashboard</h1>
+                    <h1 id="page-title">Financeiro & Métricas</h1>
                 </div>
             </header>
 
             <div class="scroll-area">
-                <!-- Dashboard Section -->
+                
+                <!-- ── 1. DASHBOARD & CONTROLE FINANCEIRO ── -->
                 <section id="dashboard" class="page-section active">
+                    <!-- Top Stat Cards -->
                     <div class="dashboard-grid">
                         <div class="card glass-card stat-card income">
                             <i class="ri-arrow-right-up-line icon"></i>
                             <div class="details">
-                                <span class="label">Receitas Totais</span>
+                                <span class="label">Receita Confirmada (Total)</span>
                                 <h3 id="total-income">R$ 0,00</h3>
                             </div>
                         </div>
-                        <div class="card glass-card stat-card expense">
-                            <i class="ri-arrow-right-down-line icon"></i>
+                        <div class="card glass-card stat-card" style="border-left: 4px solid #10b981;">
+                            <i class="ri-qr-code-line icon" style="color: #10b981;"></i>
                             <div class="details">
-                                <span class="label">Despesas Totais</span>
-                                <h3 id="total-expenses">R$ 0,00</h3>
+                                <span class="label">Inscrições via PIX</span>
+                                <h3 id="stat-pix-amount">R$ 0,00</h3>
+                                <small id="stat-pix-count" style="color: var(--text-secondary); font-size: 0.8rem;">0 atletas confirmados</small>
+                            </div>
+                        </div>
+                        <div class="card glass-card stat-card" style="border-left: 4px solid #0284c7;">
+                            <i class="ri-bank-card-line icon" style="color: #0284c7;"></i>
+                            <div class="details">
+                                <span class="label">Inscrições via CARTÃO</span>
+                                <h3 id="stat-card-amount">R$ 0,00</h3>
+                                <small id="stat-card-count" style="color: var(--text-secondary); font-size: 0.8rem;">0 atletas confirmados</small>
                             </div>
                         </div>
                         <div class="card glass-card stat-card balance">
                             <i class="ri-scales-3-line icon"></i>
                             <div class="details">
-                                <span class="label">Saldo Líquido</span>
+                                <span class="label">Saldo Líquido (Lucro)</span>
                                 <h3 id="total-balance">R$ 0,00</h3>
                             </div>
                         </div>
                     </div>
-                    <div class="dashboard-details grid-2">
-                        <div class="card glass-card details-card">
-                            <h3><i class="ri-pie-chart-2-fill"></i> Resumo de Receitas</h3>
-                            <ul class="breakdown-list" id="income-breakdown"></ul>
-                        </div>
-                        <div class="card glass-card details-card">
-                            <h3><i class="ri-pie-chart-line"></i> Resumo de Despesas</h3>
-                            <ul class="breakdown-list" id="expenses-breakdown"></ul>
-                        </div>
-                    </div>
-                </section>
 
-                <!-- Registrations Section (Batches) -->
-                <section id="registrations" class="page-section hidden">
-                    <div class="card glass-card form-container">
-                        <h3>Cadastrar Lote (Inscrições)</h3>
-                        <form id="form-registration" class="flex-form">
-                            <input type="text" id="reg-name" placeholder="Descrição do Lote" required>
-                            <input type="number" id="reg-quantity" placeholder="Quantidade" required>
-                            <input type="number" step="0.01" id="reg-amount" placeholder="Valor Unitário (R$)" required>
-                            <input type="date" id="reg-date" required>
-                            <button type="submit" class="btn btn-primary">Adicionar Lote</button>
-                        </form>
-                    </div>
-                    <div class="card glass-card table-container mt-4">
-                        <h3>Lotes de Inscrições</h3>
-                        <table>
-                            <thead><tr><th>ID</th><th>Lote</th><th>Qtd</th><th>Valor Unit.</th><th>Total</th><th>Data</th><th>Ação</th></tr></thead>
-                            <tbody id="table-registrations"></tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- Registrations Mod 2 Section -->
-                <section id="registrations-mod2" class="page-section hidden">
-                    <div class="card glass-card form-container">
-                        <h3>Nova Inscrição (Modalidade 2)</h3>
-                        <form id="form-reg-mod2" class="flex-form">
-                            <input type="text" id="reg2-name" placeholder="Nome Completo" required>
-                            <input type="email" id="reg2-email" placeholder="E-mail" required>
-                            <input type="text" id="reg2-cap" placeholder="Nome na Touca" required>
-                            <input type="number" step="0.01" id="reg2-amount" placeholder="Valor (R$)" required>
-                            <input type="date" id="reg2-date" required>
-                            <div style="flex-basis: 100%; display: flex; gap: 20px; text-align: left; margin-bottom: 10px;">
-                                <label style="display: flex; align-items: center; gap: 5px;">
-                                    <input type="checkbox" id="reg2-receipt"> Comprovante Enviado
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 5px;">
-                                    <input type="checkbox" id="reg2-confirmed"> Confirmação Concluída
-                                </label>
+                    <!-- Secondary KPI row -->
+                    <div class="dashboard-grid mt-4" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                        <div class="card glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                                <i class="ri-time-line"></i>
                             </div>
-                            <button type="submit" class="btn btn-primary">Salvar Inscrição</button>
-                        </form>
+                            <div>
+                                <span style="font-size: 0.78rem; color: var(--text-secondary); text-transform: uppercase;">Inscrições Pendentes</span>
+                                <h4 id="stat-pending-amount" style="font-size: 1.2rem; color: #fbbf24; font-weight: 800;">R$ 0,00</h4>
+                                <small id="stat-pending-count" style="color: var(--text-secondary);">0 aguardando pagamento</small>
+                            </div>
+                        </div>
+
+                        <div class="card glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(2, 132, 199, 0.15); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                                <i class="ri-checkbox-circle-line"></i>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.78rem; color: var(--text-secondary); text-transform: uppercase;">Check-ins Realizados</span>
+                                <h4 id="stat-checkin-count" style="font-size: 1.2rem; color: #38bdf8; font-weight: 800;">0 atletas</h4>
+                                <small id="stat-checkin-ratio" style="color: var(--text-secondary);">0% dos confirmados</small>
+                            </div>
+                        </div>
+
+                        <div class="card glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(239, 68, 68, 0.15); color: #f87171; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                                <i class="ri-wallet-3-line"></i>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.78rem; color: var(--text-secondary); text-transform: uppercase;">Custos Totais do Evento</span>
+                                <h4 id="total-expenses" style="font-size: 1.2rem; color: #f87171; font-weight: 800;">R$ 0,00</h4>
+                                <small id="stat-costs-detail" style="color: var(--text-secondary);">Despesas cadastradas</small>
+                            </div>
+                        </div>
+
+                        <div class="card glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(168, 85, 247, 0.15); color: #c084fc; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                                <i class="ri-hand-heart-line"></i>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.78rem; color: var(--text-secondary); text-transform: uppercase;">Patrocínios Recebidos</span>
+                                <h4 id="stat-sponsors-amount" style="font-size: 1.2rem; color: #c084fc; font-weight: 800;">R$ 0,00</h4>
+                                <small style="color: var(--text-secondary);">Apoios ao evento</small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card glass-card table-container mt-4">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
-                            <h3 style="margin-bottom: 0;">Inscrições Individuais</h3>
-                            <div style="display: flex; gap: 1rem; align-items: center;">
-                                <select id="sort-mod2" onchange="loadRegistrationsMod2()" style="padding: 0.5rem; border-radius: 6px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                                    <option value="id_desc">Mais Recentes (Padrão)</option>
-                                    <option value="name_asc">Ordem Alfabética (Participante)</option>
-                                    <option value="cap_asc">Ordem Alfabética (Touca)</option>
-                                    <option value="receipt_ok">Comprovante OK Primeiro</option>
+
+                    <!-- Breakdown & Details -->
+                    <div class="dashboard-details grid-2 mt-4">
+                        <div class="card glass-card details-card">
+                            <h3><i class="ri-pie-chart-2-fill"></i> Arrecadação por Modalidade</h3>
+                            <ul class="breakdown-list" id="categories-breakdown">
+                                <li><span>Carregando dados...</span></li>
+                            </ul>
+                        </div>
+                        <div class="card glass-card details-card">
+                            <h3><i class="ri-file-list-3-line"></i> Resumo Geral de Contas</h3>
+                            <ul class="breakdown-list" id="general-financial-breakdown">
+                                <li><span>Inscrições Confirmadas</span> <strong id="fb-confirmed">R$ 0,00</strong></li>
+                                <li><span>Subtotal via PIX</span> <strong id="fb-pix">R$ 0,00</strong></li>
+                                <li><span>Subtotal via Cartão</span> <strong id="fb-card">R$ 0,00</strong></li>
+                                <li><span>Patrocínios</span> <strong id="fb-sponsors">R$ 0,00</strong></li>
+                                <li><span>Despesas do Evento</span> <strong id="fb-expenses" style="color: #f87171;">R$ 0,00</strong></li>
+                                <li style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;"><span>Saldo Líquido</span> <strong id="fb-balance" style="font-size: 1.15rem; color: #38bdf8;">R$ 0,00</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- ── 2. GESTÃO DE ATLETAS INSCRITOS ── -->
+                <section id="athletes" class="page-section hidden">
+                    <!-- Filters and Search Toolbar -->
+                    <div class="card glass-card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1; min-width: 260px;">
+                                <input type="text" id="athletes-search" placeholder="🔍 Buscar por Nome, CPF, E-mail ou Assessoria..." style="width: 100%; padding: 10px 14px; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                                <select id="filter-athlete-status" style="padding: 10px 12px; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                                    <option value="all">Status: Todos</option>
+                                    <option value="Pendente">Apenas Pendentes</option>
+                                    <option value="Confirmado">Apenas Confirmados (Pagos)</option>
                                 </select>
-                                <button type="button" class="btn btn-primary" onclick="exportTableToXLSX('table-registrations-mod2', 'Inscricoes_Mod2.xlsx')" style="padding: 0.5rem 1rem; font-size: 0.9rem;"><i class="ri-file-excel-2-line"></i> Exportar Excel</button>
+                                <select id="filter-athlete-checkin" style="padding: 10px 12px; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                                    <option value="all">Check-in: Todos</option>
+                                    <option value="1">Check-in Realizado</option>
+                                    <option value="0">Check-in Não Realizado</option>
+                                </select>
+                                <button type="button" class="btn btn-primary" id="btn-export-athletes" style="padding: 9px 16px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                                    <i class="ri-file-excel-2-line"></i> Exportar XLSX
+                                </button>
+                                <button type="button" class="btn" id="btn-new-athlete-manual" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 9px 14px; border-radius: 8px; font-size: 0.9rem; cursor: pointer;">
+                                    <i class="ri-user-add-line"></i> Novo Atleta
+                                </button>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Athletes Table -->
+                    <div class="card glass-card table-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;"><i class="ri-team-line"></i> Lista de Atletas Inscritos (<span id="athletes-count-total">0</span>)</h3>
+                            <small style="color: var(--text-secondary);">💡 Clique no nome do atleta para ver a ficha completa e confirmar pagamento</small>
+                        </div>
                         <table>
-                            <thead><tr><th>ID</th><th>Participante</th><th>Email</th><th>Touca</th><th>Valor</th><th>Comprovante</th><th>Confirmado</th><th>Data</th><th>Ação</th></tr></thead>
-                            <tbody id="table-registrations-mod2"></tbody>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Atleta (Clique para abrir)</th>
+                                    <th>CPF</th>
+                                    <th>Prova / Modalidade</th>
+                                    <th>Camisa</th>
+                                    <th>Valor</th>
+                                    <th>Pagamento</th>
+                                    <th>Check-in</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-athletes">
+                                <tr><td colspan="9" style="text-align:center; padding: 2rem;">Carregando atletas...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </section>
 
-                <!-- Party Tickets Section -->
-                <section id="party" class="page-section hidden">
+
+                <!-- ── 3. CHECK-IN INTEGRADO DOS ATLETAS ── -->
+                <section id="checkin" class="page-section hidden">
+                    <!-- Quick KPI Ribbon -->
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 1.5rem;">
+                        <div class="card glass-card" style="padding: 1rem; text-align: center;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Total de Inscritos</span>
+                            <h3 id="ci-total" style="font-size: 1.6rem; color: #fff; margin-top: 4px;">0</h3>
+                        </div>
+                        <div class="card glass-card" style="padding: 1rem; text-align: center; border-bottom: 3px solid #10b981;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Pagamentos Confirmados</span>
+                            <h3 id="ci-confirmed" style="font-size: 1.6rem; color: #10b981; margin-top: 4px;">0</h3>
+                        </div>
+                        <div class="card glass-card" style="padding: 1rem; text-align: center; border-bottom: 3px solid #0284c7;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Check-ins Concluídos</span>
+                            <h3 id="ci-done" style="font-size: 1.6rem; color: #38bdf8; margin-top: 4px;">0</h3>
+                        </div>
+                        <div class="card glass-card" style="padding: 1rem; text-align: center; border-bottom: 3px solid #f59e0b;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Faltam Retirar Kit</span>
+                            <h3 id="ci-pending" style="font-size: 1.6rem; color: #fbbf24; margin-top: 4px;">0</h3>
+                        </div>
+                    </div>
+
+                    <!-- Station Card: Search Athlete -->
+                    <div class="checkin-station-card">
+                        <h3 style="margin-bottom: 0.75rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+                            <i class="ri-qr-scan-line" style="color: #38bdf8;"></i> Estação de Check-in & Entrega de Kits
+                        </h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Digite o nome completo ou CPF do atleta para localizar instantaneamente e liberar o kit:</p>
+                        <input type="text" id="checkin-quick-search" class="search-athlete-input" placeholder="🔍 Digite Nome ou CPF do atleta..." autocomplete="off">
+                        
+                        <!-- Search Suggestions Dropdown -->
+                        <div id="checkin-suggestions" style="display: none; background: #131b2e; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; margin-top: 8px; max-height: 280px; overflow-y: auto;"></div>
+
+                        <!-- Active Athlete Checkin Workspace -->
+                        <div id="checkin-workspace" style="display: none; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;"></div>
+                    </div>
+
+                    <!-- Today's Checked-in Table -->
+                    <div class="card glass-card table-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;"><i class="ri-list-check"></i> Check-ins Realizados (<span id="count-checkedin-table">0</span>)</h3>
+                            <button type="button" class="btn btn-primary" onclick="loadCheckinTable()" style="padding: 6px 12px; font-size: 0.85rem;"><i class="ri-refresh-line"></i> Atualizar</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Atleta</th>
+                                    <th>CPF</th>
+                                    <th>Prova</th>
+                                    <th>Camisa Entregue</th>
+                                    <th>Nº Touca</th>
+                                    <th>Retirado Por</th>
+                                    <th>Horário</th>
+                                    <th>Comprovante</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-checkins-history">
+                                <tr><td colspan="10" style="text-align: center; padding: 2rem;">Nenhum check-in realizado ainda hoje.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+
+                <!-- ── 4. CUSTOS DO EVENTO ── -->
+                <section id="costs" class="page-section hidden">
                     <div class="card glass-card form-container">
-                        <h3>Venda de Ingresso da Festa</h3>
-                        <form id="form-party-ticket" class="flex-form">
-                            <input type="text" id="ticket-name" placeholder="Nome do Comprador" required>
-                            <input type="number" step="0.01" id="ticket-amount" placeholder="Valor (R$)" required>
-                            <div class="checkbox-group" style="display: flex; gap: 1rem; align-items: center;">
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="checkbox" id="ticket-coupon"> Cupom Loja
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="checkbox" id="ticket-voucher"> Vale Chopp
-                                </label>
-                            </div>
-                            <input type="date" id="ticket-date" required>
-                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                        <h3><i class="ri-add-circle-line"></i> Cadastrar Novo Custo / Despesa do Evento</h3>
+                        <form id="form-event-cost" class="flex-form">
+                            <input type="text" id="ecost-desc" placeholder="Descrição da despesa (ex: Ambulância, Medalhas, Água)" required>
+                            <input type="number" step="0.01" id="ecost-amount" placeholder="Valor (R$)" required>
+                            <input type="date" id="ecost-date" required>
+                            <button type="submit" class="btn btn-primary">Adicionar Despesa</button>
                         </form>
                     </div>
                     <div class="card glass-card table-container mt-4">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 style="margin-bottom: 0;">Ingressos Vendidos</h3>
-                            <button type="button" class="btn btn-primary" onclick="exportTableToXLSX('table-party-tickets', 'Ingressos_Festa.xlsx')" style="padding: 0.5rem 1rem; font-size: 0.9rem;"><i class="ri-file-excel-2-line"></i> Exportar Excel</button>
+                            <h3>Lista de Custos Cadastrados</h3>
+                            <button type="button" class="btn btn-primary" onclick="exportTableToXLSX('table-event-costs', 'Custos_Evento.xlsx')" style="padding: 0.5rem 1rem; font-size: 0.9rem;"><i class="ri-file-excel-2-line"></i> Exportar Excel</button>
                         </div>
                         <table>
-                            <thead><tr><th>ID</th><th>Nome</th><th>Valor</th><th>Cupom Loja</th><th>Vale Chopp</th><th>Data</th><th>Ação</th></tr></thead>
-                            <tbody id="table-party-tickets"></tbody>
+                            <thead><tr><th>ID</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+                            <tbody id="table-event-costs"></tbody>
                         </table>
                     </div>
                 </section>
 
-                <!-- Store Section -->
-                <section id="store" class="page-section hidden">
-                    <div class="tabs">
-                        <button class="tab-btn active" data-tab="tab-store-sales">Vendas</button>
-                        <button class="tab-btn" data-tab="tab-store-packages">Pacotes para Entregar</button>
-                        <button class="tab-btn" data-tab="tab-store-online">Vendas On-line (PIX)</button>
-                        <button class="tab-btn" data-tab="tab-store-products">Produtos & Estoque</button>
-                    </div>
-                    <div id="tab-store-sales" class="tab-content active">
-                        <div class="card glass-card form-container mt-4">
-                            <h3>Registrar Venda</h3>
-                            <form id="form-store-sale" class="flex-form">
-                                <select id="sale-product-id" required>
-                                    <option value="" disabled selected>Selecione um Produto</option>
-                                </select>
-                                <input type="text" id="sale-buyer" placeholder="Nome do Comprador">
-                                <input type="number" id="sale-quantity" placeholder="Quantidade" required>
-                                <input type="number" step="0.01" id="sale-discount" placeholder="Desconto (R$)">
-                                <select id="sale-payment" required>
-                                    <option value="Pix">Pix</option>
-                                    <option value="Dinheiro">Dinheiro</option>
-                                    <option value="Cartão">Cartão</option>
-                                </select>
-                                <input type="date" id="sale-date" required>
-                                <button type="submit" class="btn btn-primary">Vender</button>
-                            </form>
-                        </div>
-                        <div class="card glass-card table-container mt-4">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h3>Histórico de Vendas</h3>
-                                <button type="button" class="btn btn-primary" id="btn-create-package" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                    <i class="ri-box-3-line"></i> Criar Pacote com Selecionados
-                                </button>
-                            </div>
-                            <table class="mt-4">
-                                <thead><tr><th>📦</th><th>Produto</th><th>Comprador</th><th>Qtd</th><th>Desconto</th><th>Pagamento</th><th>Total</th><th>Data</th><th>Ações</th></tr></thead>
-                                <tbody id="table-store-sales"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div id="tab-store-products" class="tab-content hidden">
-                        <div class="card glass-card form-container mt-4">
-                            <h3>Novo Produto</h3>
-                            <form id="form-store-product" class="grid-form">
-                                <input type="text" id="prod-name" placeholder="Nome do Produto" required>
-                                <input type="number" id="prod-stock" placeholder="Estoque Inicial" required>
-                                <input type="number" step="0.01" id="prod-cost" placeholder="Preço de Custo (R$)" required>
-                                <input type="number" step="0.01" id="prod-sell" placeholder="Preço de Venda (R$)" required>
-                                <button type="submit" class="btn btn-primary">Adicionar Produto</button>
-                            </form>
-                        </div>
-                        <div class="card glass-card table-container mt-4">
-                            <h3>Estoque</h3>
-                            <table>
-                                <thead><tr><th>ID</th><th>Produto</th><th>Estoque</th><th>Custo</th><th>Venda</th><th>Ações</th></tr></thead>
-                                <tbody id="table-store-products"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div id="tab-store-packages" class="tab-content hidden">
-                        <div class="card glass-card table-container mt-4">
-                            <h3>Pacotes Prontos para Retirada</h3>
-                            <table>
-                                <thead><tr><th>ID</th><th>Responsável pela Retirada</th><th>Itens do Pacote</th><th>Data de Criação</th><th>Entregue?</th></tr></thead>
-                                <tbody id="table-store-packages"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div id="tab-store-online" class="tab-content hidden">
-                        <div class="card glass-card table-container mt-4">
-                            <h3>Aprovação de Vendas On-line</h3>
-                            <p style="font-size:0.9rem; color:#aaa; margin-bottom:1rem;">Pedidos aguardando conferência do PIX. Ao aprovar, o estoque será descontado e um Pacote de Retirada será gerado automaticamente.</p>
-                            <table>
-                                <thead><tr><th>ID</th><th>Comprador</th><th>Valor Informado</th><th>Data</th><th>Ações</th></tr></thead>
-                                <tbody id="table-store-online"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
 
-                <!-- Costs Section -->
-                <section id="costs" class="page-section hidden">
-                    <div class="tabs">
-                        <button class="tab-btn active" data-tab="tab-costs-event">Custos do Evento</button>
-                        <button class="tab-btn" data-tab="tab-costs-party">Custos da Festa</button>
-                    </div>
-                    <div id="tab-costs-event" class="tab-content active">
-                        <div class="card glass-card form-container mt-4">
-                            <h3>Novo Custo do Evento</h3>
-                            <form id="form-event-cost" class="flex-form">
-                                <input type="text" id="ecost-desc" placeholder="Descrição" required>
-                                <input type="number" step="0.01" id="ecost-amount" placeholder="Valor (R$)" required>
-                                <input type="date" id="ecost-date" required>
-                                <button type="submit" class="btn btn-primary">Adicionar</button>
-                            </form>
-                        </div>
-                        <div class="card glass-card table-container mt-4">
-                            <h3>Lista de Custos - Evento</h3>
-                            <table>
-                                <thead><tr><th>ID</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
-                                <tbody id="table-event-costs"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div id="tab-costs-party" class="tab-content hidden">
-                        <div class="card glass-card form-container mt-4">
-                            <h3>Novo Custo da Festa</h3>
-                            <form id="form-party-cost" class="flex-form">
-                                <input type="text" id="pcost-desc" placeholder="Descrição" required>
-                                <input type="number" step="0.01" id="pcost-amount" placeholder="Valor (R$)" required>
-                                <input type="date" id="pcost-date" required>
-                                <button type="submit" class="btn btn-primary">Adicionar</button>
-                            </form>
-                        </div>
-                        <div class="card glass-card table-container mt-4">
-                            <h3>Lista de Custos - Festa</h3>
-                            <table>
-                                <thead><tr><th>ID</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
-                                <tbody id="table-party-costs"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Sponsors Section -->
+                <!-- ── 5. PATROCÍNIOS ── -->
                 <section id="sponsors" class="page-section hidden">
                     <div class="card glass-card form-container">
-                        <h3>Novo Patrocinador</h3>
+                        <h3><i class="ri-hand-heart-line"></i> Cadastrar Novo Patrocinador / Apoio</h3>
                         <form id="form-sponsor" class="flex-form">
                             <input type="text" id="sponsor-name" placeholder="Nome do Patrocinador" required>
-                            <input type="number" step="0.01" id="sponsor-amount" placeholder="Valor (R$)" required>
+                            <input type="number" step="0.01" id="sponsor-amount" placeholder="Valor do Patrocínio (R$)" required>
                             <input type="date" id="sponsor-date" required>
-                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                            <button type="submit" class="btn btn-primary">Adicionar Patrocínio</button>
                         </form>
                     </div>
                     <div class="card glass-card table-container mt-4">
@@ -326,19 +323,18 @@
                 </section>
 
 
-
-                <!-- Users Section (master only) -->
+                <!-- ── 6. USUÁRIOS (Master only) ── -->
                 <section id="users" class="page-section hidden">
                     <div class="card glass-card form-container">
-                        <h3><i class="ri-user-add-line"></i> Cadastrar Novo Usuário</h3>
+                        <h3><i class="ri-user-add-line"></i> Cadastrar Novo Organizador</h3>
                         <form id="form-user" class="flex-form">
                             <input type="text" id="new-username" placeholder="Nome de usuário" autocomplete="off" required>
                             <input type="password" id="new-password" placeholder="Senha (mín. 6 caracteres)" autocomplete="new-password" required>
-                            <button type="submit" class="btn btn-primary">Cadastrar Usuário</button>
+                            <button type="submit" class="btn btn-primary">Cadastrar</button>
                         </form>
                     </div>
                     <div class="card glass-card table-container mt-4">
-                        <h3>Usuários do Sistema</h3>
+                        <h3>Organizadores com Acesso</h3>
                         <table>
                             <thead><tr><th>ID</th><th>Usuário</th><th>Perfil</th><th>Criado em</th><th>Ação</th></tr></thead>
                             <tbody id="table-users"></tbody>
@@ -350,6 +346,7 @@
         </main>
     </div>
 
+    <!-- SheetJS for Excel export -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="app.js"></script>
 </body>

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscrição Oficial — Tubarões Cansados</title>
+    <link rel="icon" href="/logodourada.jpg" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0f1e;
+            --bg-card: rgba(15, 23, 42, 0.85);
+            --bg-card-hover: rgba(30, 41, 59, 0.95);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-active: #0284c7;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #070b16 0%, #0f172a 50%, #082f49 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(10, 15, 30, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .header-brand img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gold);
+        }
+
+        .header-brand span {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .header-brand span span {
+            color: var(--gold);
+        }
+
+        .btn-back {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Container */
+        .main-container {
+            max-width: 960px;
+            margin: 2.5rem auto 4rem;
+            padding: 0 1.5rem;
+            width: 100%;
+        }
+
+        /* Hero */
+        .page-hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(2, 132, 199, 0.15);
+            border: 1px solid rgba(2, 132, 199, 0.35);
+            color: #38bdf8;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 6px 16px;
+            border-radius: 99px;
+            margin-bottom: 1rem;
+        }
+
+        .page-title {
+            font-size: clamp(2rem, 4.5vw, 3rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-title span {
+            color: var(--gold);
+        }
+
+        .page-sub {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        @media (max-width: 640px) {
+            .form-card {
+                padding: 1.5rem 1.25rem;
+            }
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .section-heading i {
+            color: var(--gold);
+            font-size: 1.4rem;
+        }
+
+        /* Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 2.5rem;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .category-card:hover {
+            background: rgba(2, 132, 199, 0.08);
+            border-color: rgba(2, 132, 199, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .category-card.selected {
+            background: rgba(2, 132, 199, 0.15);
+            border-color: #38bdf8;
+            box-shadow: 0 0 25px rgba(2, 132, 199, 0.25);
+        }
+
+        .cat-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .cat-radio {
+            margin-top: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .category-card.selected .cat-radio {
+            border-color: #38bdf8;
+            background: #38bdf8;
+        }
+
+        .category-card.selected .cat-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #0f172a;
+        }
+
+        .cat-info h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .cat-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .cat-price {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .cat-price .val {
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: var(--gold-light);
+            white-space: nowrap;
+        }
+
+        .cat-price .sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        label .req {
+            color: var(--gold);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+        select option {
+            background: #0f172a;
+            color: #fff;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Summary Box */
+        .summary-box {
+            background: rgba(2, 132, 199, 0.1);
+            border: 1px solid rgba(2, 132, 199, 0.3);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .summary-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .summary-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(2, 132, 199, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #38bdf8;
+            font-size: 1.4rem;
+        }
+
+        .summary-info h5 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-info h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .summary-price {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--gold);
+        }
+
+        /* Terms */
+        .terms-box {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .terms-box input[type="checkbox"] {
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.35);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(2, 132, 199, 0.5);
+            background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Feedback messages */
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* Success Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+            max-width: 580px;
+            width: 100%;
+            padding: 2.5rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .success-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.25rem;
+            border: 2px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .modal-sub {
+            color: var(--text-muted);
+            margin-bottom: 1.75rem;
+            font-size: 0.95rem;
+        }
+
+        .receipt-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: left;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+
+        .receipt-row span:first-child {
+            color: var(--text-muted);
+        }
+
+        .receipt-row span:last-child {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .pix-container {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px dashed rgba(245, 158, 11, 0.4);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pix-label {
+            font-size: 0.85rem;
+            color: var(--gold);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .pix-key-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: #f8fafc;
+        }
+
+        .btn-copy-pix {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .btn-copy-pix:hover {
+            background: var(--gold-light);
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-modal-close {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-modal-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="/" class="header-brand">
+            <img src="/logodourada.jpg" alt="Logo Tubarões Cansados">
+            <span>Tubarões <span>Cansados</span></span>
+        </a>
+        <a href="/" class="btn-back">
+            <i class="ri-arrow-left-line"></i> Voltar ao site
+        </a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        
+        <div class="page-hero">
+            <div class="badge"><i class="ri-water-flash-fill"></i> Inscrições Abertas</div>
+            <h1 class="page-title">Inscrição <span>Oficial</span> da Prova</h1>
+            <p class="page-sub">Preencha seus dados para garantir sua vaga na Grande Travessia dos Tubarões Cansados. Após o envio, você poderá efetuar o pagamento.</p>
+        </div>
+
+        <div class="alert-error" id="form-error">
+            <i class="ri-error-warning-fill"></i>
+            <span id="form-error-msg">Por favor, corrija os erros no formulário.</span>
+        </div>
+
+        <form class="form-card" id="form-inscricao" novalidate>
+            
+            <!-- Etapa 1: Modalidade -->
+            <div class="section-heading">
+                <i class="ri-flag-2-fill"></i>
+                <span>1. Escolha sua Modalidade</span>
+            </div>
+
+            <div class="category-grid" id="category-grid">
+                
+                <div class="category-card selected" data-id="adulto_25k" data-price="149.00" data-name="Travessia de Adultos (2,5 km)">
+                    <div class="cat-left">
+                        <div class="cat-radio"></div>
+                        <div class="cat-info">
+                            <h4>Travessia de Adultos (2,5 km)</h4>
+                            <p>Prova principal para atletas adultos com percurso de 2,5 km em águas abertas.</p>
+                        </div>
+                    </div>
+                    <div class="cat-price">
+                        <div class="val">R$ 149</div>
+                        <div class="sub">Individual</div>
+                    </div>
+                </div>
+
+                <div class="category-card" data-id="adulto_assessoria" data-price="119.00" data-name="Travessia de Adultos (2,5 km) — Alunos de Assessorias">
+                    <div class="cat-left">
+                        <div class="cat-radio"></div>
+                        <div class="cat-info">
+                            <h4>Travessia de Adultos (2,5 km) — Assessorias</h4>
+                            <p>Desconto exclusivo para alunos de assessorias parceiras com cupom.</p>
+                        </div>
+                    </div>
+                    <div class="cat-price">
+                        <div class="val">R$ 119</div>
+                        <div class="sub">Com cupom</div>
+                    </div>
+                </div>
+
+                <div class="category-card" data-id="promocional" data-price="99.00" data-name="Travessia de Adultos (2,5 km) — Promocional de Largada">
+                    <div class="cat-left">
+                        <div class="cat-radio"></div>
+                        <div class="cat-info">
+                            <h4>Travessia de Adultos (2,5 km) — Promocional de Largada</h4>
+                            <p>Lote promocional de lançamento com vagas limitadas.</p>
+                        </div>
+                    </div>
+                    <div class="cat-price">
+                        <div class="val">R$ 99</div>
+                        <div class="sub">Promocional</div>
+                    </div>
+                </div>
+
+                <div class="category-card" data-id="pcd" data-price="79.00" data-name="Travessia de Adultos (2,5 km) — PCD">
+                    <div class="cat-left">
+                        <div class="cat-radio"></div>
+                        <div class="cat-info">
+                            <h4>Travessia de Adultos (2,5 km) — PCD</h4>
+                            <p>Inscrição e apoio especializado para atletas com deficiência.</p>
+                        </div>
+                    </div>
+                    <div class="cat-price">
+                        <div class="val">R$ 79</div>
+                        <div class="sub">Atleta PCD</div>
+                    </div>
+                </div>
+
+                <div class="category-card" data-id="kids" data-price="79.00" data-name="Travessia Kids">
+                    <div class="cat-left">
+                        <div class="cat-radio"></div>
+                        <div class="cat-info">
+                            <h4>Travessia Kids</h4>
+                            <p>Percurso adaptado e seguro para as crianças se apaixonarem pelo mar.</p>
+                        </div>
+                    </div>
+                    <div class="cat-price">
+                        <div class="val">R$ 79</div>
+                        <div class="sub">Kids</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Campos específicos para Assessoria -->
+            <div id="assessoria-fields" style="display: none; margin-bottom: 2rem; background: rgba(2, 132, 199, 0.08); padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(2, 132, 199, 0.2);">
+                <div class="form-grid" style="margin-bottom: 0;">
+                    <div class="form-group">
+                        <label for="assessoria_name">Nome da sua Assessoria <span class="req">*</span></label>
+                        <input type="text" id="assessoria_name" placeholder="Ex: Assessoria X / Equipe Y">
+                    </div>
+                    <div class="form-group">
+                        <label for="coupon_code">Cupom da Assessoria <span class="req">*</span></label>
+                        <input type="text" id="coupon_code" placeholder="Código do cupom fornecido pelo treinador" style="text-transform: uppercase;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Etapa 2: Dados Pessoais -->
+            <div class="section-heading">
+                <i class="ri-user-smile-fill"></i>
+                <span>2. Dados do Atleta</span>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="athlete_name">Nome Completo <span class="req">*</span></label>
+                    <input type="text" id="athlete_name" placeholder="Digite seu nome completo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="athlete_cpf">CPF <span class="req">*</span></label>
+                    <input type="tel" id="athlete_cpf" placeholder="000.000.000-00" maxlength="14" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="athlete_phone">WhatsApp / Celular <span class="req">*</span></label>
+                    <input type="tel" id="athlete_phone" placeholder="(00) 00000-0000" maxlength="15" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="athlete_email">E-mail para Confirmação <span class="req">*</span></label>
+                    <input type="email" id="athlete_email" placeholder="seuemail@exemplo.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="athlete_birth">Data de Nascimento <span class="req">*</span></label>
+                    <input type="date" id="athlete_birth" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="athlete_gender">Gênero <span class="req">*</span></label>
+                    <select id="athlete_gender" required>
+                        <option value="">Selecione...</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Feminino">Feminino</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Etapa 3: Kit e Informações de Prova -->
+            <div class="section-heading">
+                <i class="ri-shirt-fill"></i>
+                <span>3. Tamanho da Camisa Oficial e Segurança</span>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="tshirt_size">Tamanho da Camisa Oficial <span class="req">*</span></label>
+                    <select id="tshirt_size" required>
+                        <option value="">Selecione o tamanho...</option>
+                        <optgroup label="Modelo Tradicional (Unissex)">
+                            <option value="Tradicional P">Tradicional P</option>
+                            <option value="Tradicional M" selected>Tradicional M</option>
+                            <option value="Tradicional G">Tradicional G</option>
+                            <option value="Tradicional GG">Tradicional GG</option>
+                            <option value="Tradicional XGG">Tradicional XGG</option>
+                        </optgroup>
+                        <optgroup label="Modelo Babylook Feminina">
+                            <option value="Babylook P">Babylook P</option>
+                            <option value="Babylook M">Babylook M</option>
+                            <option value="Babylook G">Babylook G</option>
+                        </optgroup>
+                        <optgroup label="Infantil (Kids)">
+                            <option value="Kids 6">Kids 6</option>
+                            <option value="Kids 8">Kids 8</option>
+                            <option value="Kids 10">Kids 10</option>
+                            <option value="Kids 12">Kids 12</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="emergency_phone">Telefone de Emergência <span class="req">*</span></label>
+                    <input type="tel" id="emergency_phone" placeholder="(00) 00000-0000" maxlength="15" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="emergency_name">Nome do Contato de Emergência <span class="req">*</span></label>
+                    <input type="text" id="emergency_name" placeholder="Nome de um familiar ou amigo" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="medical_notes">Observações Médicas / Alergias (Opcional)</label>
+                    <textarea id="medical_notes" placeholder="Informe caso possua alguma condição de saúde relevante para a equipe médica da prova."></textarea>
+                </div>
+            </div>
+
+            <!-- Resumo Financeiro -->
+            <div class="summary-box">
+                <div class="summary-left">
+                    <div class="summary-icon"><i class="ri-secure-payment-line"></i></div>
+                    <div class="summary-info">
+                        <h5>Modalidade Selecionada</h5>
+                        <h3 id="summary-category-name">Travessia de Adultos (2,5 km)</h3>
+                    </div>
+                </div>
+                <div class="summary-price" id="summary-price-val">R$ 149,00</div>
+            </div>
+
+            <!-- Termos -->
+            <div class="terms-box">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">Declaro estar em perfeitas condições físicas e de saúde para a prática esportiva em águas abertas, concordando integralmente com o regulamento da prova dos Tubarões Cansados.</label>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-submit" id="btn-submit">
+                <span>Finalizar Inscrição</span>
+                <i class="ri-arrow-right-line"></i>
+            </button>
+
+        </form>
+
+    </main>
+
+    <!-- Modal de Sucesso & Pagamento -->
+    <div class="modal-overlay" id="modal-success">
+        <div class="modal-card">
+            <div class="success-icon"><i class="ri-check-line"></i></div>
+            <h2 class="modal-title">Inscrição Pré-Confirmada!</h2>
+            <p class="modal-sub">Seus dados foram registrados com sucesso no sistema dos Tubarões Cansados.</p>
+
+            <div class="receipt-card">
+                <div class="receipt-row">
+                    <span>Atleta:</span>
+                    <span id="modal-athlete-name">—</span>
+                </div>
+                <div class="receipt-row">
+                    <span>CPF:</span>
+                    <span id="modal-athlete-cpf">—</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Modalidade:</span>
+                    <span id="modal-athlete-cat">—</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Valor a pagar:</span>
+                    <span id="modal-athlete-val" style="color: var(--gold-light); font-size: 1.1rem;">R$ 0,00</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Status:</span>
+                    <span style="color: #fbbf24;"><i class="ri-time-line"></i> Aguardando Pagamento</span>
+                </div>
+            </div>
+
+            <div class="pix-container">
+                <div class="pix-label"><i class="ri-qr-code-line"></i> Pagamento via PIX</div>
+                <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom: 10px;">Chave PIX oficial para pagamento da inscrição:</p>
+                <div class="pix-key-box">
+                    <span id="pix-key-text" style="flex:1; overflow:hidden; text-overflow:ellipsis;">contato@tubaroescansados.com.br</span>
+                    <button type="button" class="btn-copy-pix" id="btn-copy-pix">Copiar PIX</button>
+                </div>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top: 8px;">Ou pague presencialmente com os organizadores via Cartão de Débito/Crédito.</p>
+            </div>
+
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 1.5rem;">Assim que seu pagamento for identificado ou confirmado pela organização, sua inscrição constará como <strong>Confirmada</strong> para a retirada do kit no check-in.</p>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-close" id="btn-modal-close">Entendido / Concluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // State
+        let selectedCategory = {
+            id: 'adulto_25k',
+            price: 149.00,
+            name: 'Travessia de Adultos (2,5 km)'
+        };
+
+        const categoryCards = document.querySelectorAll('.category-card');
+        const summaryCatName = document.getElementById('summary-category-name');
+        const summaryPriceVal = document.getElementById('summary-price-val');
+        const assessoriaFields = document.getElementById('assessoria-fields');
+        const formInscricao = document.getElementById('form-inscricao');
+        const formError = document.getElementById('form-error');
+        const formErrorMsg = document.getElementById('form-error-msg');
+        const btnSubmit = document.getElementById('btn-submit');
+
+        // Selection of category
+        categoryCards.forEach(card => {
+            card.addEventListener('click', () => {
+                categoryCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+
+                selectedCategory = {
+                    id: card.dataset.id,
+                    price: parseFloat(card.dataset.price),
+                    name: card.dataset.name
+                };
+
+                summaryCatName.textContent = selectedCategory.name;
+                summaryPriceVal.textContent = `R$ ${selectedCategory.price.toFixed(2).replace('.', ',')}`;
+
+                if (selectedCategory.id === 'adulto_assessoria') {
+                    assessoriaFields.style.display = 'block';
+                } else {
+                    assessoriaFields.style.display = 'none';
+                }
+            });
+        });
+
+        // Masks
+        function maskCpf(val) {
+            return val.replace(/\D/g, '')
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+                .slice(0, 14);
+        }
+
+        function maskPhone(val) {
+            return val.replace(/\D/g, '')
+                .replace(/(\d{2})(\d)/, '($1) $2')
+                .replace(/(\d{5})(\d)/, '$1-$2')
+                .slice(0, 15);
+        }
+
+        const inputCpf = document.getElementById('athlete_cpf');
+        inputCpf.addEventListener('input', (e) => e.target.value = maskCpf(e.target.value));
+
+        const inputPhone = document.getElementById('athlete_phone');
+        inputPhone.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
+
+        const inputEmergPhone = document.getElementById('emergency_phone');
+        inputEmergPhone.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
+
+        // Submit Form
+        formInscricao.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            formError.style.display = 'none';
+
+            const name = document.getElementById('athlete_name').value.trim();
+            const cpf = inputCpf.value.replace(/\D/g, '');
+            const email = document.getElementById('athlete_email').value.trim();
+            const phone = inputPhone.value.trim();
+            const birth_date = document.getElementById('athlete_birth').value;
+            const gender = document.getElementById('athlete_gender').value;
+            const tshirt_size = document.getElementById('tshirt_size').value;
+            const emergency_name = document.getElementById('emergency_name').value.trim();
+            const emergency_phone = inputEmergPhone.value.trim();
+            const medical_notes = document.getElementById('medical_notes').value.trim();
+            const termsChecked = document.getElementById('terms').checked;
+
+            const assessoria_name = document.getElementById('assessoria_name').value.trim();
+            const coupon_code = document.getElementById('coupon_code').value.trim();
+
+            if (!name || !cpf || !email || !phone || !birth_date || !gender || !tshirt_size || !emergency_name || !emergency_phone) {
+                showError('Por favor, preencha todos os campos obrigatórios marcados com *.');
+                return;
+            }
+
+            if (cpf.length !== 11) {
+                showError('O CPF informado é inválido. Digite os 11 dígitos.');
+                return;
+            }
+
+            if (selectedCategory.id === 'adulto_assessoria' && (!assessoria_name || !coupon_code)) {
+                showError('Para a modalidade com assessoria, informe o nome da assessoria e o cupom.');
+                return;
+            }
+
+            if (!termsChecked) {
+                showError('Você precisa concordar com o termo de responsabilidade para se inscrever.');
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Registrando Inscrição...`;
+
+            try {
+                const res = await fetch('/api/public/register-athlete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        cpf,
+                        email,
+                        phone,
+                        birth_date,
+                        gender,
+                        category_id: selectedCategory.id,
+                        coupon_code,
+                        assessoria_name,
+                        tshirt_size,
+                        emergency_contact_name: emergency_name,
+                        emergency_contact_phone: emergency_phone,
+                        medical_notes
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Erro ao processar inscrição');
+                }
+
+                // Show Success Modal
+                document.getElementById('modal-athlete-name').textContent = data.athlete.name;
+                document.getElementById('modal-athlete-cpf').textContent = maskCpf(data.athlete.cpf);
+                document.getElementById('modal-athlete-cat').textContent = data.athlete.category;
+                document.getElementById('modal-athlete-val').textContent = `R$ ${data.athlete.price.toFixed(2).replace('.', ',')}`;
+
+                document.getElementById('modal-success').style.display = 'flex';
+                formInscricao.reset();
+
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<span>Finalizar Inscrição</span><i class="ri-arrow-right-line"></i>`;
+            }
+        });
+
+        function showError(msg) {
+            formErrorMsg.textContent = msg;
+            formError.style.display = 'flex';
+            formError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Copy Pix
+        document.getElementById('btn-copy-pix').addEventListener('click', () => {
+            const key = document.getElementById('pix-key-text').innerText;
+            navigator.clipboard.writeText(key).then(() => {
+                const btn = document.getElementById('btn-copy-pix');
+                btn.textContent = 'Copiado!';
+                setTimeout(() => btn.textContent = 'Copiar PIX', 2500);
+            });
+        });
+
+        // Close Modal
+        document.getElementById('btn-modal-close').addEventListener('click', () => {
+            document.getElementById('modal-success').style.display = 'none';
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

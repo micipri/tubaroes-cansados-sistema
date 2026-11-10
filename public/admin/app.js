@@ -1,6 +1,6 @@
 const API_URL = '/api';
 
-// ── Mobile Sidebar (global — chamado via onclick no HTML) ─────
+// ── Mobile Sidebar ────────────────────────────────────────────
 window.toggleSidebar = function() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('sidebar-overlay');
@@ -8,9 +8,7 @@ window.toggleSidebar = function() {
     if (!sidebar) return;
     const isOpen = sidebar.classList.toggle('open');
     if (overlay) overlay.classList.toggle('active', isOpen);
-    if (btn) btn.innerHTML = isOpen
-        ? '<i class="ri-close-line"></i>'
-        : '<i class="ri-menu-line"></i>';
+    if (btn) btn.innerHTML = isOpen ? '<i class="ri-close-line"></i>' : '<i class="ri-menu-line"></i>';
 };
 
 window.closeSidebar = function() {
@@ -22,12 +20,16 @@ window.closeSidebar = function() {
     if (btn) btn.innerHTML = '<i class="ri-menu-line"></i>';
 };
 
+// ── Global State ──────────────────────────────────────────────
+let currentAthletes = [];
+let videoStream = null;
+
 // ── Auth Check on Load ────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-    // Close sidebar when a nav link is tapped on mobile
     document.querySelectorAll('.nav-links li').forEach(link => {
         link.addEventListener('click', () => { if (window.innerWidth <= 768) window.closeSidebar(); });
     });
+
     try {
         const res = await fetch('/auth/me', { credentials: 'include' });
         if (!res.ok) { window.location.href = '/admin/login.html'; return; }
@@ -35,7 +37,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('user-info').textContent = `👤 ${me.username}`;
 
-        // Show users section only for master
+        // Show users tab only for master admin
         if (me.isMaster) {
             document.getElementById('nav-users').style.display = '';
         }
@@ -46,108 +48,77 @@ window.addEventListener('DOMContentLoaded', async () => {
             window.location.href = '/admin/login.html';
         });
 
-        // Set today's date in all date inputs
+        // Set default date in date inputs
         const today = new Date().toISOString().split('T')[0];
         document.querySelectorAll('input[type="date"]').forEach(el => el.value = today);
 
-        // Load Dashboard on start
+        // Init Dashboard
         loadDashboard();
-    } catch {
+
+        // Setup Event Listeners
+        setupEventListeners();
+
+    } catch (e) {
         window.location.href = '/admin/login.html';
     }
 });
 
-// Utilities
-const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+// Formatters
+const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+
+const formatCpf = (cpf) => {
+    const clean = String(cpf || '').replace(/\D/g, '');
+    if (clean.length !== 11) return cpf || '—';
+    return clean.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 };
 
-const formatDate = (dateString) => {
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
+const formatPhone = (phone) => {
+    const clean = String(phone || '').replace(/\D/g, '');
+    if (clean.length === 11) return clean.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    if (clean.length === 10) return clean.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    return phone || '—';
 };
 
-// Export Table Data to XLSX (using SheetJS)
-function exportTableToXLSX(tbodyId, filename) {
-    const tbody = document.getElementById(tbodyId);
-    if (!tbody || tbody.rows.length === 0) { alert('Não há dados para exportar.'); return; }
-
-    const table = tbody.closest('table');
-    const thead = table.querySelector('thead tr');
-    const headers = [];
-    if (thead) {
-        for (let j = 0; j < thead.cells.length - 1; j++) {
-            headers.push(thead.cells[j].innerText.trim());
-        }
+const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+        const [datePart, timePart] = dateStr.split(' ');
+        const [y, m, d] = datePart.split('-');
+        if (!y || !m || !d) return dateStr;
+        return timePart ? `${d}/${m}/${y} ${timePart.slice(0, 5)}` : `${d}/${m}/${y}`;
+    } catch {
+        return dateStr;
     }
+};
 
-    const dataRows = [];
-    for (let i = 0; i < tbody.rows.length; i++) {
-        const row = [];
-        const cols = tbody.rows[i].cells;
-        for (let j = 0; j < cols.length - 1; j++) {
-            const cb = cols[j].querySelector('input[type="checkbox"]');
-            if (cb) { row.push(cb.checked ? 'Sim' : 'Não'); }
-            else {
-                const clone = cols[j].cloneNode(true);
-                clone.querySelectorAll('button').forEach(b => b.remove());
-                row.push(clone.innerText.trim());
-            }
-        }
-        dataRows.push(row);
-    }
-
-    const wsData = [headers, ...dataRows];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const headerRange = XLSX.utils.decode_range(ws['!ref']);
-    for (let c = headerRange.s.c; c <= headerRange.e.c; c++) {
-        const cellAddr = XLSX.utils.encode_cell({ r: 0, c });
-        if (ws[cellAddr]) ws[cellAddr].s = { font: { bold: true } };
-    }
-    const colWidths = headers.map((h, i) => {
-        const maxLen = Math.max(h.length, ...dataRows.map(r => (r[i] ? String(r[i]).length : 0)));
-        return { wch: Math.min(maxLen + 2, 50) };
-    });
-    ws['!cols'] = colWidths;
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Dados');
-    XLSX.writeFile(wb, filename);
-}
-
-// ── Navigation Logic ──────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────
 document.querySelectorAll('.nav-links li').forEach(link => {
     link.addEventListener('click', () => {
         document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
         link.classList.add('active');
         document.getElementById('page-title').textContent = link.textContent.trim();
         document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+
         const target = link.getAttribute('data-target');
-        document.getElementById(target).classList.remove('hidden');
-        loadSectionData(target);
+        const targetSection = document.getElementById(target);
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+            loadSectionData(target);
+        }
     });
 });
 
-// ── Tab Logic ─────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const parent = e.target.closest('.tabs');
-        parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        const tabGroup = parent.nextElementSibling.parentElement;
-        tabGroup.querySelectorAll(':scope > .tab-content').forEach(c => c.classList.add('hidden'));
-        const targetId = e.target.getAttribute('data-tab');
-        document.getElementById(targetId).classList.remove('hidden');
-    });
-});
-
-// ── Data Loading Dispatcher ───────────────────────────────────
 function loadSectionData(section) {
+    // Stop camera stream if moving away from checkin
+    if (section !== 'checkin' && videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+
     if (section === 'dashboard') loadDashboard();
-    else if (section === 'registrations') loadRegistrations();
-    else if (section === 'registrations-mod2') loadRegistrationsMod2();
-    else if (section === 'party') loadPartyTickets();
-    else if (section === 'store') { loadStoreSales(); loadStoreProducts(); loadStorePackages(); loadStoreOnline(); }
-    else if (section === 'costs') { loadCosts('event'); loadCosts('party'); }
+    else if (section === 'athletes') loadAthletes();
+    else if (section === 'checkin') loadCheckinStation();
+    else if (section === 'costs') loadCosts();
     else if (section === 'sponsors') loadSponsors();
     else if (section === 'users') loadUsers();
 }
@@ -155,9 +126,10 @@ function loadSectionData(section) {
 // ── Fetch Wrappers ────────────────────────────────────────────
 async function fetchData(endpoint) {
     const res = await fetch(`${API_URL}/${endpoint}`, { credentials: 'include' });
-    if (res.status === 401) { window.location.href = '/admin/login.html'; return []; }
+    if (res.status === 401) { window.location.href = '/admin/login.html'; return null; }
     return res.json();
 }
+
 async function postData(endpoint, data) {
     const res = await fetch(`${API_URL}/${endpoint}`, {
         method: 'POST',
@@ -165,10 +137,6 @@ async function postData(endpoint, data) {
         credentials: 'include',
         body: JSON.stringify(data)
     });
-    return res.json();
-}
-async function deleteData(endpoint, id) {
-    const res = await fetch(`${API_URL}/${endpoint}/${id}`, { method: 'DELETE', credentials: 'include' });
     return res.json();
 }
 
@@ -182,699 +150,999 @@ async function putData(endpoint, data) {
     return res.json();
 }
 
-const deleteHandler = (endpoint, id, reloadFunc) => async (e) => {
-    if (e) e.preventDefault();
-    if (confirm('Tem certeza que deseja excluir?')) {
-        await deleteData(endpoint, id);
-        reloadFunc();
+async function deleteData(endpoint, id) {
+    const res = await fetch(`${API_URL}/${endpoint}/${id}`, { method: 'DELETE', credentials: 'include' });
+    return res.json();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 1. DASHBOARD & FINANCEIRO INTEGRADO
+// ═══════════════════════════════════════════════════════════════
+async function loadDashboard() {
+    const data = await fetchData('summary');
+    if (!data) return;
+
+    // Top Cards
+    document.getElementById('total-income').textContent = formatCurrency(data.total_income);
+    document.getElementById('stat-pix-amount').textContent = formatCurrency(data.athletes.pix_amount);
+    document.getElementById('stat-pix-count').textContent = `${data.athletes.pix_count} atleta(s) confirmados`;
+
+    document.getElementById('stat-card-amount').textContent = formatCurrency(data.athletes.card_amount);
+    document.getElementById('stat-card-count').textContent = `${data.athletes.card_count} atleta(s) confirmados`;
+
+    const totalBalance = data.total_balance;
+    const balanceEl = document.getElementById('total-balance');
+    balanceEl.textContent = formatCurrency(totalBalance);
+    balanceEl.style.color = totalBalance >= 0 ? '#38bdf8' : '#ef4444';
+
+    // Secondary KPIs
+    document.getElementById('stat-pending-amount').textContent = formatCurrency(data.athletes.pending_amount);
+    document.getElementById('stat-pending-count').textContent = `${data.athletes.pending_count} aguardando pagamento`;
+
+    document.getElementById('stat-checkin-count').textContent = `${data.athletes.checkin_count} atletas`;
+    const checkinRatio = data.athletes.confirmed_count > 0 
+        ? Math.round((data.athletes.checkin_count / data.athletes.confirmed_count) * 100) 
+        : 0;
+    document.getElementById('stat-checkin-ratio').textContent = `${checkinRatio}% dos confirmados`;
+
+    document.getElementById('total-expenses').textContent = formatCurrency(data.total_expenses);
+    document.getElementById('stat-costs-detail').textContent = `${formatCurrency(data.costs.event_costs)} em despesas`;
+    document.getElementById('stat-sponsors-amount').textContent = formatCurrency(data.sponsors.total_amount);
+
+    // Categories breakdown
+    const catList = document.getElementById('categories-breakdown');
+    catList.innerHTML = '';
+    const categories = data.athletes.categories || {};
+    const catKeys = Object.keys(categories);
+
+    if (catKeys.length === 0) {
+        catList.innerHTML = '<li style="color:var(--text-secondary); text-align:center;">Nenhuma inscrição realizada ainda.</li>';
+    } else {
+        catKeys.forEach(catName => {
+            const item = categories[catName];
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div>
+                    <strong>${catName}</strong><br>
+                    <small style="color:var(--text-secondary);">${item.confirmed} confirmados de ${item.total} inscritos</small>
+                </div>
+                <strong style="color:var(--gold);">${formatCurrency(item.revenue)}</strong>
+            `;
+            catList.appendChild(li);
+        });
+    }
+
+    // General Summary
+    document.getElementById('fb-confirmed').textContent = formatCurrency(data.athletes.confirmed_amount);
+    document.getElementById('fb-pix').textContent = formatCurrency(data.athletes.pix_amount);
+    document.getElementById('fb-card').textContent = formatCurrency(data.athletes.card_amount);
+    document.getElementById('fb-sponsors').textContent = formatCurrency(data.sponsors.total_amount);
+    document.getElementById('fb-expenses').textContent = `- ${formatCurrency(data.total_expenses)}`;
+    document.getElementById('fb-balance').textContent = formatCurrency(data.total_balance);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// 2. GESTÃO DE ATLETAS INSCRITOS
+// ═══════════════════════════════════════════════════════════════
+async function loadAthletes() {
+    const search = document.getElementById('athletes-search').value.trim();
+    const status = document.getElementById('filter-athlete-status').value;
+    const checkin = document.getElementById('filter-athlete-checkin').value;
+
+    let query = `athletes?search=${encodeURIComponent(search)}&status=${status}&checkin=${checkin}`;
+    const athletes = await fetchData(query);
+    if (!athletes) return;
+
+    currentAthletes = athletes;
+    document.getElementById('athletes-count-total').textContent = athletes.length;
+
+    const tbody = document.getElementById('table-athletes');
+    tbody.innerHTML = '';
+
+    if (athletes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhum atleta encontrado com os filtros atuais.</td></tr>`;
+        return;
+    }
+
+    athletes.forEach(a => {
+        const tr = document.createElement('tr');
+        
+        // Status Badge
+        const isConfirmed = a.payment_status === 'Confirmado';
+        const statusBadge = isConfirmed
+            ? `<span class="badge-status confirmed"><i class="ri-checkbox-circle-fill"></i> ${a.payment_method || 'Pago'}</span>`
+            : `<span class="badge-status pending"><i class="ri-time-line"></i> Pendente</span>`;
+
+        // Checkin Badge
+        const checkinBadge = a.checkin_status === 1
+            ? `<span class="badge-checkin-ok"><i class="ri-check-line"></i> Realizado</span>`
+            : `<span class="badge-checkin-no">Não</span>`;
+
+        tr.innerHTML = `
+            <td>#${a.id}</td>
+            <td>
+                <button type="button" class="athlete-name-btn" onclick="openAthleteModal(${a.id})" title="Clique para abrir todos os dados e confirmar pagamento">
+                    <i class="ri-eye-line"></i> <span>${a.name}</span>
+                </button>
+            </td>
+            <td>${formatCpf(a.cpf)}</td>
+            <td>
+                <div>${a.category}</div>
+                ${a.assessoria_name ? `<small style="color:#38bdf8;">(${a.assessoria_name})</small>` : ''}
+            </td>
+            <td><strong style="color: #fbbf24;">${a.tshirt_size || '—'}</strong></td>
+            <td><strong>${formatCurrency(a.price)}</strong></td>
+            <td>${statusBadge}</td>
+            <td>${checkinBadge}</td>
+            <td>
+                <div style="display:flex; gap: 6px;">
+                    <button type="button" class="btn btn-primary" onclick="openAthleteModal(${a.id})" style="padding: 4px 8px; font-size: 0.8rem;" title="Ver ficha e opções de pagamento">
+                        <i class="ri-folder-user-line"></i> Ficha
+                    </button>
+                    <button type="button" class="btn-icon btn-danger" onclick="deleteAthleteHandler(${a.id})" title="Excluir atleta">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Open Athlete Full View & Payment Confirmation Modal
+async function openAthleteModal(athleteId) {
+    const a = await fetchData(`athletes/${athleteId}`);
+    if (!a) return;
+
+    const isConfirmed = a.payment_status === 'Confirmado';
+
+    const modalHTML = `
+        <div class="athlete-modal-container">
+            <div class="athlete-modal-header">
+                <div>
+                    <h2 style="font-size: 1.4rem; color: #fff; margin-bottom: 2px;">${a.name}</h2>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">ID #${a.id} • Inscrito em ${formatDate(a.created_at)}</span>
+                </div>
+                <div>
+                    ${isConfirmed 
+                        ? `<span class="badge-status confirmed" style="font-size:0.9rem; padding: 6px 14px;"><i class="ri-checkbox-circle-fill"></i> PAGO VIA ${a.payment_method ? a.payment_method.toUpperCase() : 'CONFIRMADO'}</span>`
+                        : `<span class="badge-status pending" style="font-size:0.9rem; padding: 6px 14px;"><i class="ri-time-line"></i> PAGAMENTO PENDENTE</span>`
+                    }
+                </div>
+            </div>
+
+            <div class="athlete-info-grid">
+                <div class="info-field">
+                    <label>CPF</label>
+                    <div class="val">${formatCpf(a.cpf)}</div>
+                </div>
+                <div class="info-field">
+                    <label>WhatsApp / Celular</label>
+                    <div class="val">
+                        <a href="https://wa.me/55${String(a.phone).replace(/\D/g, '')}" target="_blank" style="color: #34d399; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="ri-whatsapp-line"></i> ${formatPhone(a.phone)}
+                        </a>
+                    </div>
+                </div>
+                <div class="info-field">
+                    <label>E-mail</label>
+                    <div class="val">${a.email}</div>
+                </div>
+                <div class="info-field">
+                    <label>Nascimento / Gênero</label>
+                    <div class="val">${formatDate(a.birth_date)} (${a.gender || 'Não informado'})</div>
+                </div>
+                <div class="info-field">
+                    <label>Modalidade de Prova</label>
+                    <div class="val" style="color: #38bdf8;">${a.category}</div>
+                </div>
+                <div class="info-field">
+                    <label>Tamanho da Camisa</label>
+                    <div class="val" style="color: var(--gold); font-size: 1.05rem;">${a.tshirt_size || '—'}</div>
+                </div>
+                ${a.assessoria_name ? `
+                <div class="info-field">
+                    <label>Assessoria Esportiva</label>
+                    <div class="val">${a.assessoria_name} ${a.coupon_code ? `(Cupom: ${a.coupon_code})` : ''}</div>
+                </div>` : ''}
+                <div class="info-field">
+                    <label>Valor da Inscrição</label>
+                    <div class="val" style="color: var(--gold); font-size: 1.15rem; font-weight: 800;">${formatCurrency(a.price)}</div>
+                </div>
+                <div class="info-field">
+                    <label>Contato de Emergência</label>
+                    <div class="val">${a.emergency_contact_name || '—'} ${a.emergency_contact_phone ? `(${formatPhone(a.emergency_contact_phone)})` : ''}</div>
+                </div>
+                <div class="info-field">
+                    <label>Check-in da Prova</label>
+                    <div class="val">${a.checkin_status === 1 ? `<span style="color:#38bdf8;">✓ Realizado (${formatDate(a.checkin_date)})</span>` : 'Pendente (kit ainda não retirado)'}</div>
+                </div>
+                ${a.medical_notes ? `
+                <div class="info-field" style="grid-column: 1 / -1;">
+                    <label>Observações Médicas / Alergias</label>
+                    <div class="val" style="color: #fca5a5; font-size: 0.9rem;">${a.medical_notes}</div>
+                </div>` : ''}
+            </div>
+
+            <!-- PAYMENT CONFIRMATION SECTION -->
+            <div style="margin-top: 5px;">
+                ${!isConfirmed ? `
+                    <div class="payment-action-box">
+                        <h4 style="color: #fbbf24; font-size: 1.1rem; margin-bottom: 6px;">
+                            <i class="ri-secure-payment-line"></i> Confirmar Pagamento do Atleta
+                        </h4>
+                        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1rem;">
+                            Ao confirmar o pagamento, a inscrição será validada e o valor de <strong>${formatCurrency(a.price)}</strong> será contabilizado imediatamente no financeiro do evento.
+                        </p>
+                        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${a.price})" style="padding: 12px 24px; font-size: 1rem;">
+                                <i class="ri-qr-code-line"></i> Confirmar via PIX (${formatCurrency(a.price)})
+                            </button>
+                            <button type="button" class="btn btn-card" onclick="confirmPaymentHandler(${a.id}, 'Cartão', ${a.price})" style="padding: 12px 24px; font-size: 1rem;">
+                                <i class="ri-bank-card-line"></i> Confirmar via CARTÃO (${formatCurrency(a.price)})
+                            </button>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="payment-confirmed-box">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; color: #34d399; font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;">
+                            <i class="ri-checkbox-circle-fill" style="font-size: 1.4rem;"></i> Pagamento Confirmado via ${a.payment_method ? a.payment_method.toUpperCase() : 'SISTEMA'}
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 12px;">
+                            Confirmado em ${formatDate(a.payment_date)} ${a.confirmed_by ? `por <strong>${a.confirmed_by}</strong>` : ''}.
+                        </p>
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <button type="button" class="btn" onclick="cancelPaymentHandler(${a.id})" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;">
+                                <i class="ri-close-circle-line"></i> Reverter para Pendente
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="goToAthleteCheckin(${a.id})" style="padding: 8px 18px; font-size: 0.85rem;">
+                                <i class="ri-qr-scan-line"></i> Fazer Check-in Agora
+                            </button>
+                        </div>
+                    </div>
+                `}
+            </div>
+        </div>
+    `;
+
+    createModal(`Ficha da Inscrição #${a.id}`, modalHTML, null, false);
+}
+
+// Confirm Payment Action
+window.confirmPaymentHandler = async function(athleteId, method, price) {
+    if (!confirm(`Confirma o recebimento de ${formatCurrency(price)} via ${method} para este atleta?`)) return;
+
+    try {
+        const res = await putData(`athletes/${athleteId}/confirm-payment`, {
+            payment_method: method,
+            price: price
+        });
+
+        if (res.error) {
+            alert(`Erro: ${res.error}`);
+            return;
+        }
+
+        // Close modal
+        closeActiveModal();
+
+        // Refresh views
+        loadAthletes();
         loadDashboard();
+
+        alert(`✓ Pagamento via ${method} confirmado com sucesso! Valor contabilizado no Financeiro.`);
+    } catch (err) {
+        alert('Erro ao confirmar pagamento: ' + err.message);
     }
 };
 
-// ── Dashboard ─────────────────────────────────────────────────
-async function loadDashboard() {
-    const data = await fetchData('summary');
-    if (!data || !data.income) return;
-    document.getElementById('total-income').textContent = formatCurrency(data.total_income || Object.values(data.income).reduce((a, b) => a + b, 0));
-    document.getElementById('total-expenses').textContent = formatCurrency(data.total_expenses || Object.values(data.expenses).reduce((a, b) => a + b, 0));
-    document.getElementById('total-balance').textContent = formatCurrency(data.total_balance);
-    document.getElementById('income-breakdown').innerHTML = `
-        <li><span>Inscrições Lote</span> <strong>${formatCurrency(data.income.registrations)}</strong></li>
-        <li><span>Inscrições Mod. 2</span> <strong>${formatCurrency(data.income.registrations_mod2 || 0)}</strong></li>
-        <li><span>Ingressos Festa</span> <strong>${formatCurrency(data.income.party_tickets)}</strong></li>
-        <li><span>Lojinha (Vendas)</span> <strong>${formatCurrency(data.income.store_sales)}</strong></li>
-        <li><span>Patrocínios</span> <strong>${formatCurrency(data.income.sponsors)}</strong></li>
-    `;
-    document.getElementById('expenses-breakdown').innerHTML = `
-        <li><span>Custos Evento</span> <strong>${formatCurrency(data.expenses.event_costs)}</strong></li>
-        <li><span>Custos Festa</span> <strong>${formatCurrency(data.expenses.party_costs)}</strong></li>
-        <li><span>Custo Estoque Loja</span> <strong>${formatCurrency(data.expenses.store_costs)}</strong></li>
-    `;
-}
+// Cancel Payment Action
+window.cancelPaymentHandler = async function(athleteId) {
+    if (!confirm('Deseja realmente reverter este pagamento para Pendente? O valor será removido do total financeiro arrecadado.')) return;
 
-// ── Registrations (Batches) ───────────────────────────────────
-async function loadRegistrations() {
-    const data = await fetchData('registrations');
-    const tbody = document.getElementById('table-registrations');
-    tbody.innerHTML = '';
-    data.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>#${item.id}</td><td>${item.name}</td><td>${item.quantity} un.</td>
-            <td>${formatCurrency(item.unit_amount)}</td><td><strong>${formatCurrency(item.total_amount)}</strong></td>
-            <td>${formatDate(item.date)}</td>
-            <td><button type="button" class="btn-icon btn-danger"><i class="ri-delete-bin-line"></i></button></td>
-        `;
-        tr.querySelector('button').onclick = deleteHandler('registrations', item.id, loadRegistrations);
-        tbody.appendChild(tr);
-    });
-}
-document.getElementById('form-registration').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await postData('registrations', {
-        name: document.getElementById('reg-name').value,
-        quantity: parseInt(document.getElementById('reg-quantity').value),
-        unit_amount: parseFloat(document.getElementById('reg-amount').value),
-        date: document.getElementById('reg-date').value
-    });
-    e.target.reset();
-    loadRegistrations(); loadDashboard();
-});
-
-// ── Registrations Mod 2 ───────────────────────────────────────
-async function loadRegistrationsMod2() {
-    let data = await fetchData('registrations_mod2');
-    const sortSelect = document.getElementById('sort-mod2');
-    if (sortSelect) {
-        const sortMode = sortSelect.value;
-        if (sortMode === 'name_asc') data.sort((a, b) => (a.name || '').trim().toLowerCase().localeCompare((b.name || '').trim().toLowerCase()));
-        else if (sortMode === 'cap_asc') data.sort((a, b) => (a.cap_name || '').trim().toLowerCase().localeCompare((b.cap_name || '').trim().toLowerCase()));
-        else if (sortMode === 'receipt_ok') data.sort((a, b) => Number(b.has_receipt) - Number(a.has_receipt) || b.id - a.id);
+    try {
+        await putData(`athletes/${athleteId}/cancel-payment`, {});
+        closeActiveModal();
+        loadAthletes();
+        loadDashboard();
+    } catch (err) {
+        alert('Erro ao cancelar pagamento: ' + err.message);
     }
-    const tbody = document.getElementById('table-registrations-mod2');
+};
+
+// Delete Athlete Action
+window.deleteAthleteHandler = async function(athleteId) {
+    if (!confirm('Tem certeza de que deseja excluir permanentemente a inscrição deste atleta?')) return;
+
+    try {
+        await deleteData('athletes', athleteId);
+        loadAthletes();
+        loadDashboard();
+    } catch (err) {
+        alert('Erro ao excluir: ' + err.message);
+    }
+};
+
+// Go to check-in
+window.goToAthleteCheckin = function(athleteId) {
+    closeActiveModal();
+    // Switch to check-in tab
+    const tabCheckin = document.querySelector('.nav-links li[data-target="checkin"]');
+    if (tabCheckin) tabCheckin.click();
+
+    setTimeout(() => {
+        selectAthleteForCheckin(athleteId);
+    }, 200);
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// 3. CHECK-IN INTEGRADO DOS ATLETAS
+// ═══════════════════════════════════════════════════════════════
+async function loadCheckinStation() {
+    const summary = await fetchData('summary');
+    if (summary && summary.athletes) {
+        document.getElementById('ci-total').textContent = summary.athletes.total_count;
+        document.getElementById('ci-confirmed').textContent = summary.athletes.confirmed_count;
+        document.getElementById('ci-done').textContent = summary.athletes.checkin_count;
+        document.getElementById('ci-pending').textContent = Math.max(0, summary.athletes.confirmed_count - summary.athletes.checkin_count);
+    }
+
+    loadCheckinTable();
+}
+
+async function loadCheckinTable() {
+    const checkedAthletes = await fetchData('athletes?checkin=1');
+    if (!checkedAthletes) return;
+
+    document.getElementById('count-checkedin-table').textContent = checkedAthletes.length;
+    const tbody = document.getElementById('table-checkins-history');
     tbody.innerHTML = '';
-    data.forEach(item => {
+
+    if (checkedAthletes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhum check-in realizado ainda hoje.</td></tr>`;
+        return;
+    }
+
+    checkedAthletes.forEach(a => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>#${item.id}</td><td>${item.name}</td><td>${item.email}</td>
-            <td>${item.cap_name || ''} <button type="button" class="btn-icon edit-cap-btn" data-id="${item.id}" data-current="${item.cap_name || ''}"><i class="ri-pencil-line"></i></button></td>
-            <td><strong>${formatCurrency(item.amount)}</strong></td>
-            <td><input type="checkbox" class="toggle-cb" data-id="${item.id}" data-field="has_receipt" ${item.has_receipt ? 'checked' : ''}></td>
-            <td><input type="checkbox" class="toggle-cb" data-id="${item.id}" data-field="is_confirmed" ${item.is_confirmed ? 'checked' : ''}></td>
-            <td>${formatDate(item.date)}</td>
-            <td><button type="button" class="btn-icon btn-danger"><i class="ri-delete-bin-line"></i></button></td>
+            <td>#${a.id}</td>
+            <td><strong>${a.name}</strong></td>
+            <td>${formatCpf(a.cpf)}</td>
+            <td>${a.category}</td>
+            <td><span class="badge-status" style="background: rgba(2, 132, 199, 0.2); color:#38bdf8;">${a.tshirt_size || 'M'}</span></td>
+            <td><strong style="color:var(--gold);">${a.cap_number || '—'}</strong></td>
+            <td>${a.kit_retrieved_by || 'Próprio atleta'}</td>
+            <td>${formatDate(a.checkin_date)}</td>
+            <td>
+                ${a.checkin_photo ? `
+                    <button type="button" class="btn" onclick="viewPhotoModal('${a.checkin_photo}', '${a.name}')" style="padding: 4px 8px; font-size: 0.8rem; background: rgba(255,255,255,0.08);">
+                        <i class="ri-image-line"></i> Ver Foto
+                    </button>
+                ` : '<span style="color:var(--text-secondary); font-size:0.8rem;">Sem foto</span>'}
+            </td>
+            <td>
+                <button type="button" class="btn" onclick="undoCheckinHandler(${a.id})" style="padding: 4px 8px; font-size: 0.75rem; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3);">
+                    Desfazer
+                </button>
+            </td>
         `;
-        tr.querySelector('.btn-danger').onclick = deleteHandler('registrations_mod2', item.id, loadRegistrationsMod2);
-        tr.querySelectorAll('.toggle-cb').forEach(cb => {
-            cb.addEventListener('change', async (e) => {
-                const id = e.target.getAttribute('data-id');
-                const field = e.target.getAttribute('data-field');
-                const value = e.target.checked;
-                try {
-                    await fetch(API_URL + '/registrations_mod2/' + id + '/toggle', {
-                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include', body: JSON.stringify({ field, value })
-                    });
-                    loadDashboard();
-                } catch { alert('Erro ao atualizar.'); e.target.checked = !value; }
-            });
-        });
-        tr.querySelector('.edit-cap-btn').addEventListener('click', async (e) => {
-            const btn = e.target.closest('button');
-            const id = btn.getAttribute('data-id');
-            const currentName = btn.getAttribute('data-current');
-            const newName = prompt('Editar Nome na Touca:', currentName);
-            if (newName !== null && newName !== currentName) {
-                try {
-                    const res = await fetch(API_URL + '/registrations_mod2/' + id + '/cap_name', {
-                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include', body: JSON.stringify({ cap_name: newName })
-                    });
-                    if (!res.ok) throw new Error(await res.text());
-                    const result = await res.json();
-                    if (!result.updated) throw new Error('No rows updated.');
-                    loadRegistrationsMod2();
-                } catch (err) { alert('Erro ao atualizar nome: ' + err.message); }
-            }
-        });
         tbody.appendChild(tr);
     });
 }
-document.getElementById('form-reg-mod2').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await postData('registrations_mod2', {
-        name: document.getElementById('reg2-name').value,
-        email: document.getElementById('reg2-email').value,
-        cap_name: document.getElementById('reg2-cap').value,
-        amount: parseFloat(document.getElementById('reg2-amount').value),
-        has_receipt: document.getElementById('reg2-receipt').checked,
-        is_confirmed: document.getElementById('reg2-confirmed').checked,
-        date: document.getElementById('reg2-date').value
+
+// Live Search for Checkin
+const checkinInput = document.getElementById('checkin-quick-search');
+const suggestionsBox = document.getElementById('checkin-suggestions');
+
+checkinInput.addEventListener('input', async (e) => {
+    const term = e.target.value.trim();
+    if (term.length < 2) {
+        suggestionsBox.style.display = 'none';
+        return;
+    }
+
+    const athletes = await fetchData(`athletes?search=${encodeURIComponent(term)}`);
+    if (!athletes || athletes.length === 0) {
+        suggestionsBox.innerHTML = '<div style="padding: 12px; color: var(--text-secondary); text-align: center;">Nenhum atleta encontrado</div>';
+        suggestionsBox.style.display = 'block';
+        return;
+    }
+
+    suggestionsBox.innerHTML = '';
+    athletes.slice(0, 8).forEach(a => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; display: flex; justify-content: space-between; align-items: center;';
+        item.innerHTML = `
+            <div>
+                <strong style="color: #fff;">${a.name}</strong> <span style="font-size:0.85rem; color:var(--text-secondary);">(${formatCpf(a.cpf)})</span>
+                <div style="font-size: 0.8rem; color: #38bdf8;">${a.category} • Camisa: ${a.tshirt_size || 'M'}</div>
+            </div>
+            <div>
+                ${a.payment_status === 'Confirmado' 
+                    ? `<span class="badge-status confirmed" style="font-size:0.75rem;">Pago (${a.payment_method})</span>`
+                    : `<span class="badge-status pending" style="font-size:0.75rem;">Pendente</span>`
+                }
+                ${a.checkin_status === 1 ? `<span class="badge-checkin-ok" style="margin-left: 5px;">Check-in OK</span>` : ''}
+            </div>
+        `;
+        item.onmouseenter = () => item.style.background = 'rgba(2, 132, 199, 0.15)';
+        item.onmouseleave = () => item.style.background = 'transparent';
+        item.onclick = () => {
+            suggestionsBox.style.display = 'none';
+            checkinInput.value = '';
+            selectAthleteForCheckin(a.id);
+        };
+        suggestionsBox.appendChild(item);
     });
-    e.target.reset(); loadRegistrationsMod2(); loadDashboard();
+    suggestionsBox.style.display = 'block';
 });
 
-// ── Party Tickets ─────────────────────────────────────────────
-async function loadPartyTickets() {
-    const data = await fetchData('party_tickets');
-    const tbody = document.getElementById('table-party-tickets');
+// Select Athlete into the Checkin Workspace
+async function selectAthleteForCheckin(athleteId) {
+    const a = await fetchData(`athletes/${athleteId}`);
+    if (!a) return;
+
+    const workspace = document.getElementById('checkin-workspace');
+    workspace.style.display = 'block';
+
+    const isConfirmed = a.payment_status === 'Confirmado';
+    const isChecked = a.checkin_status === 1;
+
+    workspace.innerHTML = `
+        <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-glass);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 1.25rem;">
+                <div>
+                    <h2 style="font-size: 1.4rem; color: #fff; margin-bottom: 4px;">${a.name}</h2>
+                    <span style="font-size: 0.9rem; color: var(--text-secondary);">CPF: ${formatCpf(a.cpf)} • Tel: ${formatPhone(a.phone)}</span>
+                    <div style="margin-top: 6px; font-weight: 700; color: #38bdf8;">${a.category}</div>
+                </div>
+                <div style="text-align: right;">
+                    ${isConfirmed
+                        ? `<span class="badge-status confirmed" style="font-size:0.95rem; padding: 6px 14px;"><i class="ri-checkbox-circle-fill"></i> PAGO VIA ${a.payment_method || 'PIX/CARTÃO'}</span>`
+                        : `<span class="badge-status pending" style="font-size:0.95rem; padding: 6px 14px;"><i class="ri-alert-line"></i> PAGAMENTO PENDENTE</span>`
+                    }
+                </div>
+            </div>
+
+            ${!isConfirmed ? `
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <strong style="color: #fca5a5;"><i class="ri-alert-fill"></i> Atenção: Inscrição com pagamento pendente!</strong>
+                        <p style="font-size: 0.85rem; color: #cbd5e1; margin-top: 2px;">Confirme o pagamento de ${formatCurrency(a.price)} agora para liberar a entrega do kit:</p>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${a.price})" style="padding: 8px 14px; font-size: 0.85rem;">
+                            Confirmar PIX
+                        </button>
+                        <button type="button" class="btn btn-card" onclick="confirmPaymentHandler(${a.id}, 'Cartão', ${a.price})" style="padding: 8px 14px; font-size: 0.85rem;">
+                            Confirmar Cartão
+                        </button>
+                    </div>
+                </div>
+            ` : ''}
+
+            <!-- Check-in Form Form Inputs -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 1.5rem;">
+                
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Tamanho da Camisa do Kit</label>
+                    <select id="ci-tshirt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                        <option value="Tradicional P" ${a.tshirt_size === 'Tradicional P' ? 'selected' : ''}>Tradicional P</option>
+                        <option value="Tradicional M" ${a.tshirt_size === 'Tradicional M' ? 'selected' : ''}>Tradicional M</option>
+                        <option value="Tradicional G" ${a.tshirt_size === 'Tradicional G' ? 'selected' : ''}>Tradicional G</option>
+                        <option value="Tradicional GG" ${a.tshirt_size === 'Tradicional GG' ? 'selected' : ''}>Tradicional GG</option>
+                        <option value="Tradicional XGG" ${a.tshirt_size === 'Tradicional XGG' ? 'selected' : ''}>Tradicional XGG</option>
+                        <option value="Babylook P" ${a.tshirt_size === 'Babylook P' ? 'selected' : ''}>Babylook P</option>
+                        <option value="Babylook M" ${a.tshirt_size === 'Babylook M' ? 'selected' : ''}>Babylook M</option>
+                        <option value="Babylook G" ${a.tshirt_size === 'Babylook G' ? 'selected' : ''}>Babylook G</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Número da Touca / Numeral</label>
+                    <input type="text" id="ci-cap-number" value="${a.cap_number || ''}" placeholder="Ex: 042" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Kit Retirado Por</label>
+                    <input type="text" id="ci-retrieved-by" value="${a.kit_retrieved_by || 'Próprio atleta'}" placeholder="Nome de quem está retirando" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                </div>
+
+            </div>
+
+            <!-- Optional Camera Section -->
+            <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 0.9rem; font-weight: 700; color: #fff;"><i class="ri-camera-lens-line"></i> Foto de Confirmação do Kit (Opcional)</span>
+                    <button type="button" class="btn" id="btn-toggle-camera" onclick="startCamera()" style="padding: 6px 12px; font-size: 0.8rem; background: rgba(255,255,255,0.1);">
+                        <i class="ri-camera-fill"></i> Ativar Câmera
+                    </button>
+                </div>
+                <div id="camera-container" style="display: none; text-align: center;">
+                    <video id="camera-feed" class="camera-feed" autoplay playsinline></video>
+                    <canvas id="camera-canvas" style="display: none;"></canvas>
+                    <div style="margin-top: 10px;">
+                        <button type="button" class="btn btn-primary" onclick="capturePhoto()" style="padding: 8px 16px;">Tirar Foto</button>
+                    </div>
+                </div>
+                <div id="photo-preview-container" style="display: ${a.checkin_photo ? 'block' : 'none'}; text-align: center; margin-top: 10px;">
+                    <img id="photo-preview-img" src="${a.checkin_photo || ''}" style="max-height: 160px; border-radius: 8px; border: 2px solid var(--border-glass);">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Foto atual do check-in</div>
+                </div>
+            </div>
+
+            <!-- Complete Checkin Button -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" class="btn" onclick="document.getElementById('checkin-workspace').style.display='none'" style="background: rgba(255,255,255,0.08); color: #fff; padding: 12px 20px;">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btn-save-checkin" onclick="submitCheckin(${a.id})" style="padding: 12px 28px; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                    <i class="ri-checkbox-circle-fill"></i> ${isChecked ? 'Atualizar Check-in' : 'Concluir Check-in & Entregar Kit'}
+                </button>
+            </div>
+
+        </div>
+    `;
+
+    workspace.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Camera control
+let capturedPhotoBase64 = null;
+
+window.startCamera = async function() {
+    const container = document.getElementById('camera-container');
+    const video = document.getElementById('camera-feed');
+    try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            video.srcObject = videoStream;
+            container.style.display = 'block';
+        } else {
+            alert('Câmera não suportada neste navegador.');
+        }
+    } catch (e) {
+        alert('Não foi possível acessar a câmera: ' + e.message);
+    }
+};
+
+window.capturePhoto = function() {
+    const video = document.getElementById('camera-feed');
+    const canvas = document.getElementById('camera-canvas');
+    if (!video || !canvas) return;
+
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+    document.getElementById('photo-preview-img').src = capturedPhotoBase64;
+    document.getElementById('photo-preview-container').style.display = 'block';
+
+    // Stop video
+    if (videoStream) {
+        videoStream.getTracks().forEach(t => t.stop());
+        videoStream = null;
+    }
+    document.getElementById('camera-container').style.display = 'none';
+};
+
+window.submitCheckin = async function(athleteId) {
+    const tshirt = document.getElementById('ci-tshirt').value;
+    const capNumber = document.getElementById('ci-cap-number').value.trim();
+    const retrievedBy = document.getElementById('ci-retrieved-by').value.trim();
+
+    const btn = document.getElementById('btn-save-checkin');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Salvando Check-in...`;
+
+    try {
+        let photoUrl = null;
+        if (capturedPhotoBase64) {
+            const photoRes = await postData(`athletes/${athleteId}/photo`, { photo: capturedPhotoBase64 });
+            if (photoRes && photoRes.photoUrl) {
+                photoUrl = photoRes.photoUrl;
+            }
+        }
+
+        const res = await putData(`athletes/${athleteId}/checkin`, {
+            tshirt_size: tshirt,
+            cap_number: capNumber,
+            kit_retrieved_by: retrievedBy,
+            checkin_photo: photoUrl
+        });
+
+        if (res.error) {
+            alert(`Erro: ${res.error}`);
+            return;
+        }
+
+        document.getElementById('checkin-workspace').style.display = 'none';
+        capturedPhotoBase64 = null;
+
+        alert('✓ Check-in e entrega de kit registrados com sucesso!');
+        loadCheckinStation();
+        loadDashboard();
+
+    } catch (e) {
+        alert('Erro ao registrar check-in: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="ri-checkbox-circle-fill"></i> Concluir Check-in`;
+    }
+};
+
+window.undoCheckinHandler = async function(athleteId) {
+    if (!confirm('Deseja realmente desfazer o check-in deste atleta?')) return;
+    try {
+        await putData(`athletes/${athleteId}/undo-checkin`, {});
+        loadCheckinStation();
+        loadDashboard();
+    } catch (e) {
+        alert('Erro: ' + e.message);
+    }
+};
+
+window.viewPhotoModal = function(url, athleteName) {
+    const html = `
+        <div style="text-align: center;">
+            <img src="${url}" style="max-width: 100%; border-radius: 12px; border: 2px solid rgba(255,255,255,0.15);">
+            <div style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">Foto de comprovação: ${athleteName}</div>
+        </div>
+    `;
+    createModal(`Comprovante de Check-in`, html, null, false);
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// 4. CUSTOS DO EVENTO
+// ═══════════════════════════════════════════════════════════════
+async function loadCosts() {
+    const data = await fetchData('costs/event');
+    const tbody = document.getElementById('table-event-costs');
     tbody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color:var(--text-secondary);">Nenhuma despesa cadastrada ainda.</td></tr>`;
+        return;
+    }
+
     data.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>#${item.id}</td>
-            <td>${item.name}</td>
-            <td>${formatCurrency(item.amount)}</td>
-            <td><label class="toggle-switch"><input type="checkbox" class="ticket-toggle" data-id="${item.id}" data-field="has_store_coupon" ${item.has_store_coupon ? 'checked' : ''}><span class="slider"></span></label></td>
-            <td><label class="toggle-switch"><input type="checkbox" class="ticket-toggle" data-id="${item.id}" data-field="has_beer_voucher" ${item.has_beer_voucher ? 'checked' : ''}><span class="slider"></span></label></td>
-            <td>${formatDate(item.date)}</td>
-            <td><button type="button" class="btn-icon btn-danger"><i class="ri-delete-bin-line"></i></button></td>
-        `;
-        tr.querySelector('button').onclick = deleteHandler('party_tickets', item.id, loadPartyTickets);
-        
-        tr.querySelectorAll('.ticket-toggle').forEach(input => {
-            input.addEventListener('change', async (e) => {
-                const id = e.target.getAttribute('data-id');
-                const field = e.target.getAttribute('data-field');
-                const value = e.target.checked;
-                try {
-                    await fetch(API_URL + '/party_tickets/' + id + '/' + field, {
-                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include', body: JSON.stringify({ value })
-                    });
-                    loadDashboard();
-                } catch { alert('Erro ao atualizar.'); e.target.checked = !value; }
-            });
-        });
-
-        tbody.appendChild(tr);
-    });
-}
-document.getElementById('form-party-ticket').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await postData('party_tickets', {
-        name: document.getElementById('ticket-name').value,
-        amount: parseFloat(document.getElementById('ticket-amount').value),
-        has_store_coupon: document.getElementById('ticket-coupon').checked,
-        has_beer_voucher: document.getElementById('ticket-voucher').checked,
-        date: document.getElementById('ticket-date').value
-    });
-    e.target.reset(); loadPartyTickets(); loadDashboard();
-});
-
-// ── Store Products ────────────────────────────────────────────
-async function loadStoreProducts() {
-    const data = await fetchData('store_products');
-    const tbody = document.getElementById('table-store-products');
-    tbody.innerHTML = '';
-    const select = document.getElementById('sale-product-id');
-    select.innerHTML = '<option value="" disabled selected>Selecione um Produto</option>';
-    data.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>#${item.id}</td><td>${item.name}</td><td>${item.stock} un.</td><td>${formatCurrency(item.cost_price)}</td><td>${formatCurrency(item.sell_price)}</td><td>
-            <button type="button" class="btn-icon add-stock" title="Adicionar Estoque"><i class="ri-add-line"></i></button>
-            <button type="button" class="btn-icon btn-edit edit-prod" title="Editar"><i class="ri-pencil-line"></i></button>
-            <button type="button" class="btn-icon btn-danger delete-prod" title="Excluir"><i class="ri-delete-bin-line"></i></button>
-        </td>`;
-        tr.querySelector('.add-stock').onclick = async () => {
-            const qty = prompt(`Quantas unidades adicionar ao produto ${item.name}?`);
-            if (qty && !isNaN(qty)) {
-                await fetch(`${API_URL}/store_products/${item.id}/stock`, {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', body: JSON.stringify({ stock: parseInt(qty) })
-                });
-                loadStoreProducts(); loadDashboard();
-            }
-        };
-        tr.querySelector('.edit-prod').onclick = () => openEditProductModal(item);
-        tr.querySelector('.delete-prod').onclick = deleteHandler('store_products', item.id, loadStoreProducts);
-        tbody.appendChild(tr);
-        if (item.stock > 0) select.innerHTML += `<option value="${item.id}">${item.name} (Estoque: ${item.stock} | ${formatCurrency(item.sell_price)})</option>`;
-    });
-}
-document.getElementById('form-store-product').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await postData('store_products', {
-        name: document.getElementById('prod-name').value,
-        stock: parseInt(document.getElementById('prod-stock').value),
-        cost_price: parseFloat(document.getElementById('prod-cost').value),
-        sell_price: parseFloat(document.getElementById('prod-sell').value)
-    });
-    e.target.reset(); loadStoreProducts(); loadDashboard();
-});
-
-// ── Store Sales ───────────────────────────────────────────────
-async function loadStoreSales() {
-    const data = await fetchData('store_sales');
-    const tbody = document.getElementById('table-store-sales');
-    tbody.innerHTML = '';
-    data.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>
-                ${item.package_id 
-                    ? `<span title="No pacote #${item.package_id}">✔️</span>` 
-                    : `<input type="checkbox" class="sale-pkg-checkbox" value="${item.id}">`}
-            </td>
-            <td>${item.product_name}</td>
-            <td>${item.buyer_name || 'Anônimo'}</td>
-            <td>${item.quantity} un.</td>
-            <td>${formatCurrency(item.discount || 0)}</td>
-            <td>${item.payment_method || 'Não informado'}</td>
-            <td><strong>${formatCurrency(item.total_amount)}</strong></td>
+            <td><strong>${item.description}</strong></td>
+            <td style="color: #f87171;">${formatCurrency(item.amount)}</td>
             <td>${formatDate(item.date)}</td>
             <td>
-                <button type="button" class="btn-icon btn-edit edit-sale-discount" title="Editar Desconto"><i class="ri-pencil-line"></i></button>
-                <button type="button" class="btn-icon btn-danger delete-sale" title="Excluir Venda"><i class="ri-delete-bin-line"></i></button>
-            </td>
-        `;
-        
-        tr.querySelector('.edit-sale-discount').onclick = async () => {
-            const newDiscount = prompt(`Editar desconto para venda de ${item.product_name} (Atual: ${formatCurrency(item.discount || 0)}):`, item.discount || 0);
-            if (newDiscount !== null) {
-                const parsedDiscount = parseFloat(newDiscount.replace(',', '.'));
-                if (!isNaN(parsedDiscount)) {
-                    const res = await putData(`store_sales/${item.id}/discount`, { discount: parsedDiscount });
-                    if (res.error) alert(res.error);
-                    else { loadStoreSales(); loadDashboard(); }
-                } else {
-                    alert('Valor inválido!');
-                }
-            }
-        };
-        
-        tr.querySelector('.delete-sale').onclick = deleteHandler('store_sales', item.id, () => {
-            loadStoreSales(); 
-            loadStoreProducts(); // restore stock visually
-        });
-        
-        tbody.appendChild(tr);
-    });
-}
-document.getElementById('form-store-sale').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const res = await postData('store_sales', {
-        product_id: parseInt(document.getElementById('sale-product-id').value),
-        buyer_name: document.getElementById('sale-buyer').value,
-        quantity: parseInt(document.getElementById('sale-quantity').value),
-        discount: parseFloat(document.getElementById('sale-discount').value) || 0,
-        payment_method: document.getElementById('sale-payment').value,
-        date: document.getElementById('sale-date').value
-    });
-    if (res.error) alert(res.error);
-    else { 
-        e.target.reset(); 
-        loadStoreSales(); 
-        loadStoreProducts(); 
-        loadDashboard(); 
-    }
-});
-
-document.getElementById('btn-create-package').addEventListener('click', async () => {
-    const checkboxes = document.querySelectorAll('.sale-pkg-checkbox:checked');
-    const sale_ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
-    
-    if (sale_ids.length === 0) {
-        return alert('Selecione pelo menos uma venda para criar um pacote.');
-    }
-    
-    const recipient_name = prompt('Qual o nome do responsável por retirar este pacote no evento?');
-    if (!recipient_name) return; // User cancelled
-    
-    try {
-        const res = await fetch(API_URL + '/store_packages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ recipient_name, sale_ids })
-        });
-        const result = await res.json();
-        if (result.error) throw new Error(result.error);
-        
-        alert(`Pacote #${result.package_id} criado com sucesso para ${recipient_name}!`);
-        loadStoreSales();
-        loadStorePackages();
-    } catch (err) {
-        alert('Erro ao criar pacote: ' + err.message);
-    }
-});
-
-// ── Store Packages ────────────────────────────────────────────
-async function loadStorePackages() {
-    const data = await fetchData('store_packages');
-    const tbody = document.getElementById('table-store-packages');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    data.forEach(pkg => {
-        const tr = document.createElement('tr');
-        
-        // Formata os itens
-        const itemsHtml = pkg.items ? pkg.items.map(i => `${i.quantity}x ${i.product_name}`).join('<br>') : 'Nenhum item';
-        
-        const isDelivered = pkg.status === 'Entregue';
-        
-        tr.innerHTML = `
-            <td>#${pkg.id}</td>
-            <td><strong>${pkg.recipient_name}</strong></td>
-            <td>${itemsHtml}</td>
-            <td>${formatDate(pkg.created_at)}</td>
-            <td style="white-space: nowrap;">
-                ${isDelivered ? `
-                    <span style="color:#00ff88; font-weight:bold; display:inline-block; padding: 0.4rem 0;"><i class="ri-check-double-line"></i> Entregue</span>
-                ` : `
-                    <button type="button" class="btn btn-primary deliver-pkg" data-id="${pkg.id}" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; margin-right: 10px;">
-                        <i class="ri-check-line"></i> Entregar
-                    </button>
-                    <button type="button" class="btn-icon btn-danger delete-pkg" data-id="${pkg.id}" title="Cancelar pacote e retornar itens ao estoque">
-                        <i class="ri-delete-bin-line"></i>
-                    </button>
-                `}
-            </td>
-        `;
-        
-        if (!isDelivered) {
-            tr.querySelector('.delete-pkg').addEventListener('click', async (e) => {
-                const id = e.currentTarget.getAttribute('data-id');
-                if (confirm('Tem certeza que deseja excluir este pacote? Todas as vendas atreladas a ele serão apagadas e os itens retornarão ao estoque!')) {
-                    try {
-                        const res = await fetch(`${API_URL}/store_packages/${id}`, { method: 'DELETE', credentials: 'include' });
-                        const result = await res.json();
-                        if(result.error) throw new Error(result.error);
-                        
-                        loadStorePackages();
-                        loadStoreSales();
-                        loadStoreProducts();
-                    } catch(err) {
-                        alert('Erro ao excluir pacote: ' + err.message);
-                    }
-                }
-            });
-            
-            tr.querySelector('.deliver-pkg').addEventListener('click', async (e) => {
-                const id = e.currentTarget.getAttribute('data-id');
-                if (confirm('Confirmar entrega do pacote ao comprador? Uma vez marcado como entregue, não será mais possível excluí-lo do sistema.')) {
-                    try {
-                        await fetch(API_URL + '/store_packages/' + id + '/status', {
-                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include', body: JSON.stringify({ status: 'Entregue' })
-                        });
-                        loadStorePackages();
-                    } catch { 
-                        alert('Erro ao atualizar status.'); 
-                    }
-                }
-            });
-        }
-
-        tbody.appendChild(tr);
-    });
-}
-
-// ── Store Online Orders ─────────────────────────────────────────
-async function loadStoreOnline() {
-    const data = await fetchData('online_orders');
-    const tbody = document.getElementById('table-store-online');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    
-    if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">Nenhum pedido pendente</td></tr>';
-        return;
-    }
-    
-    data.forEach(order => {
-        const tr = document.createElement('tr');
-        
-        tr.innerHTML = `
-            <td>#${order.id}</td>
-            <td><strong>${order.buyer_name}</strong></td>
-            <td>${formatCurrency(order.total_amount)}</td>
-            <td>${formatDate(order.created_at)}</td>
-            <td>
-                <button type="button" class="btn btn-primary btn-approve-online" data-id="${order.id}" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
-                    Confirmar Venda
+                <button type="button" class="btn-icon btn-danger" onclick="deleteCostHandler(${item.id})">
+                    <i class="ri-delete-bin-line"></i>
                 </button>
             </td>
         `;
-        
-        tr.querySelector('.btn-approve-online').addEventListener('click', () => openOnlineOrderModal(order));
-
         tbody.appendChild(tr);
     });
 }
 
-function openOnlineOrderModal(order) {
-    const products = JSON.parse(order.selected_products);
-    const itemsHtml = products.map(p => `<li>${p.quantity}x ${p.name} - R$ ${(p.sell_price * p.quantity).toFixed(2).replace('.',',')}</li>`).join('');
-    
-    createModal('Aprovar Venda PIX', `
-        <div style="display:flex; flex-direction:column; gap:1rem;">
-            <div>
-                <strong>Comprador:</strong> ${order.buyer_name}<br>
-                <strong>Valor Declarado:</strong> ${formatCurrency(order.total_amount)}
-            </div>
-            
-            <div style="text-align:center;">
-                <p style="margin-bottom:0.5rem; font-size:0.9rem; color:#aaa;">Imagem do Comprovante Enviada:</p>
-                <img src="${order.receipt_image_path}" style="max-width:100%; max-height:300px; border-radius:8px; border:1px solid #333;" alt="Comprovante">
-            </div>
-            
-            <div>
-                <strong>Produtos Selecionados:</strong>
-                <ul style="margin-left:1.5rem; color:#ccc;">
-                    ${itemsHtml}
-                </ul>
-            </div>
-        </div>
-        <div style="margin-top: 1.5rem; display:flex; gap: 1rem;">
-            <button id="btn-modal-approve" class="btn btn-primary" style="flex: 2;">✅ Conferir e Finalizar Venda</button>
-            <button id="btn-modal-reject" class="btn btn-danger" style="flex: 1;">❌ Rejeitar</button>
-        </div>
-    `, async () => {
-        // We handle custom buttons inside the modal instead of the default confirm
-        return false; // Prevent default close since we do it manually
-    });
-    
-    // Hide default confirm button in modal because we added our own custom ones
-    document.getElementById('modal-confirm-btn').style.display = 'none';
-    
-    document.getElementById('btn-modal-approve').addEventListener('click', async () => {
-        if (!confirm('Deseja aprovar? Isso dará baixa no estoque e criará um pacote.')) return;
-        
-        try {
-            const btn = document.getElementById('btn-modal-approve');
-            btn.disabled = true;
-            btn.innerText = 'Processando...';
-            
-            const res = await fetch(`${API_URL}/online_orders/${order.id}/approve`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-            const result = await res.json();
-            if(result.error) throw new Error(result.error);
-            
-            alert('Venda processada com sucesso! Pacote criado na aba de Pacotes.');
-            document.getElementById('edit-modal-overlay').remove();
-            
-            loadStoreOnline();
-            loadStoreSales();
-            loadStoreProducts();
-            loadStorePackages();
-        } catch(err) {
-            alert('Erro ao aprovar: ' + err.message);
-            document.getElementById('btn-modal-approve').disabled = false;
-        }
-    });
-    
-    document.getElementById('btn-modal-reject').addEventListener('click', async () => {
-        if (!confirm('Tem certeza que deseja REJEITAR esta venda? Ela será cancelada.')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/online_orders/${order.id}/reject`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-            const result = await res.json();
-            if(result.error) throw new Error(result.error);
-            
-            alert('Venda rejeitada.');
-            document.getElementById('edit-modal-overlay').remove();
-            loadStoreOnline();
-        } catch(err) {
-            alert('Erro ao rejeitar: ' + err.message);
-        }
-    });
-}
-
-// ── Costs ─────────────────────────────────────────────────────
-async function loadCosts(type) {
-    const data = await fetchData(`costs/${type}`);
-    const tbody = document.getElementById(`table-${type}-costs`);
-    tbody.innerHTML = '';
-    data.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>#${item.id}</td><td>${item.description}</td><td>${formatCurrency(item.amount)}</td><td>${formatDate(item.date)}</td><td>
-            <button class="btn-icon btn-edit edit-cost" title="Editar"><i class="ri-pencil-line"></i></button>
-            <button class="btn-icon btn-danger delete-cost" title="Excluir"><i class="ri-delete-bin-line"></i></button>
-        </td>`;
-        tr.querySelector('.edit-cost').onclick = () => openEditCostModal(type, item);
-        tr.querySelector('.delete-cost').onclick = deleteHandler(`costs/${type}`, item.id, () => loadCosts(type));
-        tbody.appendChild(tr);
-    });
-}
 document.getElementById('form-event-cost').addEventListener('submit', async (e) => {
     e.preventDefault();
-    await postData('costs/event', { description: document.getElementById('ecost-desc').value, amount: parseFloat(document.getElementById('ecost-amount').value), date: document.getElementById('ecost-date').value });
-    e.target.reset(); loadCosts('event'); loadDashboard();
-});
-document.getElementById('form-party-cost').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await postData('costs/party', { description: document.getElementById('pcost-desc').value, amount: parseFloat(document.getElementById('pcost-amount').value), date: document.getElementById('pcost-date').value });
-    e.target.reset(); loadCosts('party'); loadDashboard();
+    await postData('costs/event', {
+        description: document.getElementById('ecost-desc').value.trim(),
+        amount: parseFloat(document.getElementById('ecost-amount').value),
+        date: document.getElementById('ecost-date').value
+    });
+    e.target.reset();
+    document.getElementById('ecost-date').value = new Date().toISOString().split('T')[0];
+    loadCosts();
+    loadDashboard();
 });
 
-// ── Sponsors ──────────────────────────────────────────────────
+window.deleteCostHandler = async function(id) {
+    if (!confirm('Deseja excluir esta despesa?')) return;
+    await deleteData('costs/event', id);
+    loadCosts();
+    loadDashboard();
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// 5. PATROCÍNIOS
+// ═══════════════════════════════════════════════════════════════
 async function loadSponsors() {
     const data = await fetchData('sponsors');
     const tbody = document.getElementById('table-sponsors');
     tbody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color:var(--text-secondary);">Nenhum patrocínio cadastrado.</td></tr>`;
+        return;
+    }
+
     data.forEach(item => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>#${item.id}</td><td>${item.name}</td><td>${formatCurrency(item.amount)}</td><td>${formatDate(item.date)}</td><td><button class="btn-icon btn-danger"><i class="ri-delete-bin-line"></i></button></td>`;
-        tr.querySelector('button').onclick = deleteHandler('sponsors', item.id, loadSponsors);
+        tr.innerHTML = `
+            <td>#${item.id}</td>
+            <td><strong>${item.name}</strong></td>
+            <td style="color: #38bdf8;">${formatCurrency(item.amount)}</td>
+            <td>${formatDate(item.date)}</td>
+            <td>
+                <button type="button" class="btn-icon btn-danger" onclick="deleteSponsorHandler(${item.id})">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </td>
+        `;
         tbody.appendChild(tr);
     });
 }
+
 document.getElementById('form-sponsor').addEventListener('submit', async (e) => {
     e.preventDefault();
-    await postData('sponsors', { name: document.getElementById('sponsor-name').value, amount: parseFloat(document.getElementById('sponsor-amount').value), date: document.getElementById('sponsor-date').value });
-    e.target.reset(); loadSponsors(); loadDashboard();
+    await postData('sponsors', {
+        name: document.getElementById('sponsor-name').value.trim(),
+        amount: parseFloat(document.getElementById('sponsor-amount').value),
+        date: document.getElementById('sponsor-date').value
+    });
+    e.target.reset();
+    document.getElementById('sponsor-date').value = new Date().toISOString().split('T')[0];
+    loadSponsors();
+    loadDashboard();
 });
 
+window.deleteSponsorHandler = async function(id) {
+    if (!confirm('Deseja excluir este patrocínio?')) return;
+    await deleteData('sponsors', id);
+    loadSponsors();
+    loadDashboard();
+};
 
-// ── User Management (Master only) ─────────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════════
+// 6. USUÁRIOS (Master Only)
+// ═══════════════════════════════════════════════════════════════
 async function loadUsers() {
     const data = await fetchData('users');
     const tbody = document.getElementById('table-users');
     tbody.innerHTML = '';
-    data.forEach(item => {
+
+    if (!data) return;
+
+    data.forEach(u => {
         const tr = document.createElement('tr');
-        const isMasterUser = item.is_master === 1;
         tr.innerHTML = `
-            <td>#${item.id}</td>
-            <td>${item.username}</td>
-            <td>${isMasterUser ? '<span style="color:#d4af37; font-weight:700;">👑 Master</span>' : 'Padrão'}</td>
-            <td>${item.created_at ? item.created_at.split('T')[0].split('-').reverse().join('/') : '—'}</td>
-            <td>${isMasterUser ? '—' : `<button type="button" class="btn-icon btn-danger"><i class="ri-delete-bin-line"></i></button>`}</td>
+            <td>#${u.id}</td>
+            <td><strong>${u.username}</strong></td>
+            <td>${u.is_master ? '<span class="badge-status confirmed">Master</span>' : '<span class="badge-status">Organizador</span>'}</td>
+            <td>${formatDate(u.created_at)}</td>
+            <td>
+                ${!u.is_master ? `
+                    <button type="button" class="btn-icon btn-danger" onclick="deleteUserHandler(${u.id})">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                ` : '<span style="color:var(--text-secondary); font-size:0.8rem;">Protegido</span>'}
+            </td>
         `;
-        if (!isMasterUser) {
-            tr.querySelector('button').onclick = async () => {
-                if (confirm(`Excluir o usuário "${item.username}"?`)) {
-                    const res = await fetch(`${API_URL}/users/${item.id}`, { method: 'DELETE', credentials: 'include' });
-                    const data = await res.json();
-                    if (data.error) alert(data.error);
-                    else loadUsers();
-                }
-            };
-        }
         tbody.appendChild(tr);
     });
 }
+
 document.getElementById('form-user').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('new-username').value.trim();
-    const password = document.getElementById('new-password').value;
-    const res = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    if (data.error) { alert(data.error); return; }
-    alert(`Usuário "${data.username}" cadastrado com sucesso!`);
+    const password = document.getElementById('new-password').value.trim();
+
+    const res = await postData('users', { username, password });
+    if (res.error) {
+        alert(res.error);
+        return;
+    }
     e.target.reset();
     loadUsers();
 });
 
-// ── Edit Modals ───────────────────────────────────────────────
-function createModal(title, bodyHTML, onConfirm) {
-    // Remove any existing modal
-    const existing = document.getElementById('edit-modal-overlay');
-    if (existing) existing.remove();
+window.deleteUserHandler = async function(id) {
+    if (!confirm('Deseja excluir este usuário organizador?')) return;
+    await deleteData('users', id);
+    loadUsers();
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL SYSTEM & UTILITIES
+// ═══════════════════════════════════════════════════════════════
+function createModal(title, bodyHTML, onConfirm, showSaveBtn = true) {
+    closeActiveModal();
 
     const overlay = document.createElement('div');
-    overlay.id = 'edit-modal-overlay';
+    overlay.id = 'active-modal-overlay';
     overlay.style.cssText = `
-        position:fixed;inset:0;z-index:9999;
-        background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);
-        display:flex;align-items:center;justify-content:center;padding:1rem;
+        position: fixed; inset: 0; z-index: 9999;
+        background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+        display: flex; align-items: center; justify-content: center; padding: 1rem;
     `;
 
     overlay.innerHTML = `
-        <div id="edit-modal" style="
-            background:#1a1f2e;border:1px solid rgba(212,175,55,0.3);
-            border-radius:16px;padding:2rem;width:100%;max-width:480px;
-            box-shadow:0 24px 64px rgba(0,0,0,0.6);
-            animation:modalIn .2s ease;
+        <div style="
+            background: #0f172a; border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px; padding: 2rem; width: 100%; max-width: 680px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.7); max-height: 90vh; overflow-y: auto;
+            position: relative; animation: modalIn .2s ease;
         ">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-                <h3 style="margin:0;color:#d4af37;font-size:1.1rem;">${title}</h3>
-                <button id="modal-close-btn" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.4rem;cursor:pointer;line-height:1;">×</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.25rem;">${title}</h3>
+                <button id="modal-close-x" style="background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.6rem; cursor: pointer; line-height: 1;">×</button>
             </div>
-            <div class="modal-body" style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div class="modal-body-content">
                 ${bodyHTML}
             </div>
-            <div style="display:flex;gap:0.75rem;margin-top:1.5rem;justify-content:flex-end;">
-                <button id="modal-cancel-btn" class="btn" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:0.5rem 1.25rem;border-radius:8px;cursor:pointer;">Cancelar</button>
-                <button id="modal-confirm-btn" class="btn btn-primary" style="padding:0.5rem 1.25rem;">Salvar</button>
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem;">
+                <button id="modal-btn-cancel" class="btn" style="background: rgba(255,255,255,0.08); color: #fff; padding: 8px 18px; border-radius: 8px;">Fechar</button>
+                ${showSaveBtn ? `<button id="modal-btn-confirm" class="btn btn-primary" style="padding: 8px 22px;">Salvar</button>` : ''}
             </div>
         </div>
     `;
 
-    // Inject keyframe animation once
-    if (!document.getElementById('modal-anim-style')) {
-        const style = document.createElement('style');
-        style.id = 'modal-anim-style';
-        style.textContent = `
-            @keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
-            #edit-modal input, #edit-modal select {
-                width:100%;padding:.6rem .9rem;border-radius:8px;
-                background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
-                color:#fff;font-size:.95rem;font-family:Outfit,sans-serif;box-sizing:border-box;
-            }
-            #edit-modal label { font-size:.82rem;color:rgba(255,255,255,.55);margin-bottom:2px;display:block; }
-        `;
-        document.head.appendChild(style);
-    }
-
     document.body.appendChild(overlay);
 
-    const close = () => overlay.remove();
-    document.getElementById('modal-close-btn').onclick = close;
-    document.getElementById('modal-cancel-btn').onclick = close;
-    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-    document.getElementById('modal-confirm-btn').onclick = async () => {
-        const success = await onConfirm();
-        if (success !== false) close();
-    };
+    const close = () => closeActiveModal();
+    document.getElementById('modal-close-x').onclick = close;
+    document.getElementById('modal-btn-cancel').onclick = close;
+
+    if (showSaveBtn && onConfirm) {
+        document.getElementById('modal-btn-confirm').onclick = async () => {
+            await onConfirm();
+            close();
+        };
+    }
 }
 
-function openEditProductModal(item) {
-    createModal('Editar Produto', `
-        <div><label>Nome do Produto</label><input id="ep-name" type="text" value="${item.name}"></div>
-        <div><label>Estoque (unidades)</label><input id="ep-stock" type="number" value="${item.stock}"></div>
-        <div><label>Preço de Custo (R$)</label><input id="ep-cost" type="number" step="0.01" value="${item.cost_price}"></div>
-        <div><label>Preço de Venda (R$)</label><input id="ep-sell" type="number" step="0.01" value="${item.sell_price}"></div>
-    `, async () => {
-        const name = document.getElementById('ep-name').value.trim();
-        const stock = parseInt(document.getElementById('ep-stock').value);
-        const cost_price = parseFloat(document.getElementById('ep-cost').value);
-        const sell_price = parseFloat(document.getElementById('ep-sell').value);
-        if (!name || isNaN(stock) || isNaN(cost_price) || isNaN(sell_price)) {
-            alert('Preencha todos os campos corretamente.'); return false;
-        }
-        const res = await putData(`store_products/${item.id}`, { name, stock, cost_price, sell_price });
-        if (res.error) { alert(res.error); return false; }
-        loadStoreProducts(); loadDashboard();
+function closeActiveModal() {
+    const existing = document.getElementById('active-modal-overlay');
+    if (existing) existing.remove();
+}
+
+// Export Athletes to XLSX
+function exportAthletesXLSX() {
+    if (!currentAthletes || currentAthletes.length === 0) {
+        alert('Não há atletas para exportar.');
+        return;
+    }
+
+    const headers = [
+        'ID', 'Nome Completo', 'CPF', 'E-mail', 'Telefone',
+        'Data Nascimento', 'Gênero', 'Modalidade', 'Distância',
+        'Valor (R$)', 'Status Pagamento', 'Forma Pagamento', 'Data Pagamento',
+        'Confirmado Por', 'Tamanho Camisa', 'Assessoria', 'Cupom',
+        'Contato Emergência Nome', 'Contato Emergência Tel',
+        'Check-in Realizado', 'Data Check-in', 'Nº Touca', 'Retirado Por'
+    ];
+
+    const dataRows = currentAthletes.map(a => [
+        a.id,
+        a.name,
+        formatCpf(a.cpf),
+        a.email,
+        formatPhone(a.phone),
+        a.birth_date || '',
+        a.gender || '',
+        a.category,
+        a.distance || '2,5 km',
+        a.price,
+        a.payment_status,
+        a.payment_method || '',
+        a.payment_date || '',
+        a.confirmed_by || '',
+        a.tshirt_size || '',
+        a.assessoria_name || '',
+        a.coupon_code || '',
+        a.emergency_contact_name || '',
+        a.emergency_contact_phone || '',
+        a.checkin_status === 1 ? 'Sim' : 'Não',
+        a.checkin_date || '',
+        a.cap_number || '',
+        a.kit_retrieved_by || ''
+    ]);
+
+    const wsData = [headers, ...dataRows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inscritos');
+    XLSX.writeFile(wb, `Inscritos_Tubaroes_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+// Setup Event Listeners
+function setupEventListeners() {
+    document.getElementById('athletes-search').addEventListener('input', () => loadAthletes());
+    document.getElementById('filter-athlete-status').addEventListener('change', () => loadAthletes());
+    document.getElementById('filter-athlete-checkin').addEventListener('change', () => loadAthletes());
+    document.getElementById('btn-export-athletes').addEventListener('click', exportAthletesXLSX);
+
+    document.getElementById('btn-new-athlete-manual').addEventListener('click', () => {
+        openManualAthleteModal();
     });
 }
 
-function openEditCostModal(type, item) {
-    const label = type === 'party' ? 'Custo da Festa' : 'Custo do Evento';
-    createModal(`Editar ${label}`, `
-        <div><label>Descrição</label><input id="ec-desc" type="text" value="${item.description.replace(/"/g, '&quot;')}"></div>
-        <div><label>Valor (R$)</label><input id="ec-amount" type="number" step="0.01" value="${item.amount}"></div>
-        <div><label>Data</label><input id="ec-date" type="date" value="${item.date}"></div>
-    `, async () => {
-        const description = document.getElementById('ec-desc').value.trim();
-        const amount = parseFloat(document.getElementById('ec-amount').value);
-        const date = document.getElementById('ec-date').value;
-        if (!description || isNaN(amount) || !date) {
-            alert('Preencha todos os campos corretamente.'); return false;
+// Manual Athlete Registration (Admin action)
+function openManualAthleteModal() {
+    const html = `
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+                <label style="font-size: 0.8rem; color: var(--text-secondary);">Nome Completo *</label>
+                <input type="text" id="man-name" placeholder="Nome do Atleta" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">CPF *</label>
+                    <input type="text" id="man-cpf" placeholder="000.000.000-00" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Telefone / WhatsApp *</label>
+                    <input type="text" id="man-phone" placeholder="(00) 00000-0000" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                </div>
+            </div>
+            <div>
+                <label style="font-size: 0.8rem; color: var(--text-secondary);">E-mail *</label>
+                <input type="email" id="man-email" placeholder="atleta@email.com" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Modalidade *</label>
+                    <select id="man-category" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                        <option value="adulto_25k">Travessia Adultos (2,5 km) - R$ 149</option>
+                        <option value="adulto_assessoria">Travessia Assessorias (com cupom) - R$ 119</option>
+                        <option value="promocional">Promocional de Largada - R$ 99</option>
+                        <option value="pcd">Travessia PCD - R$ 79</option>
+                        <option value="kids">Travessia Kids - R$ 79</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Camisa *</label>
+                    <select id="man-tshirt" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                        <option value="Tradicional P">Tradicional P</option>
+                        <option value="Tradicional M" selected>Tradicional M</option>
+                        <option value="Tradicional G">Tradicional G</option>
+                        <option value="Tradicional GG">Tradicional GG</option>
+                        <option value="Tradicional XGG">Tradicional XGG</option>
+                        <option value="Babylook P">Babylook P</option>
+                        <option value="Babylook M">Babylook M</option>
+                        <option value="Babylook G">Babylook G</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+
+    createModal('Cadastrar Atleta Manualmente', html, async () => {
+        const name = document.getElementById('man-name').value.trim();
+        const cpf = document.getElementById('man-cpf').value.replace(/\D/g, '');
+        const phone = document.getElementById('man-phone').value.trim();
+        const email = document.getElementById('man-email').value.trim();
+        const category_id = document.getElementById('man-category').value;
+        const tshirt_size = document.getElementById('man-tshirt').value;
+
+        if (!name || !cpf || !phone || !email) {
+            alert('Preencha os campos obrigatórios');
+            return;
         }
-        const res = await putData(`costs/${type}/${item.id}`, { description, amount, date });
-        if (res.error) { alert(res.error); return false; }
-        loadCosts(type); loadDashboard();
+
+        const res = await postData('public/register-athlete', {
+            name, cpf, phone, email, category_id, tshirt_size,
+            emergency_contact_name: 'Organizador',
+            emergency_contact_phone: phone
+        });
+
+        if (res.error) {
+            alert('Erro: ' + res.error);
+            return;
+        }
+
+        loadAthletes();
+        loadDashboard();
+        alert('Atleta cadastrado com sucesso!');
     });
 }
