@@ -787,6 +787,20 @@
                     </div>
                 </div>
 
+                <div class="category-card" data-id="promocional_1k" data-price="99.00" data-name="Travessia de Adultos (1 km) — Promocional de Largada" data-requires-coupon="false">
+                    <div class="cat-left">
+                        <div class="cat-radio"></div>
+                        <div class="cat-info">
+                            <h4>Travessia de Adultos (1 km) — Promocional de Largada</h4>
+                            <p>Lote promocional limitado de largada (1 km). <strong>Inclui Kit Atleta: Touca, Camisa, Bolsa, Medalha e Brindes</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="cat-price">
+                        <div class="val">R$ 99</div>
+                        <div class="sub">Promocional</div>
+                    </div>
+                </div>
+
                 <div class="category-card" data-id="pcd_1k" data-price="79.00" data-name="Travessia de Adultos (1 km) — PCD" data-requires-coupon="false">
                     <div class="cat-left">
                         <div class="cat-radio"></div>
@@ -804,9 +818,14 @@
             </div>
 
             <!-- PROVA KIDS -->
-            <div style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
-                <span style="background: rgba(245, 158, 11, 0.2); color: var(--gold); font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; border: 1px solid rgba(245, 158, 11, 0.4);">Infantil</span>
-                <span style="font-size: 0.88rem; color: var(--text-muted);">Travessia Kids</span>
+            <div style="margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: rgba(245, 158, 11, 0.2); color: var(--gold); font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; border: 1px solid rgba(245, 158, 11, 0.4);">Infantil</span>
+                    <span style="font-size: 0.88rem; color: var(--text-muted);">Travessia Kids</span>
+                </div>
+                <span id="vac-badge-kids" style="font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 99px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
+                    <i class="ri-user-line"></i> Limite: 20 vagas
+                </span>
             </div>
 
             <div class="category-grid" style="margin-bottom: 2rem;">
@@ -1009,7 +1028,12 @@
         categoryCards.forEach(card => {
             card.addEventListener('click', () => {
                 if (card.classList.contains('category-sold-out')) {
-                    alert('As vagas para esta modalidade estão esgotadas (limite máximo de 50 vagas preenchido).');
+                    alert('As vagas para esta modalidade estão esgotadas.');
+                    return;
+                }
+
+                if (card.classList.contains('category-locked')) {
+                    alert('As inscrições regulares e de assessorias só serão liberadas após o preenchimento das 10 vagas do Lote Promocional de Largada. Aproveite a inscrição promocional com desconto!');
                     return;
                 }
 
@@ -1162,14 +1186,14 @@
             });
         }
 
-        // Carregar limites de vagas (50 por percurso)
+        // Carregar limites de vagas (50 por percurso, 10 promocionais e 20 kids)
         async function loadRaceVacancies() {
             try {
                 const res = await fetch('/api/public/race-vacancies');
                 if (!res.ok) return;
                 const data = await res.json();
 
-                // 2 km
+                // ── 2 KM ──
                 const vac2k = data['2 km'];
                 const badge2k = document.getElementById('vac-badge-2k');
                 if (vac2k && badge2k) {
@@ -1181,6 +1205,7 @@
                         categoryCards.forEach(card => {
                             if (card.dataset.id.includes('2k') || card.dataset.id.includes('25k') || card.dataset.id === 'adulto_assessoria' || card.dataset.id === 'promocional' || card.dataset.id === 'pcd') {
                                 card.classList.add('category-sold-out');
+                                card.classList.remove('category-locked');
                                 card.style.opacity = '0.4';
                                 card.style.cursor = 'not-allowed';
                                 card.style.filter = 'grayscale(1)';
@@ -1190,16 +1215,77 @@
                                 }
                             }
                         });
-                        if (selectedCategory.id.includes('2k') || selectedCategory.id.includes('25k')) {
-                            const firstAvail = Array.from(categoryCards).find(c => !c.classList.contains('category-sold-out'));
-                            if (firstAvail) firstAvail.click();
-                        }
                     } else {
                         badge2k.innerHTML = `<i class="ri-user-line"></i> ${vac2k.available} de ${vac2k.limit} vagas restantes`;
+
+                        // Lote Promocional 2k
+                        const cardPromo2k = document.querySelector('.category-card[data-id="promocional_2k"]');
+                        const cardAdulto2k = document.querySelector('.category-card[data-id="adulto_2k"]');
+                        const cardAsses2k = document.querySelector('.category-card[data-id="adulto_assessoria_2k"]');
+
+                        if (vac2k.promo && vac2k.promo.active) {
+                            // Promocional Ativo (Menos de 10 inscritos promocionais)
+                            if (cardPromo2k) {
+                                cardPromo2k.classList.remove('category-sold-out', 'category-locked');
+                                cardPromo2k.style.opacity = '1';
+                                cardPromo2k.style.filter = 'none';
+                                const h4 = cardPromo2k.querySelector('h4');
+                                const existingBadge = cardPromo2k.querySelector('.badge-promo-live');
+                                if (!existingBadge && h4) {
+                                    h4.insertAdjacentHTML('beforeend', ` <span class="badge-promo-live" style="background:#f59e0b; color:#000; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;">Lote 1: Promocional (${vac2k.promo.available} restantes)</span>`);
+                                }
+                            }
+
+                            // Bloquear Adulto e Assessorias até esgotar o Promocional
+                            [cardAdulto2k, cardAsses2k].forEach(card => {
+                                if (card) {
+                                    card.classList.add('category-locked');
+                                    card.style.opacity = '0.45';
+                                    card.style.cursor = 'not-allowed';
+                                    const h4 = card.querySelector('h4');
+                                    if (h4 && !card.querySelector('.badge-locked')) {
+                                        h4.insertAdjacentHTML('beforeend', ' <span class="badge-locked" style="background:rgba(255,255,255,0.08); color:var(--text-muted); font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase;"><i class="ri-lock-line"></i> Libera após Lote Promocional</span>');
+                                    }
+                                }
+                            });
+
+                            // Se a categoria selecionada estiver bloqueada, selecionar o Promocional 2k automaticamente
+                            if (selectedCategory.id === 'adulto_2k' || selectedCategory.id === 'adulto_assessoria_2k') {
+                                if (cardPromo2k) cardPromo2k.click();
+                            }
+                        } else {
+                            // Lote Promocional 2k Esgotado -> Liberar inscrições regulares
+                            if (cardPromo2k) {
+                                cardPromo2k.classList.add('category-sold-out');
+                                cardPromo2k.style.opacity = '0.4';
+                                cardPromo2k.style.cursor = 'not-allowed';
+                                cardPromo2k.style.filter = 'grayscale(1)';
+                                const h4 = cardPromo2k.querySelector('h4');
+                                const liveB = cardPromo2k.querySelector('.badge-promo-live');
+                                if (liveB) liveB.remove();
+                                if (h4 && !cardPromo2k.querySelector('.badge-sold-out')) {
+                                    h4.insertAdjacentHTML('beforeend', ' <span class="badge-sold-out" style="background:#ef4444; color:#fff; font-size:0.68rem; font-weight:800; padding:2px 6px; border-radius:4px; text-transform:uppercase;">Esgotado (10/10)</span>');
+                                }
+                            }
+
+                            [cardAdulto2k, cardAsses2k].forEach(card => {
+                                if (card) {
+                                    card.classList.remove('category-locked');
+                                    card.style.opacity = '1';
+                                    card.style.cursor = 'pointer';
+                                    const lockB = card.querySelector('.badge-locked');
+                                    if (lockB) lockB.remove();
+                                }
+                            });
+
+                            if (selectedCategory.id === 'promocional_2k') {
+                                if (cardAdulto2k) cardAdulto2k.click();
+                            }
+                        }
                     }
                 }
 
-                // 1 km
+                // ── 1 KM ──
                 const vac1k = data['1 km'];
                 const badge1k = document.getElementById('vac-badge-1k');
                 if (vac1k && badge1k) {
@@ -1211,6 +1297,7 @@
                         categoryCards.forEach(card => {
                             if (card.dataset.id.includes('1k')) {
                                 card.classList.add('category-sold-out');
+                                card.classList.remove('category-locked');
                                 card.style.opacity = '0.4';
                                 card.style.cursor = 'not-allowed';
                                 card.style.filter = 'grayscale(1)';
@@ -1220,14 +1307,97 @@
                                 }
                             }
                         });
-                        if (selectedCategory.id.includes('1k')) {
-                            const firstAvail = Array.from(categoryCards).find(c => !c.classList.contains('category-sold-out'));
-                            if (firstAvail) firstAvail.click();
-                        }
                     } else {
                         badge1k.innerHTML = `<i class="ri-user-line"></i> ${vac1k.available} de ${vac1k.limit} vagas restantes`;
+
+                        // Lote Promocional 1k
+                        const cardPromo1k = document.querySelector('.category-card[data-id="promocional_1k"]');
+                        const cardAdulto1k = document.querySelector('.category-card[data-id="adulto_1k"]');
+                        const cardAsses1k = document.querySelector('.category-card[data-id="adulto_assessoria_1k"]');
+
+                        if (vac1k.promo && vac1k.promo.active) {
+                            if (cardPromo1k) {
+                                cardPromo1k.classList.remove('category-sold-out', 'category-locked');
+                                cardPromo1k.style.opacity = '1';
+                                cardPromo1k.style.filter = 'none';
+                                const h4 = cardPromo1k.querySelector('h4');
+                                const existingBadge = cardPromo1k.querySelector('.badge-promo-live');
+                                if (!existingBadge && h4) {
+                                    h4.insertAdjacentHTML('beforeend', ` <span class="badge-promo-live" style="background:#f59e0b; color:#000; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;">Lote 1: Promocional (${vac1k.promo.available} restantes)</span>`);
+                                }
+                            }
+
+                            [cardAdulto1k, cardAsses1k].forEach(card => {
+                                if (card) {
+                                    card.classList.add('category-locked');
+                                    card.style.opacity = '0.45';
+                                    card.style.cursor = 'not-allowed';
+                                    const h4 = card.querySelector('h4');
+                                    if (h4 && !card.querySelector('.badge-locked')) {
+                                        h4.insertAdjacentHTML('beforeend', ' <span class="badge-locked" style="background:rgba(255,255,255,0.08); color:var(--text-muted); font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase;"><i class="ri-lock-line"></i> Libera após Lote Promocional</span>');
+                                    }
+                                }
+                            });
+
+                            if (selectedCategory.id === 'adulto_1k' || selectedCategory.id === 'adulto_assessoria_1k') {
+                                if (cardPromo1k) cardPromo1k.click();
+                            }
+                        } else {
+                            if (cardPromo1k) {
+                                cardPromo1k.classList.add('category-sold-out');
+                                cardPromo1k.style.opacity = '0.4';
+                                cardPromo1k.style.cursor = 'not-allowed';
+                                cardPromo1k.style.filter = 'grayscale(1)';
+                                const h4 = cardPromo1k.querySelector('h4');
+                                const liveB = cardPromo1k.querySelector('.badge-promo-live');
+                                if (liveB) liveB.remove();
+                                if (h4 && !cardPromo1k.querySelector('.badge-sold-out')) {
+                                    h4.insertAdjacentHTML('beforeend', ' <span class="badge-sold-out" style="background:#ef4444; color:#fff; font-size:0.68rem; font-weight:800; padding:2px 6px; border-radius:4px; text-transform:uppercase;">Esgotado (10/10)</span>');
+                                }
+                            }
+
+                            [cardAdulto1k, cardAsses1k].forEach(card => {
+                                if (card) {
+                                    card.classList.remove('category-locked');
+                                    card.style.opacity = '1';
+                                    card.style.cursor = 'pointer';
+                                    const lockB = card.querySelector('.badge-locked');
+                                    if (lockB) lockB.remove();
+                                }
+                            });
+
+                            if (selectedCategory.id === 'promocional_1k') {
+                                if (cardAdulto1k) cardAdulto1k.click();
+                            }
+                        }
                     }
                 }
+
+                // ── KIDS (20 VAGAS) ──
+                const vacKids = data['kids'];
+                const badgeKids = document.getElementById('vac-badge-kids');
+                const cardKids = document.querySelector('.category-card[data-id="kids"]');
+                if (vacKids && badgeKids) {
+                    if (vacKids.is_sold_out) {
+                        badgeKids.style.background = 'rgba(239, 68, 68, 0.2)';
+                        badgeKids.style.color = '#f87171';
+                        badgeKids.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        badgeKids.innerHTML = '<i class="ri-error-warning-line"></i> ESGOTADO (20/20 vagas)';
+                        if (cardKids) {
+                            cardKids.classList.add('category-sold-out');
+                            cardKids.style.opacity = '0.4';
+                            cardKids.style.cursor = 'not-allowed';
+                            cardKids.style.filter = 'grayscale(1)';
+                            const h4 = cardKids.querySelector('h4');
+                            if (h4 && !cardKids.querySelector('.badge-sold-out')) {
+                                h4.insertAdjacentHTML('beforeend', ' <span class="badge-sold-out" style="background:#ef4444; color:#fff; font-size:0.68rem; font-weight:800; padding:2px 6px; border-radius:4px; text-transform:uppercase;">Esgotado</span>');
+                            }
+                        }
+                    } else {
+                        badgeKids.innerHTML = `<i class="ri-user-line"></i> ${vacKids.available} de ${vacKids.limit} vagas restantes`;
+                    }
+                }
+
             } catch (e) {
                 console.warn('Erro ao carregar vagas:', e);
             }

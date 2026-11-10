@@ -87,17 +87,18 @@
                         </div>
                     </div>
 
-                    <!-- Limites de Vagas por Prova (50 para 2 km e 50 para 1 km) -->
-                    <div class="dashboard-grid mt-4" style="grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <!-- Limites de Vagas por Prova (50 para 2 km, 50 para 1 km e 20 para Kids) -->
+                    <div class="dashboard-grid mt-4" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+                        <!-- Prova 2 km -->
                         <div class="card glass-card" style="padding: 1.25rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <div style="width:34px; height:34px; border-radius:8px; background:rgba(2, 132, 199, 0.2); color:#38bdf8; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
                                         <i class="ri-navigation-line"></i>
                                     </div>
                                     <div>
-                                        <h4 style="margin:0; font-size:0.95rem; color:#fff;">Limite de Inscrições — Prova 2 km</h4>
-                                        <small style="color:var(--text-secondary); font-size:0.75rem;">Adulto, Assessorias, PCD e Promocional</small>
+                                        <h4 style="margin:0; font-size:0.95rem; color:#fff;">Prova 2 km (Principal)</h4>
+                                        <small id="admin-promo-info-2k" style="color:#fbbf24; font-size:0.75rem; font-weight:700;">Lote Promo: 0/10 vagas</small>
                                     </div>
                                 </div>
                                 <span id="admin-vac-badge-2k" style="font-size:0.85rem; font-weight:800; padding:4px 10px; border-radius:12px; background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3);">
@@ -109,15 +110,16 @@
                             </div>
                         </div>
 
+                        <!-- Prova 1 km -->
                         <div class="card glass-card" style="padding: 1.25rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <div style="width:34px; height:34px; border-radius:8px; background:rgba(16, 185, 129, 0.2); color:#34d399; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
                                         <i class="ri-navigation-line"></i>
                                     </div>
                                     <div>
-                                        <h4 style="margin:0; font-size:0.95rem; color:#fff;">Limite de Inscrições — Prova 1 km</h4>
-                                        <small style="color:var(--text-secondary); font-size:0.75rem;">Adulto, Assessorias e PCD</small>
+                                        <h4 style="margin:0; font-size:0.95rem; color:#fff;">Prova 1 km</h4>
+                                        <small id="admin-promo-info-1k" style="color:#fbbf24; font-size:0.75rem; font-weight:700;">Lote Promo: 0/10 vagas</small>
                                     </div>
                                 </div>
                                 <span id="admin-vac-badge-1k" style="font-size:0.85rem; font-weight:800; padding:4px 10px; border-radius:12px; background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3);">
@@ -126,6 +128,27 @@
                             </div>
                             <div style="height:10px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden; margin-top:10px;">
                                 <div id="admin-vac-bar-1k" style="height:100%; width:0%; background:linear-gradient(90deg, #059669, #34d399); border-radius:99px; transition:width 0.4s ease;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Prova Kids -->
+                        <div class="card glass-card" style="padding: 1.25rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="width:34px; height:34px; border-radius:8px; background:rgba(245, 158, 11, 0.2); color:#fbbf24; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                                        <i class="ri-user-star-line"></i>
+                                    </div>
+                                    <div>
+                                        <h4 style="margin:0; font-size:0.95rem; color:#fff;">Travessia Kids</h4>
+                                        <small style="color:var(--text-secondary); font-size:0.75rem;">Percurso Infantil Adaptado</small>
+                                    </div>
+                                </div>
+                                <span id="admin-vac-badge-kids" style="font-size:0.85rem; font-weight:800; padding:4px 10px; border-radius:12px; background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.3);">
+                                    0 / 20 vagas
+                                </span>
+                            </div>
+                            <div style="height:10px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden; margin-top:10px;">
+                                <div id="admin-vac-bar-kids" style="height:100%; width:0%; background:linear-gradient(90deg, #d97706, #fbbf24); border-radius:99px; transition:width 0.4s ease;"></div>
                             </div>
                         </div>
                     </div>

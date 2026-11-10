@@ -246,6 +246,13 @@ const EVENT_CATEGORIES = {
         description: 'Desconto exclusivo com cupom para alunos de assessorias parceiras (1 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.',
         requires_coupon: true
     },
+    'promocional_1k': {
+        id: 'promocional_1k',
+        name: 'Travessia de Adultos (1 km) — Promocional de Largada',
+        distance: '1 km',
+        price: 99.00,
+        description: 'Lote promocional limitado de largada (1 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+    },
     'pcd_1k': {
         id: 'pcd_1k',
         name: 'Travessia de Adultos (1 km) — PCD',
@@ -340,45 +347,93 @@ app.get('/api/public/validate-coupon', (req, res) => {
     });
 });
 
-// Helper: Obter contagem de vagas e limites das provas (50 vagas para 1 km e 50 vagas para 2 km)
+// Helper: Obter contagem de vagas, lotes promocionais e limites das provas
 function getRaceVacancies(callback) {
-    const LIMIT = 50;
-    db.all(`
+    const LIMIT_RACE = 50;
+    const LIMIT_PROMO = 10;
+    const LIMIT_KIDS = 20;
+
+    const query = `
         SELECT 
-            CASE 
-                WHEN distance LIKE '%2%' OR category LIKE '%2%' THEN '2 km'
-                WHEN distance LIKE '%1%' OR category LIKE '%1%' THEN '1 km'
-                ELSE 'outros'
-            END as dist_group,
-            COUNT(*) as count
+            id,
+            category,
+            distance,
+            payment_status
         FROM athletes
         WHERE payment_status != 'Cancelado'
-        GROUP BY dist_group
-    `, [], (err, rows) => {
+    `;
+
+    db.all(query, [], (err, rows) => {
         if (err) return callback(err);
-        const counts = { '1 km': 0, '2 km': 0 };
+        
+        let total_2k = 0;
+        let promo_2k = 0;
+        let total_1k = 0;
+        let promo_1k = 0;
+        let total_kids = 0;
+
         (rows || []).forEach(r => {
-            if (r.dist_group === '1 km') counts['1 km'] = r.count;
-            if (r.dist_group === '2 km') counts['2 km'] = r.count;
+            const cat = (r.category || '').toLowerCase();
+            const dist = (r.distance || '').toLowerCase();
+
+            if (dist.includes('kid') || cat.includes('kid')) {
+                total_kids++;
+            } else if (dist.includes('2') || cat.includes('2')) {
+                total_2k++;
+                if (cat.includes('promocional')) {
+                    promo_2k++;
+                }
+            } else if (dist.includes('1') || cat.includes('1')) {
+                total_1k++;
+                if (cat.includes('promocional')) {
+                    promo_1k++;
+                }
+            }
         });
+
+        const promo_sold_out_2k = promo_2k >= LIMIT_PROMO;
+        const promo_sold_out_1k = promo_1k >= LIMIT_PROMO;
+
         callback(null, {
-            '1 km': {
-                limit: LIMIT,
-                registered: counts['1 km'],
-                available: Math.max(0, LIMIT - counts['1 km']),
-                is_sold_out: counts['1 km'] >= LIMIT
-            },
             '2 km': {
-                limit: LIMIT,
-                registered: counts['2 km'],
-                available: Math.max(0, LIMIT - counts['2 km']),
-                is_sold_out: counts['2 km'] >= LIMIT
+                limit: LIMIT_RACE,
+                registered: total_2k,
+                available: Math.max(0, LIMIT_RACE - total_2k),
+                is_sold_out: total_2k >= LIMIT_RACE,
+                promo: {
+                    limit: LIMIT_PROMO,
+                    registered: promo_2k,
+                    available: Math.max(0, LIMIT_PROMO - promo_2k),
+                    is_sold_out: promo_sold_out_2k,
+                    active: !promo_sold_out_2k
+                },
+                regular_unlocked: promo_sold_out_2k
+            },
+            '1 km': {
+                limit: LIMIT_RACE,
+                registered: total_1k,
+                available: Math.max(0, LIMIT_RACE - total_1k),
+                is_sold_out: total_1k >= LIMIT_RACE,
+                promo: {
+                    limit: LIMIT_PROMO,
+                    registered: promo_1k,
+                    available: Math.max(0, LIMIT_PROMO - promo_1k),
+                    is_sold_out: promo_sold_out_1k,
+                    active: !promo_sold_out_1k
+                },
+                regular_unlocked: promo_sold_out_1k
+            },
+            'kids': {
+                limit: LIMIT_KIDS,
+                registered: total_kids,
+                available: Math.max(0, LIMIT_KIDS - total_kids),
+                is_sold_out: total_kids >= LIMIT_KIDS
             }
         });
     });
 }
 
-// Public endpoint: Vagas Disponíveis nas Provas (Limite de 50 para 1 km e 2 km)
+// Public endpoint: Vagas Disponíveis nas Provas (Limite de 50 para 1 km e 2 km, Lotes Promo de 10, e 20 para Kids)
 app.get('/api/public/race-vacancies', (req, res) => {
     getRaceVacancies((err, vacancies) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -417,26 +472,75 @@ app.get('/api/public/store-products', (req, res) => {
     });
 });
 
-// Helper: Validar limite de 50 vagas (1 km e 2 km) e disponibilidade do estoque de camisas
+// Helper: Validar vagas, lotes promocionais (10 vagas) e estoque de camisas
 function validateVacanciesAndTshirt(cat, cleanTshirt, existingAthlete, callback) {
     const dist = cat.distance;
+    const catId = cat.id || '';
 
-    // 1. Verificação de Limite de 50 Vagas por Prova (1 km e 2 km)
+    // 1. Verificação de Limites de Vagas e Lotes Promocionais
     const checkVac = (cbVac) => {
-        if (dist === '1 km' || dist === '2 km') {
+        // Prova Kids: Limite de 20 inscrições
+        if (catId === 'kids' || dist === 'Kids') {
             const excludeClause = existingAthlete ? 'AND id != ' + existingAthlete.id : '';
-            const pattern = `%${dist}%`;
             db.get(`
                 SELECT COUNT(*) as count 
                 FROM athletes 
                 WHERE payment_status != 'Cancelado' 
+                AND (distance LIKE '%Kid%' OR category LIKE '%Kid%')
+                ${excludeClause}
+            `, [], (errK, rowK) => {
+                if (errK) return cbVac(errK);
+                if (rowK && rowK.count >= 20) {
+                    return cbVac(new Error('As inscrições para a Travessia Kids estão esgotadas (limite máximo de 20 vagas atingido).'));
+                }
+                cbVac(null);
+            });
+            return;
+        }
+
+        // Provas de 1 km e 2 km (Limite de 50 vagas no total; 10 destinadas ao lote promocional de largada)
+        if (dist === '1 km' || dist === '2 km') {
+            const excludeClause = existingAthlete ? 'AND id != ' + existingAthlete.id : '';
+            const patternDist = `%${dist}%`;
+
+            db.all(`
+                SELECT category, distance
+                FROM athletes
+                WHERE payment_status != 'Cancelado'
                 AND (distance = ? OR category LIKE ?)
                 ${excludeClause}
-            `, [dist, pattern], (errVac, rowVac) => {
-                if (errVac) return cbVac(errVac);
-                if (rowVac && rowVac.count >= 50) {
+            `, [dist, patternDist], (errRows, rows) => {
+                if (errRows) return cbVac(errRows);
+                
+                const totalCount = (rows || []).length;
+                let promoCount = 0;
+                (rows || []).forEach(r => {
+                    const cName = (r.category || '').toLowerCase();
+                    if (cName.includes('promocional')) promoCount++;
+                });
+
+                // Teto global da prova: 50 vagas
+                if (totalCount >= 50) {
                     return cbVac(new Error(`As inscrições para a prova de ${dist} estão esgotadas (limite máximo de 50 vagas preenchido).`));
                 }
+
+                const isPromoCategory = catId.includes('promocional');
+                const isPcdCategory = catId.includes('pcd');
+
+                // Se o atleta escolheu categoria Promocional de Largada
+                if (isPromoCategory) {
+                    if (promoCount >= 10) {
+                        return cbVac(new Error(`O lote promocional de largada para a prova de ${dist} está esgotado (limite de 10 vagas preenchido). Por favor, selecione as inscrições regulares.`));
+                    }
+                } 
+                // Se escolheu inscrições regulares (Adulto ou Assessoria), PCD não é bloqueada
+                else if (!isPcdCategory) {
+                    // Só libera regular/assessoria se o lote promocional de 10 vagas já tiver acabado
+                    if (promoCount < 10) {
+                        return cbVac(new Error(`As inscrições regulares e de assessorias para a prova de ${dist} só estarão disponíveis após o término do Lote Promocional de Largada (ainda restam ${10 - promoCount} vagas promocionais). Aproveite o valor promocional!`));
+                    }
+                }
+
                 cbVac(null);
             });
         } else {
@@ -446,7 +550,7 @@ function validateVacanciesAndTshirt(cat, cleanTshirt, existingAthlete, callback)
 
     // 2. Verificação de Estoque da Camisa
     const checkTshirt = (cbTshirt) => {
-        const isAdultOrPcd = cat.id !== 'kids' && dist !== 'Kids';
+        const isAdultOrPcd = catId !== 'kids' && dist !== 'Kids';
         const size = (cleanTshirt || '').trim().toUpperCase();
         if (isAdultOrPcd && ['M', 'G', 'XG'].includes(size)) {
             db.get("SELECT id, name, stock FROM store_products WHERE tshirt_size = ?", [size], (errT, rowT) => {

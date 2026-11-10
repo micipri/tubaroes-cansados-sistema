@@ -233,6 +233,8 @@ async function loadDashboard() {
                 const pct2k = Math.min(100, Math.round((reg2k / lim2k) * 100));
                 const badge2k = document.getElementById('admin-vac-badge-2k');
                 const bar2k = document.getElementById('admin-vac-bar-2k');
+                const promoInfo2k = document.getElementById('admin-promo-info-2k');
+
                 if (badge2k) {
                     badge2k.textContent = `${reg2k} / ${lim2k} vagas (${Math.max(0, lim2k - reg2k)} restantes)`;
                     if (reg2k >= lim2k) {
@@ -246,6 +248,14 @@ async function loadDashboard() {
                     bar2k.style.width = `${pct2k}%`;
                     if (reg2k >= lim2k) bar2k.style.background = '#ef4444';
                 }
+                if (promoInfo2k && vacData['2 km'].promo) {
+                    const pr = vacData['2 km'].promo;
+                    if (pr.is_sold_out) {
+                        promoInfo2k.innerHTML = `<span style="color:#f87171;"><i class="ri-checkbox-circle-fill"></i> Lote Promo Esgotado (${pr.registered}/${pr.limit}) — Regulares Liberadas</span>`;
+                    } else {
+                        promoInfo2k.innerHTML = `<span style="color:#fbbf24;"><i class="ri-flashlight-fill"></i> Lote Promo Ativo: ${pr.registered}/${pr.limit} vagas (${pr.available} restantes)</span>`;
+                    }
+                }
             }
             if (vacData['1 km']) {
                 const reg1k = vacData['1 km'].registered;
@@ -253,6 +263,8 @@ async function loadDashboard() {
                 const pct1k = Math.min(100, Math.round((reg1k / lim1k) * 100));
                 const badge1k = document.getElementById('admin-vac-badge-1k');
                 const bar1k = document.getElementById('admin-vac-bar-1k');
+                const promoInfo1k = document.getElementById('admin-promo-info-1k');
+
                 if (badge1k) {
                     badge1k.textContent = `${reg1k} / ${lim1k} vagas (${Math.max(0, lim1k - reg1k)} restantes)`;
                     if (reg1k >= lim1k) {
@@ -265,6 +277,35 @@ async function loadDashboard() {
                 if (bar1k) {
                     bar1k.style.width = `${pct1k}%`;
                     if (reg1k >= lim1k) bar1k.style.background = '#ef4444';
+                }
+                if (promoInfo1k && vacData['1 km'].promo) {
+                    const pr = vacData['1 km'].promo;
+                    if (pr.is_sold_out) {
+                        promoInfo1k.innerHTML = `<span style="color:#f87171;"><i class="ri-checkbox-circle-fill"></i> Lote Promo Esgotado (${pr.registered}/${pr.limit}) — Regulares Liberadas</span>`;
+                    } else {
+                        promoInfo1k.innerHTML = `<span style="color:#fbbf24;"><i class="ri-flashlight-fill"></i> Lote Promo Ativo: ${pr.registered}/${pr.limit} vagas (${pr.available} restantes)</span>`;
+                    }
+                }
+            }
+            if (vacData['kids']) {
+                const regKids = vacData['kids'].registered;
+                const limKids = vacData['kids'].limit;
+                const pctKids = Math.min(100, Math.round((regKids / limKids) * 100));
+                const badgeKids = document.getElementById('admin-vac-badge-kids');
+                const barKids = document.getElementById('admin-vac-bar-kids');
+
+                if (badgeKids) {
+                    badgeKids.textContent = `${regKids} / ${limKids} vagas (${Math.max(0, limKids - regKids)} restantes)`;
+                    if (regKids >= limKids) {
+                        badgeKids.style.background = 'rgba(239, 68, 68, 0.2)';
+                        badgeKids.style.color = '#f87171';
+                        badgeKids.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        badgeKids.textContent = `ESGOTADO (${regKids}/${limKids})`;
+                    }
+                }
+                if (barKids) {
+                    barKids.style.width = `${pctKids}%`;
+                    if (regKids >= limKids) barKids.style.background = '#ef4444';
                 }
             }
         }
@@ -1184,6 +1225,7 @@ function openManualAthleteModal() {
                         <optgroup label="Percurso 1 km">
                             <option value="adulto_1k">Travessia Adultos (1 km) - R$ 149</option>
                             <option value="adulto_assessoria_1k">Travessia Assessorias (1 km, com cupom) - R$ 119</option>
+                            <option value="promocional_1k">Promocional de Largada (1 km) - R$ 99</option>
                             <option value="pcd_1k">Travessia PCD (1 km) - R$ 79</option>
                         </optgroup>
                         <optgroup label="Infantil">
