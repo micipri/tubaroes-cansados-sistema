@@ -204,14 +204,14 @@ const EVENT_CATEGORIES = {
         name: 'Travessia de Adultos (2,5 km)',
         distance: '2,5 km',
         price: 149.00,
-        description: 'Inscrição para a travessia de adultos com percurso de 2,5 km.'
+        description: 'Inscrição para a travessia de adultos (2,5 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
     },
     'adulto_assessoria': {
         id: 'adulto_assessoria',
         name: 'Travessia de Adultos (2,5 km) — Alunos de Assessorias (com cupom)',
         distance: '2,5 km',
         price: 119.00,
-        description: 'Valor especial com cupom para alunos de assessorias credenciadas.',
+        description: 'Valor especial com cupom para alunos de assessorias credenciadas (2,5 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.',
         requires_coupon: true
     },
     'kids': {
@@ -219,21 +219,21 @@ const EVENT_CATEGORIES = {
         name: 'Travessia Kids',
         distance: 'Kids',
         price: 79.00,
-        description: 'Inscrição para a prova infantil Travessia Kids.'
+        description: 'Inscrição para a prova infantil Travessia Kids. Inclui Kit Kids: Bolsa, Touca, Medalha e Brindes.'
     },
     'pcd': {
         id: 'pcd',
         name: 'Travessia de Adultos (2,5 km) — PCD',
         distance: '2,5 km',
         price: 79.00,
-        description: 'Valor especial de 2,5 km para atletas PCD.'
+        description: 'Valor especial de 2,5 km para atletas PCD. Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
     },
     'promocional': {
         id: 'promocional',
         name: 'Travessia de Adultos (2,5 km) — Promocional de Largada',
         distance: '2,5 km',
         price: 99.00,
-        description: 'Lote promocional limitado de largada.'
+        description: 'Lote promocional limitado de largada (2,5 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
     }
 };
 
