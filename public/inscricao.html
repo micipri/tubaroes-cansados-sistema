@@ -217,6 +217,30 @@
             box-shadow: 0 0 25px rgba(2, 132, 199, 0.25);
         }
 
+        .category-card.category-locked {
+            opacity: 0.55 !important;
+            filter: grayscale(0.85);
+            cursor: not-allowed !important;
+            border-style: dashed !important;
+            border-color: rgba(255, 255, 255, 0.18) !important;
+            background: rgba(15, 23, 42, 0.45) !important;
+        }
+
+        .category-card.category-locked:hover {
+            transform: none !important;
+            border-color: rgba(239, 68, 68, 0.4) !important;
+            background: rgba(239, 68, 68, 0.08) !important;
+        }
+
+        .category-card.category-locked .cat-radio {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+            background: transparent !important;
+        }
+
+        .category-card.category-locked .val {
+            color: var(--text-muted) !important;
+        }
+
         .cat-left {
             display: flex;
             align-items: flex-start;
@@ -693,12 +717,12 @@
                     <div class="cat-left">
                         <div class="cat-radio"></div>
                         <div class="cat-info">
-                            <h4>Travessia de Adultos (2 km) — Promocional de Largada</h4>
+                            <h4>Travessia de Adultos (2 km) — Promocional de Largada <span class="badge-promo-live" style="background:#f59e0b; color:#000; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;"><i class="ri-fire-fill"></i> 1º Lote Aberto</span></h4>
                             <p>Lote promocional limitado de largada (2 km). <strong>Inclui Kit Atleta: Touca, Camisa, Bolsa, Medalha e Brindes</strong>.</p>
                         </div>
                     </div>
                     <div class="cat-price">
-                        <div class="val">R$ 99</div>
+                        <div class="val" style="color: #f59e0b; font-weight: 900;">R$ 99</div>
                         <div class="sub">Promocional</div>
                     </div>
                 </div>
@@ -718,12 +742,12 @@
                     </div>
                 </div>
 
-                <!-- 3. Adulto 2 km Regular (Libera após esgotar o lote promocional) -->
-                <div class="category-card" data-id="adulto_2k" data-price="149.00" data-name="Travessia de Adultos (2 km)" data-requires-coupon="false" style="display: none;">
+                <!-- 3. Adulto 2 km Regular (Exibido, mas bloqueado até esgotar o promocional) -->
+                <div class="category-card category-locked" data-id="adulto_2k" data-price="149.00" data-name="Travessia de Adultos (2 km)" data-requires-coupon="false">
                     <div class="cat-left">
                         <div class="cat-radio"></div>
                         <div class="cat-info">
-                            <h4>Travessia de Adultos (2 km)</h4>
+                            <h4>Travessia de Adultos (2 km) <span class="badge-locked" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;"><i class="ri-lock-line"></i> Libera após 10 Vagas Promocionais</span></h4>
                             <p>Prova principal para adultos (2 km). <strong>Inclui Kit Atleta: Touca, Camisa, Bolsa, Medalha e Brindes</strong>.</p>
                         </div>
                     </div>
@@ -733,12 +757,12 @@
                     </div>
                 </div>
 
-                <!-- 4. Assessorias 2 km (Libera após esgotar o lote promocional) -->
-                <div class="category-card" data-id="adulto_assessoria_2k" data-price="119.00" data-name="Travessia de Adultos (2 km) — Alunos de Assessorias" data-requires-coupon="true" style="display: none;">
+                <!-- 4. Assessorias 2 km (Exibido, mas bloqueado até esgotar o promocional) -->
+                <div class="category-card category-locked" data-id="adulto_assessoria_2k" data-price="119.00" data-name="Travessia de Adultos (2 km) — Alunos de Assessorias" data-requires-coupon="true">
                     <div class="cat-left">
                         <div class="cat-radio"></div>
                         <div class="cat-info">
-                            <h4>Travessia de Adultos (2 km) — Assessorias</h4>
+                            <h4>Travessia de Adultos (2 km) — Assessorias <span class="badge-locked" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;"><i class="ri-lock-line"></i> Libera após 10 Vagas Promocionais</span></h4>
                             <p>Desconto exclusivo com cupom de assessoria (2 km). <strong>Inclui Kit Atleta: Touca, Camisa, Bolsa, Medalha e Brindes</strong>.</p>
                         </div>
                     </div>
@@ -768,12 +792,12 @@
                     <div class="cat-left">
                         <div class="cat-radio"></div>
                         <div class="cat-info">
-                            <h4>Travessia de Adultos (1 km) — Promocional de Largada</h4>
+                            <h4>Travessia de Adultos (1 km) — Promocional de Largada <span class="badge-promo-live" style="background:#f59e0b; color:#000; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;"><i class="ri-fire-fill"></i> 1º Lote Aberto</span></h4>
                             <p>Lote promocional limitado de largada (1 km). <strong>Inclui Kit Atleta: Touca, Camisa, Bolsa, Medalha e Brindes</strong>.</p>
                         </div>
                     </div>
                     <div class="cat-price">
-                        <div class="val">R$ 99</div>
+                        <div class="val" style="color: #f59e0b; font-weight: 900;">R$ 99</div>
                         <div class="sub">Promocional</div>
                     </div>
                 </div>
@@ -793,12 +817,12 @@
                     </div>
                 </div>
 
-                <!-- 3. Adulto 1 km Regular (Libera após esgotar o lote promocional) -->
-                <div class="category-card" data-id="adulto_1k" data-price="149.00" data-name="Travessia de Adultos (1 km)" data-requires-coupon="false" style="display: none;">
+                <!-- 3. Adulto 1 km Regular (Exibido, mas bloqueado até esgotar o promocional) -->
+                <div class="category-card category-locked" data-id="adulto_1k" data-price="149.00" data-name="Travessia de Adultos (1 km)" data-requires-coupon="false">
                     <div class="cat-left">
                         <div class="cat-radio"></div>
                         <div class="cat-info">
-                            <h4>Travessia de Adultos (1 km)</h4>
+                            <h4>Travessia de Adultos (1 km) <span class="badge-locked" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;"><i class="ri-lock-line"></i> Libera após 10 Vagas Promocionais</span></h4>
                             <p>Prova de 1 km em águas abertas para adultos. <strong>Inclui Kit Atleta: Touca, Camisa, Bolsa, Medalha e Brindes</strong>.</p>
                         </div>
                     </div>
@@ -808,12 +832,12 @@
                     </div>
                 </div>
 
-                <!-- 4. Assessorias 1 km (Libera após esgotar o lote promocional) -->
-                <div class="category-card" data-id="adulto_assessoria_1k" data-price="119.00" data-name="Travessia de Adultos (1 km) — Alunos de Assessorias" data-requires-coupon="true" style="display: none;">
+                <!-- 4. Assessorias 1 km (Exibido, mas bloqueado até esgotar o promocional) -->
+                <div class="category-card category-locked" data-id="adulto_assessoria_1k" data-price="119.00" data-name="Travessia de Adultos (1 km) — Alunos de Assessorias" data-requires-coupon="true">
                     <div class="cat-left">
                         <div class="cat-radio"></div>
                         <div class="cat-info">
-                            <h4>Travessia de Adultos (1 km) — Assessorias</h4>
+                            <h4>Travessia de Adultos (1 km) — Assessorias <span class="badge-locked" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;"><i class="ri-lock-line"></i> Libera após 10 Vagas Promocionais</span></h4>
                             <p>Desconto exclusivo com cupom de assessoria (1 km). <strong>Inclui Kit Atleta: Touca, Camisa, Bolsa, Medalha e Brindes</strong>.</p>
                         </div>
                     </div>
@@ -1231,7 +1255,7 @@
                         const cardAsses2k = document.querySelector('.category-card[data-id="adulto_assessoria_2k"]');
 
                         if (vac2k.promo && vac2k.promo.active) {
-                            // Promocional Ativo: Exibir APENAS Promocional de Largada (R$ 99) e PCD (R$ 79)
+                            // Promocional Ativo: Exibir Promocional e PCD liberados, e manter Adulto/Assessorias visíveis mas BLOQUEADOS
                             badge2k.innerHTML = `<i class="ri-fire-fill" style="color:#f59e0b;"></i> Lote Promocional: ${vac2k.promo.available} de 10 vagas (${vac2k.available}/50 na prova)`;
                             badge2k.style.background = 'rgba(245, 158, 11, 0.15)';
                             badge2k.style.color = '#f59e0b';
@@ -1251,19 +1275,28 @@
 
                             if (cardPcd2k) {
                                 cardPcd2k.style.display = 'flex';
+                                cardPcd2k.classList.remove('category-locked');
                             }
 
-                            // Ocultar completamente Adulto Regular e Assessorias durante o lote promocional
+                            // Exibir Adulto Regular e Assessorias, porém BLOQUEADOS para seleção
                             [cardAdulto2k, cardAsses2k].forEach(card => {
-                                if (card) card.style.display = 'none';
+                                if (card) {
+                                    card.style.display = 'flex';
+                                    card.classList.add('category-locked');
+                                    card.classList.remove('selected');
+                                    const h4 = card.querySelector('h4');
+                                    if (h4 && !card.querySelector('.badge-locked')) {
+                                        h4.insertAdjacentHTML('beforeend', ' <span class="badge-locked" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;"><i class="ri-lock-line"></i> Libera após 10 Vagas Promocionais</span>');
+                                    }
+                                }
                             });
 
-                            // Se estiver selecionado Adulto ou Assessoria 2k, direcionar para o Promocional 2k
+                            // Se estiver selecionado Adulto ou Assessoria 2k, redirecionar para o Promocional 2k
                             if (selectedCategory.id === 'adulto_2k' || selectedCategory.id === 'adulto_assessoria_2k') {
                                 if (cardPromo2k) cardPromo2k.click();
                             }
                         } else {
-                            // Lote Promocional 2k Esgotado: Ocultar Promocional e exibir Adulto Regular e Assessorias
+                            // Lote Promocional 2k Esgotado: Ocultar Promocional e liberar Adulto Regular e Assessorias
                             badge2k.innerHTML = `<i class="ri-user-line"></i> ${vac2k.available} de ${vac2k.limit} vagas restantes`;
                             badge2k.style.background = 'rgba(56, 189, 248, 0.15)';
                             badge2k.style.color = '#38bdf8';
@@ -1321,7 +1354,7 @@
                         const cardAsses1k = document.querySelector('.category-card[data-id="adulto_assessoria_1k"]');
 
                         if (vac1k.promo && vac1k.promo.active) {
-                            // Promocional Ativo: Exibir APENAS Promocional de Largada (R$ 99) e PCD (R$ 79)
+                            // Promocional Ativo: Exibir Promocional e PCD liberados, e manter Adulto/Assessorias visíveis mas BLOQUEADOS
                             badge1k.innerHTML = `<i class="ri-fire-fill" style="color:#f59e0b;"></i> Lote Promocional: ${vac1k.promo.available} de 10 vagas (${vac1k.available}/50 na prova)`;
                             badge1k.style.background = 'rgba(245, 158, 11, 0.15)';
                             badge1k.style.color = '#f59e0b';
@@ -1341,18 +1374,27 @@
 
                             if (cardPcd1k) {
                                 cardPcd1k.style.display = 'flex';
+                                cardPcd1k.classList.remove('category-locked');
                             }
 
-                            // Ocultar completamente Adulto Regular e Assessorias durante o lote promocional
+                            // Exibir Adulto Regular e Assessorias, porém BLOQUEADOS para seleção
                             [cardAdulto1k, cardAsses1k].forEach(card => {
-                                if (card) card.style.display = 'none';
+                                if (card) {
+                                    card.style.display = 'flex';
+                                    card.classList.add('category-locked');
+                                    card.classList.remove('selected');
+                                    const h4 = card.querySelector('h4');
+                                    if (h4 && !card.querySelector('.badge-locked')) {
+                                        h4.insertAdjacentHTML('beforeend', ' <span class="badge-locked" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase;"><i class="ri-lock-line"></i> Libera após 10 Vagas Promocionais</span>');
+                                    }
+                                }
                             });
 
                             if (selectedCategory.id === 'adulto_1k' || selectedCategory.id === 'adulto_assessoria_1k') {
                                 if (cardPromo1k) cardPromo1k.click();
                             }
                         } else {
-                            // Lote Promocional 1k Esgotado: Ocultar Promocional e exibir Adulto Regular e Assessorias
+                            // Lote Promocional 1k Esgotado: Ocultar Promocional e liberar Adulto Regular e Assessorias
                             badge1k.innerHTML = `<i class="ri-user-line"></i> ${vac1k.available} de ${vac1k.limit} vagas restantes`;
                             badge1k.style.background = 'rgba(16, 185, 129, 0.15)';
                             badge1k.style.color = '#34d399';
