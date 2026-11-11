@@ -338,6 +338,10 @@ function createSqliteTables(dbInstance) {
                     if (!hasIsSystem) {
                         dbInstance.run("ALTER TABLE store_products ADD COLUMN is_system INTEGER DEFAULT 0");
                     }
+                    const hasShowInCheckout = columns.some(c => c.name === 'show_in_checkout');
+                    if (!hasShowInCheckout) {
+                        dbInstance.run("ALTER TABLE store_products ADD COLUMN show_in_checkout INTEGER NOT NULL DEFAULT 0");
+                    }
                 }
 
                 const defaultShirts = [

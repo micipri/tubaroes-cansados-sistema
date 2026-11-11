@@ -464,9 +464,9 @@ app.get('/api/public/tshirt-stock', (req, res) => {
     });
 });
 
-// Public endpoint: Listar Produtos da Loja com Estoque Disponível para Compra Adicional
+// Public endpoint: Listar Produtos da Loja com Estoque Disponível para Compra Adicional (Apenas marcados para Checkout)
 app.get('/api/public/store-products', (req, res) => {
-    db.all("SELECT id, name, stock, sell_price FROM store_products WHERE stock > 0 AND (is_system = 0 OR is_system IS NULL OR sell_price > 0) ORDER BY name ASC", [], (err, rows) => {
+    db.all("SELECT id, name, stock, sell_price FROM store_products WHERE stock > 0 AND show_in_checkout = 1 ORDER BY name ASC", [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows || []);
     });
@@ -1353,10 +1353,11 @@ app.get('/api/public/store_products', (req, res) => {
     });
 });
 app.post('/api/store_products', requireAuth, (req, res) => {
-    const { name, stock, cost_price, sell_price } = req.body;
-    db.run("INSERT INTO store_products (name, stock, cost_price, sell_price) VALUES (?, ?, ?, ?)", [name, stock, cost_price, sell_price], function(err) {
+    const { name, stock, cost_price, sell_price, show_in_checkout } = req.body;
+    const inCheckout = show_in_checkout ? 1 : 0;
+    db.run("INSERT INTO store_products (name, stock, cost_price, sell_price, show_in_checkout) VALUES (?, ?, ?, ?, ?)", [name, stock, cost_price, sell_price, inCheckout], function(err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ id: this.lastID, name, stock, cost_price, sell_price });
+        res.json({ id: this.lastID, name, stock, cost_price, sell_price, show_in_checkout: inCheckout });
     });
 });
 app.delete('/api/store_products/:id', requireAuth, (req, res) => {
@@ -1381,13 +1382,14 @@ app.put('/api/store_products/:id', requireAuth, (req, res) => {
         const stock = req.body.stock !== undefined ? parseInt(req.body.stock, 10) : current.stock;
         const cost_price = req.body.cost_price !== undefined ? parseFloat(req.body.cost_price) : current.cost_price;
         const sell_price = req.body.sell_price !== undefined ? parseFloat(req.body.sell_price) : current.sell_price;
+        const show_in_checkout = req.body.show_in_checkout !== undefined ? (req.body.show_in_checkout ? 1 : 0) : (current.show_in_checkout !== undefined ? current.show_in_checkout : 0);
 
         db.run(
-            "UPDATE store_products SET name = ?, stock = ?, cost_price = ?, sell_price = ? WHERE id = ?",
-            [name, Math.max(0, stock), cost_price, sell_price, req.params.id],
+            "UPDATE store_products SET name = ?, stock = ?, cost_price = ?, sell_price = ?, show_in_checkout = ? WHERE id = ?",
+            [name, Math.max(0, stock), cost_price, sell_price, show_in_checkout, req.params.id],
             function(err2) {
                 if (err2) return res.status(500).json({ error: err2.message });
-                res.json({ updated: this.changes > 0, id: req.params.id, name, stock: Math.max(0, stock), sell_price });
+                res.json({ updated: this.changes > 0, id: req.params.id, name, stock: Math.max(0, stock), sell_price, show_in_checkout });
             }
         );
     });

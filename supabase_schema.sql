@@ -94,8 +94,11 @@ CREATE TABLE IF NOT EXISTS public.store_products (
     cost_price NUMERIC(10, 2) NOT NULL DEFAULT 0,
     sell_price NUMERIC(10, 2) NOT NULL DEFAULT 0,
     tshirt_size TEXT DEFAULT NULL,
-    is_system INTEGER DEFAULT 0
+    is_system INTEGER DEFAULT 0,
+    show_in_checkout INTEGER NOT NULL DEFAULT 0
 );
+
+ALTER TABLE public.store_products ADD COLUMN IF NOT EXISTS show_in_checkout INTEGER NOT NULL DEFAULT 0;
 
 -- Inserir camisas oficiais com 30 unidades iniciais (se não existirem)
 INSERT INTO public.store_products (name, stock, cost_price, sell_price, tshirt_size, is_system)

@@ -1528,7 +1528,7 @@ async function loadStoreProducts() {
 
     tbody.innerHTML = '';
     if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhum produto cadastrado na loja.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhum produto cadastrado na loja.</td></tr>`;
         return;
     }
 
@@ -1551,6 +1551,12 @@ async function loadStoreProducts() {
             </td>
             <td><strong style="color:var(--gold); font-size:1.05rem;">${formatCurrency(p.sell_price)}</strong></td>
             <td>
+                <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:0.85rem;" title="Marque para este item aparecer para compra no checkout da inscrição">
+                    <input type="checkbox" ${p.show_in_checkout ? 'checked' : ''} onchange="toggleProductCheckout(${p.id}, this.checked)" style="width:18px; height:18px; cursor:pointer;">
+                    <span style="font-weight:700; color:${p.show_in_checkout ? '#34d399' : 'var(--text-muted)'};">${p.show_in_checkout ? 'Sim (Visível)' : 'Não (Oculto)'}</span>
+                </label>
+            </td>
+            <td>
                 ${isSystemShirt ? `
                     <span title="Item fixo do kit atleta vinculado às inscrições. Não pode ser excluído do estoque." style="display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; color:#38bdf8; background:rgba(56,189,248,0.12); padding:5px 10px; border-radius:6px; font-weight:700; border:1px solid rgba(56,189,248,0.25);">
                         <i class="ri-lock-line"></i> Item do Kit (Fixo)
@@ -1565,6 +1571,16 @@ async function loadStoreProducts() {
         tbody.appendChild(tr);
     });
 }
+
+// Alternar visibilidade no checkout da inscrição
+window.toggleProductCheckout = async function(id, isChecked) {
+    try {
+        await putData(`store_products/${id}`, { show_in_checkout: isChecked ? 1 : 0 });
+        loadStoreProducts();
+    } catch (err) {
+        alert('Erro ao atualizar visibilidade: ' + err.message);
+    }
+};
 
 // Definir quantidade exata de estoque (para o organizador corrigir facilmente)
 window.setExactStock = async function(id, name, currentStock) {
@@ -1619,11 +1635,14 @@ function setupStoreListeners() {
                 return;
             }
 
+            const show_in_checkout = document.getElementById('prod-checkout') ? (document.getElementById('prod-checkout').checked ? 1 : 0) : 1;
+
             const res = await postData('store_products', {
                 name,
                 stock: Math.max(0, stock),
                 cost_price: 0,
-                sell_price: Math.max(0, sell_price)
+                sell_price: Math.max(0, sell_price),
+                show_in_checkout
             });
 
             if (res.error) {
