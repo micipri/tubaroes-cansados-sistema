@@ -100,18 +100,18 @@ CREATE TABLE IF NOT EXISTS public.store_products (
 
 ALTER TABLE public.store_products ADD COLUMN IF NOT EXISTS show_in_checkout INTEGER NOT NULL DEFAULT 0;
 
--- Inserir camisas oficiais com 30 unidades iniciais (se não existirem)
-INSERT INTO public.store_products (name, stock, cost_price, sell_price, tshirt_size, is_system)
-SELECT 'Camisa Oficial do Evento (Tamanho M)', 30, 0, 0, 'M', 1
-WHERE NOT EXISTS (SELECT 1 FROM public.store_products WHERE tshirt_size = 'M' OR name = 'Camisa Oficial do Evento (Tamanho M)');
+-- Inserir camisas oficiais com 100 unidades no total (44 M, 41 G, 15 XG) se não existirem
+INSERT INTO public.store_products (id, name, stock, cost_price, sell_price, tshirt_size, is_system, show_in_checkout)
+SELECT 12, 'Camisa Oficial do Evento (Tamanho M)', 44, 0, 0, 'M', 1, 0
+WHERE NOT EXISTS (SELECT 1 FROM public.store_products WHERE tshirt_size = 'M' OR name LIKE '%Tamanho M%');
 
-INSERT INTO public.store_products (name, stock, cost_price, sell_price, tshirt_size, is_system)
-SELECT 'Camisa Oficial do Evento (Tamanho G)', 30, 0, 0, 'G', 1
-WHERE NOT EXISTS (SELECT 1 FROM public.store_products WHERE tshirt_size = 'G' OR name = 'Camisa Oficial do Evento (Tamanho G)');
+INSERT INTO public.store_products (id, name, stock, cost_price, sell_price, tshirt_size, is_system, show_in_checkout)
+SELECT 13, 'Camisa Oficial do Evento (Tamanho G)', 41, 0, 0, 'G', 1, 0
+WHERE NOT EXISTS (SELECT 1 FROM public.store_products WHERE tshirt_size = 'G' OR name LIKE '%Tamanho G%');
 
-INSERT INTO public.store_products (name, stock, cost_price, sell_price, tshirt_size, is_system)
-SELECT 'Camisa Oficial do Evento (Tamanho XG)', 30, 0, 0, 'XG', 1
-WHERE NOT EXISTS (SELECT 1 FROM public.store_products WHERE tshirt_size = 'XG' OR name = 'Camisa Oficial do Evento (Tamanho XG)');
+INSERT INTO public.store_products (id, name, stock, cost_price, sell_price, tshirt_size, is_system, show_in_checkout)
+SELECT 14, 'Camisa Oficial do Evento (Tamanho XG)', 15, 0, 0, 'XG', 1, 0
+WHERE NOT EXISTS (SELECT 1 FROM public.store_products WHERE tshirt_size = 'XG' OR name LIKE '%Tamanho XG%');
 
 -- 5. Vendas da Loja
 CREATE TABLE IF NOT EXISTS public.store_sales (
