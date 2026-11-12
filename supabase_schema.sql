@@ -53,11 +53,22 @@ CREATE TABLE IF NOT EXISTS public.athletes (
     kit_retrieved_by TEXT,
     cap_number TEXT,
     notes TEXT,
+    responsible_name TEXT,
+    responsible_cpf TEXT,
+    responsible_phone TEXT,
+    responsible_email TEXT,
+    responsible_birth TEXT,
     store_items TEXT DEFAULT '[]',
     store_amount NUMERIC(10, 2) DEFAULT 0,
     total_amount NUMERIC(10, 2) DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS responsible_name TEXT;
+ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS responsible_cpf TEXT;
+ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS responsible_phone TEXT;
+ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS responsible_email TEXT;
+ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS responsible_birth TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_athletes_cpf ON public.athletes(cpf);
 CREATE INDEX IF NOT EXISTS idx_athletes_status ON public.athletes(payment_status);

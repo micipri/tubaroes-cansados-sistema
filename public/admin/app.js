@@ -468,6 +468,17 @@ async function openAthleteModal(athleteId) {
                     <label>Assessoria Esportiva</label>
                     <div class="val">${a.assessoria_name} ${a.coupon_code ? `(Cupom: <strong>${a.coupon_code}</strong>)` : ''}</div>
                 </div>` : ''}
+                ${a.responsible_name ? `
+                <div class="info-field" style="grid-column: 1 / -1; background: rgba(245, 158, 11, 0.08); padding: 12px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.25);">
+                    <label style="color: var(--gold);"><i class="ri-parent-fill"></i> Responsável Legal (Atleta Menor / Kids)</label>
+                    <div class="val" style="margin-top: 4px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 0.9rem;">
+                        <div><strong>Nome:</strong> ${escapeHtml(a.responsible_name)}</div>
+                        <div><strong>CPF:</strong> ${formatCpf(a.responsible_cpf)}</div>
+                        <div><strong>WhatsApp:</strong> ${formatPhone(a.responsible_phone)}</div>
+                        <div><strong>E-mail:</strong> ${escapeHtml(a.responsible_email || '—')}</div>
+                        <div><strong>Nascimento:</strong> ${formatDate(a.responsible_birth)}</div>
+                    </div>
+                </div>` : ''}
                 <div class="info-field">
                     <label>Valor Inscrição / Total</label>
                     <div class="val" style="color: var(--gold); font-size: 1.25rem; font-weight: 800;">${formatCurrency(totalToPay)}</div>
@@ -1153,6 +1164,7 @@ function exportAthletesXLSX() {
         'Data Nascimento', 'Gênero', 'Modalidade', 'Distância',
         'Valor (R$)', 'Status Pagamento', 'Forma Pagamento', 'Data Pagamento',
         'Confirmado Por', 'Tamanho Camisa', 'Assessoria', 'Cupom',
+        'Responsável Nome', 'Responsável CPF', 'Responsável Tel', 'Responsável Email', 'Responsável Nasc',
         'Contato Emergência Nome', 'Contato Emergência Tel',
         'Check-in Realizado', 'Data Check-in', 'Nº Touca', 'Retirado Por'
     ];
@@ -1175,6 +1187,11 @@ function exportAthletesXLSX() {
         a.tshirt_size || '',
         a.assessoria_name || '',
         a.coupon_code || '',
+        a.responsible_name || '',
+        a.responsible_cpf ? formatCpf(a.responsible_cpf) : '',
+        a.responsible_phone ? formatPhone(a.responsible_phone) : '',
+        a.responsible_email || '',
+        a.responsible_birth || '',
         a.emergency_contact_name || '',
         a.emergency_contact_phone || '',
         a.checkin_status === 1 ? 'Sim' : 'Não',

@@ -623,6 +623,10 @@
                         <label style="color: #38bdf8;">Assessoria Esportiva & Cupom Validado</label>
                         <div class="val" id="rev-assessoria-val" style="color: #34d399;">—</div>
                     </div>
+                    <div class="review-item" id="rev-responsible-box" style="display: none; grid-column: 1 / -1; background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.3);">
+                        <label style="color: #fbbf24;"><i class="ri-parent-fill"></i> Responsável Legal do Atleta Menor</label>
+                        <div class="val" id="rev-responsible-val" style="color: #fff; line-height: 1.5;">—</div>
+                    </div>
                 </div>
             </section>
 
@@ -899,7 +903,7 @@
             document.getElementById('rev-phone').textContent = maskPhone(athleteDraft.phone);
             document.getElementById('rev-email').textContent = athleteDraft.email;
             document.getElementById('rev-birth-gender').textContent = `${formatDate(athleteDraft.birth_date)} (${athleteDraft.gender})`;
-            document.getElementById('rev-tshirt').textContent = athleteDraft.tshirt_size;
+            document.getElementById('rev-tshirt').textContent = athleteDraft.category_id === 'kids' ? 'Kit Kids (Não inclui camisa)' : athleteDraft.tshirt_size;
             document.getElementById('rev-category').textContent = athleteDraft.category_name;
             document.getElementById('rev-price').textContent = formatCurrency(athleteDraft.price);
 
@@ -908,6 +912,16 @@
                 const assessoriaVal = document.getElementById('rev-assessoria-val');
                 assessoriaBox.style.display = 'block';
                 assessoriaVal.innerHTML = `<strong>${athleteDraft.assessoria_name || 'Assessoria Parceira'}</strong> — Cupom aplicado: <code style="background:rgba(245,158,11,0.2); padding:2px 6px; border-radius:4px; font-weight:800; color:var(--gold); font-family:monospace;">${athleteDraft.coupon_code}</code>`;
+            }
+
+            if (athleteDraft.category_id === 'kids' && athleteDraft.responsible_name) {
+                const respBox = document.getElementById('rev-responsible-box');
+                const respVal = document.getElementById('rev-responsible-val');
+                if (respBox && respVal) {
+                    respBox.style.display = 'block';
+                    respVal.innerHTML = `<strong>${escapeHtml(athleteDraft.responsible_name)}</strong> (CPF: ${maskCpf(athleteDraft.responsible_cpf)})<br>` +
+                        `<span style="color:var(--text-muted); font-size:0.85rem;"><i class="ri-whatsapp-line"></i> ${maskPhone(athleteDraft.responsible_phone)} • <i class="ri-mail-line"></i> ${escapeHtml(athleteDraft.responsible_email)} • Nasc: ${formatDate(athleteDraft.responsible_birth)}</span>`;
+                }
             }
 
             document.getElementById('sum-cat-title').textContent = athleteDraft.category_name;

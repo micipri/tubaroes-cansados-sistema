@@ -630,11 +630,33 @@ app.post('/api/public/complete-registration', (req, res) => {
         tshirt_size,
         emergency_contact_name,
         emergency_contact_phone,
-        medical_notes
+        medical_notes,
+        responsible_name,
+        responsible_cpf,
+        responsible_phone,
+        responsible_email,
+        responsible_birth
     } = athlete;
 
-    if (!name || !cpf || !email || !phone || !category_id) {
-        return res.status(400).json({ error: 'Preencha todos os campos obrigatórios (Nome, CPF, E-mail, Celular e Modalidade).' });
+    const cleanCatId = String(category_id || '').trim().toLowerCase();
+    const cat = EVENT_CATEGORIES[category_id] || EVENT_CATEGORIES[cleanCatId];
+    if (!cat) {
+        return res.status(400).json({ error: 'Modalidade de prova inválida selecionada.' });
+    }
+
+    const isKids = cleanCatId === 'kids' || cat.id === 'kids';
+    const finalEmail = isKids ? (responsible_email || email) : email;
+    const finalPhone = isKids ? (responsible_phone || phone) : phone;
+    const finalTshirt = isKids ? 'Kids' : (tshirt_size || 'M');
+
+    if (isKids) {
+        if (!name || !cpf || !birth_date || !gender || !responsible_name || !responsible_cpf || !responsible_phone || !responsible_email || !responsible_birth) {
+            return res.status(400).json({ error: 'Preencha todos os campos obrigatórios da Travessia Kids (dados da criança e dados do responsável).' });
+        }
+    } else {
+        if (!name || !cpf || !finalEmail || !finalPhone || !category_id) {
+            return res.status(400).json({ error: 'Preencha todos os campos obrigatórios (Nome, CPF, E-mail, Celular e Modalidade).' });
+        }
     }
 
     const cleanCpf = String(cpf).replace(/\D/g, '');
@@ -642,10 +664,11 @@ app.post('/api/public/complete-registration', (req, res) => {
         return res.status(400).json({ error: 'CPF inválido. Deve conter 11 dígitos numéricos.' });
     }
 
-    const cleanCatId = String(category_id || '').trim().toLowerCase();
-    const cat = EVENT_CATEGORIES[category_id] || EVENT_CATEGORIES[cleanCatId];
-    if (!cat) {
-        return res.status(400).json({ error: 'Modalidade de prova inválida selecionada.' });
+    if (isKids && responsible_cpf) {
+        const cleanRespCpf = String(responsible_cpf).replace(/\D/g, '');
+        if (cleanRespCpf.length !== 11) {
+            return res.status(400).json({ error: 'CPF do responsável inválido. Deve conter 11 dígitos numéricos.' });
+        }
     }
 
     if (!payment_method || (payment_method !== 'Pix' && payment_method !== 'Cartão')) {
@@ -756,15 +779,22 @@ app.post('/api/public/complete-registration', (req, res) => {
                         name = ?, email = ?, phone = ?, birth_date = ?, gender = ?,
                         category = ?, distance = ?, price = ?, coupon_code = ?, assessoria_name = ?,
                         tshirt_size = ?, emergency_contact_name = ?, emergency_contact_phone = ?,
-                        medical_notes = ?, payment_method = ?, store_items = ?, store_amount = ?, total_amount = ?
+                        medical_notes = ?, payment_method = ?, store_items = ?, store_amount = ?, total_amount = ?,
+                        responsible_name = ?, responsible_cpf = ?, responsible_phone = ?, responsible_email = ?, responsible_birth = ?
                         WHERE id = ?`;
                     db.run(sqlUpdate, [
-                        name.trim(), email.trim(), phone.trim(), birth_date || null, gender || null,
+                        name.trim(), String(finalEmail).trim(), String(finalPhone).trim(), birth_date || null, gender || null,
                         cat.name, cat.distance, inscriptionPrice, catResult.coupon_code,
-                        catResult.assessoria_name, tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                        catResult.assessoria_name, finalTshirt, emergency_contact_name ? emergency_contact_name.trim() : null,
                         emergency_contact_phone ? emergency_contact_phone.trim() : null,
                         medical_notes ? medical_notes.trim() : null, payment_method,
-                        storeItemsJson, storeAmount, totalAmount, existing.id
+                        storeItemsJson, storeAmount, totalAmount,
+                        responsible_name ? responsible_name.trim() : null,
+                        responsible_cpf ? String(responsible_cpf).replace(/\D/g, '') : null,
+                        responsible_phone ? responsible_phone.trim() : null,
+                        responsible_email ? responsible_email.trim() : null,
+                        responsible_birth || null,
+                        existing.id
                     ], function(err3) {
                         if (err3) return res.status(500).json({ error: err3.message });
                         return res.json({
@@ -791,16 +821,22 @@ app.post('/api/public/complete-registration', (req, res) => {
                         name, cpf, email, phone, birth_date, gender,
                         category, distance, price, coupon_code, assessoria_name,
                         tshirt_size, emergency_contact_name, emergency_contact_phone,
-                        medical_notes, payment_status, payment_method, store_items, store_amount, total_amount
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente', ?, ?, ?, ?)`;
+                        medical_notes, payment_status, payment_method, store_items, store_amount, total_amount,
+                        responsible_name, responsible_cpf, responsible_phone, responsible_email, responsible_birth
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente', ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
                     db.run(sqlInsert, [
-                        name.trim(), cleanCpf, email.trim(), phone.trim(), birth_date || null, gender || null,
+                        name.trim(), cleanCpf, String(finalEmail).trim(), String(finalPhone).trim(), birth_date || null, gender || null,
                         cat.name, cat.distance, inscriptionPrice, catResult.coupon_code,
-                        catResult.assessoria_name, tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                        catResult.assessoria_name, finalTshirt, emergency_contact_name ? emergency_contact_name.trim() : null,
                         emergency_contact_phone ? emergency_contact_phone.trim() : null,
                         medical_notes ? medical_notes.trim() : null, payment_method,
-                        storeItemsJson, storeAmount, totalAmount
+                        storeItemsJson, storeAmount, totalAmount,
+                        responsible_name ? responsible_name.trim() : null,
+                        responsible_cpf ? String(responsible_cpf).replace(/\D/g, '') : null,
+                        responsible_phone ? responsible_phone.trim() : null,
+                        responsible_email ? responsible_email.trim() : null,
+                        responsible_birth || null
                     ], function(err3) {
                         if (err3) return res.status(500).json({ error: err3.message });
                         const newId = this.lastID;
@@ -847,11 +883,33 @@ app.post('/api/public/register-athlete', (req, res) => {
         tshirt_size,
         emergency_contact_name,
         emergency_contact_phone,
-        medical_notes
+        medical_notes,
+        responsible_name,
+        responsible_cpf,
+        responsible_phone,
+        responsible_email,
+        responsible_birth
     } = req.body;
 
-    if (!name || !cpf || !email || !phone || !category_id) {
-        return res.status(400).json({ error: 'Preencha todos os campos obrigatórios (Nome, CPF, E-mail, Celular e Modalidade).' });
+    const cleanCatId = String(category_id || '').trim().toLowerCase();
+    const cat = EVENT_CATEGORIES[category_id] || EVENT_CATEGORIES[cleanCatId];
+    if (!cat) {
+        return res.status(400).json({ error: 'Modalidade de prova inválida selecionada.' });
+    }
+
+    const isKids = cleanCatId === 'kids' || cat.id === 'kids';
+    const finalEmail = isKids ? (responsible_email || email) : email;
+    const finalPhone = isKids ? (responsible_phone || phone) : phone;
+    const finalTshirt = isKids ? 'Kids' : (tshirt_size || 'M');
+
+    if (isKids) {
+        if (!name || !cpf || !birth_date || !gender || !responsible_name || !responsible_cpf || !responsible_phone || !responsible_email || !responsible_birth) {
+            return res.status(400).json({ error: 'Preencha todos os campos obrigatórios da Travessia Kids (dados da criança e do responsável).' });
+        }
+    } else {
+        if (!name || !cpf || !finalEmail || !finalPhone || !category_id) {
+            return res.status(400).json({ error: 'Preencha todos os campos obrigatórios (Nome, CPF, E-mail, Celular e Modalidade).' });
+        }
     }
 
     const cleanCpf = String(cpf).replace(/\D/g, '');
@@ -859,10 +917,11 @@ app.post('/api/public/register-athlete', (req, res) => {
         return res.status(400).json({ error: 'CPF inválido. Deve conter 11 dígitos numéricos.' });
     }
 
-    const cleanCatId = String(category_id || '').trim().toLowerCase();
-    const cat = EVENT_CATEGORIES[category_id] || EVENT_CATEGORIES[cleanCatId];
-    if (!cat) {
-        return res.status(400).json({ error: 'Modalidade de prova inválida selecionada.' });
+    if (isKids && responsible_cpf) {
+        const cleanRespCpf = String(responsible_cpf).replace(/\D/g, '');
+        if (cleanRespCpf.length !== 11) {
+            return res.status(400).json({ error: 'CPF do responsável inválido. Deve conter 11 dígitos numéricos.' });
+        }
     }
 
     // Check if athlete already registered
@@ -883,7 +942,7 @@ app.post('/api/public/register-athlete', (req, res) => {
             const price = cat.price;
 
             // Ajustar estoque da camisa oficial
-            adjustTshirtStock(tshirt_size, existing);
+            adjustTshirtStock(finalTshirt, existing);
 
             if (existing) {
                 // Update existing pending registration
@@ -891,15 +950,21 @@ app.post('/api/public/register-athlete', (req, res) => {
                     name = ?, email = ?, phone = ?, birth_date = ?, gender = ?,
                     category = ?, distance = ?, price = ?, coupon_code = ?, assessoria_name = ?,
                     tshirt_size = ?, emergency_contact_name = ?, emergency_contact_phone = ?,
-                    medical_notes = ?
+                    medical_notes = ?,
+                    responsible_name = ?, responsible_cpf = ?, responsible_phone = ?, responsible_email = ?, responsible_birth = ?
                     WHERE id = ?`;
                 db.run(sqlUpdate, [
-                    name.trim(), email.trim(), phone.trim(), birth_date || null, gender || null,
+                    name.trim(), String(finalEmail).trim(), String(finalPhone).trim(), birth_date || null, gender || null,
                     categoryName, distance, price, coupon_code ? coupon_code.trim().toUpperCase() : null,
                     assessoria_name ? assessoria_name.trim() : null,
-                    tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                    finalTshirt, emergency_contact_name ? emergency_contact_name.trim() : null,
                     emergency_contact_phone ? emergency_contact_phone.trim() : null,
                     medical_notes ? medical_notes.trim() : null,
+                    responsible_name ? responsible_name.trim() : null,
+                    responsible_cpf ? String(responsible_cpf).replace(/\D/g, '') : null,
+                    responsible_phone ? responsible_phone.trim() : null,
+                    responsible_email ? responsible_email.trim() : null,
+                    responsible_birth || null,
                     existing.id
                 ], function(err2) {
                     if (err2) return res.status(500).json({ error: err2.message });
@@ -925,16 +990,22 @@ app.post('/api/public/register-athlete', (req, res) => {
                     name, cpf, email, phone, birth_date, gender,
                     category, distance, price, coupon_code, assessoria_name,
                     tshirt_size, emergency_contact_name, emergency_contact_phone,
-                    medical_notes, payment_status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente')`;
+                    medical_notes, payment_status,
+                    responsible_name, responsible_cpf, responsible_phone, responsible_email, responsible_birth
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente', ?, ?, ?, ?, ?)`;
 
                 db.run(sqlInsert, [
-                    name.trim(), cleanCpf, email.trim(), phone.trim(), birth_date || null, gender || null,
+                    name.trim(), cleanCpf, String(finalEmail).trim(), String(finalPhone).trim(), birth_date || null, gender || null,
                     categoryName, distance, price, coupon_code ? coupon_code.trim().toUpperCase() : null,
                     assessoria_name ? assessoria_name.trim() : null,
-                    tshirt_size || 'M', emergency_contact_name ? emergency_contact_name.trim() : null,
+                    finalTshirt, emergency_contact_name ? emergency_contact_name.trim() : null,
                     emergency_contact_phone ? emergency_contact_phone.trim() : null,
-                    medical_notes ? medical_notes.trim() : null
+                    medical_notes ? medical_notes.trim() : null,
+                    responsible_name ? responsible_name.trim() : null,
+                    responsible_cpf ? String(responsible_cpf).replace(/\D/g, '') : null,
+                    responsible_phone ? responsible_phone.trim() : null,
+                    responsible_email ? responsible_email.trim() : null,
+                    responsible_birth || null
                 ], function(err2) {
                     if (err2) return res.status(500).json({ error: err2.message });
                     const newId = this.lastID;

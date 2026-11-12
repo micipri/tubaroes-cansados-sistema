@@ -908,31 +908,16 @@
                 <div id="coupon-feedback" style="font-size: 0.88rem; display: none; padding-top: 4px;"></div>
             </div>
 
-            <!-- Etapa 2: Dados Pessoais -->
-            <div class="section-heading">
-                <i class="ri-user-smile-fill"></i>
-                <span>2. Dados do Atleta</span>
+            <!-- Etapa 2: Dados Pessoais do Atleta -->
+            <div class="section-heading" id="heading-step2">
+                <i class="ri-user-smile-fill" id="step2-icon"></i>
+                <span id="step2-title">2. Dados do Atleta</span>
             </div>
 
             <div class="form-grid">
                 <div class="form-group full-width">
-                    <label for="athlete_name">Nome Completo <span class="req">*</span></label>
-                    <input type="text" id="athlete_name" placeholder="Digite seu nome completo" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="athlete_cpf">CPF <span class="req">*</span></label>
-                    <input type="tel" id="athlete_cpf" placeholder="000.000.000-00" maxlength="14" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="athlete_phone">WhatsApp / Celular <span class="req">*</span></label>
-                    <input type="tel" id="athlete_phone" placeholder="(00) 00000-0000" maxlength="15" required>
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="athlete_email">E-mail para Confirmação <span class="req">*</span></label>
-                    <input type="email" id="athlete_email" placeholder="seuemail@exemplo.com" required>
+                    <label for="athlete_name" id="label-athlete-name">Nome Completo <span class="req">*</span></label>
+                    <input type="text" id="athlete_name" placeholder="Digite o nome completo" required>
                 </div>
 
                 <div class="form-group">
@@ -949,12 +934,63 @@
                         <option value="Outro">Outro</option>
                     </select>
                 </div>
+
+                <div class="form-group full-width">
+                    <label for="athlete_cpf" id="label-athlete-cpf">CPF <span class="req">*</span></label>
+                    <input type="tel" id="athlete_cpf" placeholder="000.000.000-00" maxlength="14" required>
+                </div>
+
+                <!-- Contatos do atleta adulto (ocultados automaticamente na Travessia Kids, pois ficam nos Dados do Responsável) -->
+                <div id="adult-contact-fields" style="display: contents;">
+                    <div class="form-group">
+                        <label for="athlete_phone">WhatsApp / Celular <span class="req">*</span></label>
+                        <input type="tel" id="athlete_phone" placeholder="(00) 00000-0000" maxlength="15" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="athlete_email">E-mail para Confirmação <span class="req">*</span></label>
+                        <input type="email" id="athlete_email" placeholder="seuemail@exemplo.com" required>
+                    </div>
+                </div>
             </div>
 
-            <!-- Etapa 3: Kit e Informações de Prova -->
-            <div class="section-heading">
-                <i class="ri-shirt-fill"></i>
-                <span>3. Tamanho da Camisa Oficial e Segurança</span>
+            <!-- Dados do Responsável Legal (Exibido automaticamente apenas para Travessia Kids) -->
+            <div id="responsible-fields" style="display: none; margin-top: 1.5rem; margin-bottom: 2rem; background: rgba(245, 158, 11, 0.07); padding: 1.5rem; border-radius: 14px; border: 1px solid rgba(245, 158, 11, 0.35);">
+                <div class="section-heading" style="margin-top: 0; margin-bottom: 0.5rem; color: #fbbf24; border-bottom: none; padding-bottom: 0;">
+                    <i class="ri-parent-fill" style="color: #fbbf24;"></i>
+                    <span>Dados do Responsável Legal</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0; margin-bottom: 1.25rem;">
+                    Preencha os dados do pai, mãe ou responsável legal pela inscrição do menor de idade.
+                </p>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="responsible_name">Nome Completo do Responsável <span class="req">*</span></label>
+                        <input type="text" id="responsible_name" placeholder="Digite o nome completo do responsável">
+                    </div>
+                    <div class="form-group">
+                        <label for="responsible_cpf">CPF do Responsável <span class="req">*</span></label>
+                        <input type="tel" id="responsible_cpf" placeholder="000.000.000-00" maxlength="14">
+                    </div>
+                    <div class="form-group">
+                        <label for="responsible_phone">WhatsApp / Celular do Responsável <span class="req">*</span></label>
+                        <input type="tel" id="responsible_phone" placeholder="(00) 00000-0000" maxlength="15">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="responsible_email">E-mail para Confirmação <span class="req">*</span></label>
+                        <input type="email" id="responsible_email" placeholder="emaildoresponsavel@exemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="responsible_birth">Data de Nascimento do Responsável <span class="req">*</span></label>
+                        <input type="date" id="responsible_birth">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Etapa 3: Kit e Informações de Segurança -->
+            <div class="section-heading" id="heading-step3">
+                <i class="ri-shirt-fill" id="step3-icon"></i>
+                <span id="step3-title">3. Tamanho da Camisa Oficial e Segurança</span>
             </div>
 
             <div class="form-grid">
@@ -999,10 +1035,22 @@
                 <div class="summary-price" id="summary-price-val">R$ 99,00</div>
             </div>
 
-            <!-- Termos -->
-            <div class="terms-box">
-                <input type="checkbox" id="terms" required>
-                <label for="terms">Declaro estar em perfeitas condições físicas e de saúde para a prática esportiva em águas abertas, concordando integralmente com o regulamento da prova dos Tubarões Cansados.</label>
+            <!-- Declaração de Risco e Termo de Responsabilidade -->
+            <div class="terms-box" style="background: rgba(15, 23, 42, 0.65); padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.12); margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 12px;">
+                <input type="checkbox" id="terms" required style="margin-top: 5px; width: 20px; height: 20px; min-width: 20px; accent-color: var(--primary); cursor: pointer;">
+                <label for="terms" style="cursor: pointer; color: #cbd5e1; font-size: 0.88rem; line-height: 1.6;">
+                    <span style="display: block; font-weight: 800; color: #fff; margin-bottom: 8px; font-size: 0.95rem;">Declaração de Risco e Termo de Responsabilidade:</span>
+                    Declaro que participo da 10 ANOS DOS TUBARÕES CANSADOS  - Invasão VIX por livre e espontânea vontade, entendendo 
+                    que é uma natação DE CARÁTER NÃO COMPETITIVO;<br><br>
+                    Sou responsável por minha hidratação, alimentação e transporte; tenho conhecimento e aceito que, aos organizadores, cabe o direito de adiar, cancelar ou modificar o 
+                    evento, por questões que envolvam a segurança dos participantes e da equipe de trabalho, incluindo 
+                    razões climáticas ou ainda por determinação dos Órgãos Públicos; estou treinado e em pleno gozo de saúde e condições físicas de participar do evento, não apresentando 
+cardiopatias genéticas, congênitas ou infecciosas, viroses, ou qualquer outra doença, patologia ou distúrbio 
+de saúde que implique em impedimento ou restrição à prática de exercícios físicos, atividades físicas e 
+esportivas, tendo realizado, no período de pré-participação por 
+minha própria conta e risco, avaliação clínica que atesta as condições apresentadas; estou treinado adequadamente e em condições físicas para realizar o percurso de 2km, 1km.<br><br>
+                    Caso esteja inscrevendo um menor de idade sobre minha responsabilidade para a prova de 300 m afirmo que ele está apto segundo todas as exigências acima a participar da prova. Portanto dou ciência de que sei que o menor sobre minha responsabilidade está participando de um evento que envolve riscos em mar aberto.
+                </label>
             </div>
 
             <!-- Submit -->
@@ -1082,22 +1130,8 @@
                 summaryCatName.textContent = selectedCategory.name;
                 summaryPriceVal.textContent = `R$ ${selectedCategory.price.toFixed(2).replace('.', ',')}`;
 
-                // Visibilidade do tamanho de camisa (Kit Kids não inclui camisa)
-                const tshirtGroup = document.getElementById('tshirt-group-container');
-                const tshirtSelect = document.getElementById('tshirt_size');
-                if (selectedCategory.id === 'kids') {
-                    if (tshirtGroup) tshirtGroup.style.display = 'none';
-                    if (tshirtSelect) {
-                        tshirtSelect.required = false;
-                        tshirtSelect.value = 'Kids';
-                    }
-                } else {
-                    if (tshirtGroup) tshirtGroup.style.display = 'block';
-                    if (tshirtSelect) {
-                        tshirtSelect.required = true;
-                        if (tshirtSelect.value === 'Kids') tshirtSelect.value = '';
-                    }
-                }
+                // Alternar dinamicamente os campos entre Adulto e Travessia Kids
+                updateModalityUI(selectedCategory.id);
 
                 if (selectedCategory.requiresCoupon) {
                     assessoriaFields.style.display = 'block';
@@ -1111,6 +1145,87 @@
                 }
             });
         });
+
+        // Alternar dinamicamente a ficha de inscrição entre Adulto e Travessia Kids
+        function updateModalityUI(catId) {
+            const isKids = catId === 'kids';
+
+            const step2Title = document.getElementById('step2-title');
+            const labelAthleteName = document.getElementById('label-athlete-name');
+            const labelAthleteCpf = document.getElementById('label-athlete-cpf');
+            const adultContactFields = document.getElementById('adult-contact-fields');
+
+            const responsibleFields = document.getElementById('responsible-fields');
+            const respName = document.getElementById('responsible_name');
+            const respCpf = document.getElementById('responsible_cpf');
+            const respPhone = document.getElementById('responsible_phone');
+            const respEmail = document.getElementById('responsible_email');
+            const respBirth = document.getElementById('responsible_birth');
+
+            const step3Title = document.getElementById('step3-title');
+            const step3Icon = document.getElementById('step3-icon');
+            const tshirtGroup = document.getElementById('tshirt-group-container');
+            const tshirtSelect = document.getElementById('tshirt_size');
+
+            const inputPhone = document.getElementById('athlete_phone');
+            const inputEmail = document.getElementById('athlete_email');
+
+            if (isKids) {
+                // Modo Travessia Kids: Campos do Menor (Nome, Nascimento, Gênero, CPF)
+                if (step2Title) step2Title.textContent = '2. Dados do Atleta (Menor de Idade)';
+                if (labelAthleteName) labelAthleteName.innerHTML = 'Nome Completo da Criança <span class="req">*</span>';
+                if (labelAthleteCpf) labelAthleteCpf.innerHTML = 'CPF da Criança <span class="req">*</span>';
+
+                // Ocultar contatos no bloco do atleta (ficam no bloco do responsável)
+                if (adultContactFields) adultContactFields.style.display = 'none';
+                if (inputPhone) inputPhone.required = false;
+                if (inputEmail) inputEmail.required = false;
+
+                // Exibir e exigir dados do responsável legal
+                if (responsibleFields) responsibleFields.style.display = 'block';
+                if (respName) respName.required = true;
+                if (respCpf) respCpf.required = true;
+                if (respPhone) respPhone.required = true;
+                if (respEmail) respEmail.required = true;
+                if (respBirth) respBirth.required = true;
+
+                // Item 3: Informações de Segurança (sem camisa)
+                if (step3Title) step3Title.textContent = '3. Informações de Segurança';
+                if (step3Icon) step3Icon.className = 'ri-shield-cross-fill';
+                if (tshirtGroup) tshirtGroup.style.display = 'none';
+                if (tshirtSelect) {
+                    tshirtSelect.required = false;
+                    tshirtSelect.value = 'Kids';
+                }
+            } else {
+                // Modo Adulto (2 km / 1 km): Campos completos do atleta adulto
+                if (step2Title) step2Title.textContent = '2. Dados do Atleta';
+                if (labelAthleteName) labelAthleteName.innerHTML = 'Nome Completo <span class="req">*</span>';
+                if (labelAthleteCpf) labelAthleteCpf.innerHTML = 'CPF <span class="req">*</span>';
+
+                // Exibir contatos no bloco do atleta
+                if (adultContactFields) adultContactFields.style.display = 'contents';
+                if (inputPhone) inputPhone.required = true;
+                if (inputEmail) inputEmail.required = true;
+
+                // Ocultar bloco do responsável
+                if (responsibleFields) responsibleFields.style.display = 'none';
+                if (respName) respName.required = false;
+                if (respCpf) respCpf.required = false;
+                if (respPhone) respPhone.required = false;
+                if (respEmail) respEmail.required = false;
+                if (respBirth) respBirth.required = false;
+
+                // Item 3: Tamanho da Camisa Oficial e Segurança
+                if (step3Title) step3Title.textContent = '3. Tamanho da Camisa Oficial e Segurança';
+                if (step3Icon) step3Icon.className = 'ri-shirt-fill';
+                if (tshirtGroup) tshirtGroup.style.display = 'block';
+                if (tshirtSelect) {
+                    tshirtSelect.required = true;
+                    if (tshirtSelect.value === 'Kids') tshirtSelect.value = '';
+                }
+            }
+        }
 
         // Masks
         function maskCpf(val) {
@@ -1133,6 +1248,12 @@
 
         const inputPhone = document.getElementById('athlete_phone');
         inputPhone.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
+
+        const inputRespCpf = document.getElementById('responsible_cpf');
+        if (inputRespCpf) inputRespCpf.addEventListener('input', (e) => e.target.value = maskCpf(e.target.value));
+
+        const inputRespPhone = document.getElementById('responsible_phone');
+        if (inputRespPhone) inputRespPhone.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
 
         const inputEmergPhone = document.getElementById('emergency_phone');
         inputEmergPhone.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
@@ -1494,6 +1615,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadRaceVacancies();
             loadTshirtStock();
+            updateModalityUI(selectedCategory.id);
 
             try {
                 const saved = sessionStorage.getItem('tutubas_athlete_draft');
@@ -1509,6 +1631,13 @@
                     if (d.emergency_contact_name) document.getElementById('emergency_name').value = d.emergency_contact_name;
                     if (d.emergency_contact_phone) inputEmergPhone.value = maskPhone(d.emergency_contact_phone);
                     if (d.medical_notes) document.getElementById('medical_notes').value = d.medical_notes;
+
+                    // Dados do responsável (Kids)
+                    if (d.responsible_name && document.getElementById('responsible_name')) document.getElementById('responsible_name').value = d.responsible_name;
+                    if (d.responsible_cpf && document.getElementById('responsible_cpf')) document.getElementById('responsible_cpf').value = maskCpf(d.responsible_cpf);
+                    if (d.responsible_phone && document.getElementById('responsible_phone')) document.getElementById('responsible_phone').value = maskPhone(d.responsible_phone);
+                    if (d.responsible_email && document.getElementById('responsible_email')) document.getElementById('responsible_email').value = d.responsible_email;
+                    if (d.responsible_birth && document.getElementById('responsible_birth')) document.getElementById('responsible_birth').value = d.responsible_birth;
 
                     if (d.category_id) {
                         const targetCard = document.querySelector(`.category-card[data-id="${d.category_id}"]`);
@@ -1529,13 +1658,17 @@
             e.preventDefault();
             formError.style.display = 'none';
 
+            const isKids = selectedCategory.id === 'kids';
+
             const name = document.getElementById('athlete_name').value.trim();
             const cpf = inputCpf.value.replace(/\D/g, '');
-            const email = document.getElementById('athlete_email').value.trim();
-            const phone = inputPhone.value.trim();
             const birth_date = document.getElementById('athlete_birth').value;
             const gender = document.getElementById('athlete_gender').value;
-            const tshirt_size = document.getElementById('tshirt_size').value;
+
+            const email = document.getElementById('athlete_email') ? document.getElementById('athlete_email').value.trim() : '';
+            const phone = inputPhone ? inputPhone.value.trim() : '';
+            const tshirt_size = isKids ? 'Kids' : (document.getElementById('tshirt_size') ? document.getElementById('tshirt_size').value : '');
+
             const emergency_name = document.getElementById('emergency_name').value.trim();
             const emergency_phone = inputEmergPhone.value.trim();
             const medical_notes = document.getElementById('medical_notes').value.trim();
@@ -1543,14 +1676,35 @@
 
             const coupon_code = inputCoupon ? inputCoupon.value.trim().toUpperCase() : '';
 
-            if (!name || !cpf || !email || !phone || !birth_date || !gender || !tshirt_size || !emergency_name || !emergency_phone) {
-                showError('Por favor, preencha todos os campos obrigatórios marcados com *.');
-                return;
-            }
+            // Dados do responsável (Travessia Kids)
+            const resp_name = isKids && document.getElementById('responsible_name') ? document.getElementById('responsible_name').value.trim() : null;
+            const resp_cpf = isKids && document.getElementById('responsible_cpf') ? document.getElementById('responsible_cpf').value.replace(/\D/g, '') : null;
+            const resp_phone = isKids && document.getElementById('responsible_phone') ? document.getElementById('responsible_phone').value.trim() : null;
+            const resp_email = isKids && document.getElementById('responsible_email') ? document.getElementById('responsible_email').value.trim() : null;
+            const resp_birth = isKids && document.getElementById('responsible_birth') ? document.getElementById('responsible_birth').value : null;
 
-            if (cpf.length !== 11) {
-                showError('O CPF informado é inválido. Digite os 11 dígitos.');
-                return;
+            if (isKids) {
+                if (!name || !cpf || !birth_date || !gender || !resp_name || !resp_cpf || !resp_phone || !resp_email || !resp_birth || !emergency_name || !emergency_phone) {
+                    showError('Por favor, preencha todos os campos obrigatórios da inscrição da criança e do responsável legal.');
+                    return;
+                }
+                if (cpf.length !== 11) {
+                    showError('O CPF da criança informado é inválido. Digite os 11 dígitos.');
+                    return;
+                }
+                if (resp_cpf.length !== 11) {
+                    showError('O CPF do responsável legal informado é inválido. Digite os 11 dígitos.');
+                    return;
+                }
+            } else {
+                if (!name || !cpf || !email || !phone || !birth_date || !gender || !tshirt_size || !emergency_name || !emergency_phone) {
+                    showError('Por favor, preencha todos os campos obrigatórios marcados com *.');
+                    return;
+                }
+                if (cpf.length !== 11) {
+                    showError('O CPF informado é inválido. Digite os 11 dígitos.');
+                    return;
+                }
             }
 
             if (selectedCategory.requiresCoupon) {
@@ -1569,8 +1723,8 @@
             const athleteDraft = {
                 name,
                 cpf,
-                email,
-                phone,
+                email: isKids ? resp_email : email,
+                phone: isKids ? resp_phone : phone,
                 birth_date,
                 gender,
                 category_id: selectedCategory.id,
@@ -1578,10 +1732,15 @@
                 price: selectedCategory.price,
                 coupon_code: selectedCategory.requiresCoupon ? coupon_code : null,
                 assessoria_name: selectedCategory.requiresCoupon ? validatedAssessoriaName : null,
-                tshirt_size,
+                tshirt_size: isKids ? 'Kids' : tshirt_size,
                 emergency_contact_name: emergency_name,
                 emergency_contact_phone: emergency_phone,
-                medical_notes
+                medical_notes,
+                responsible_name: resp_name,
+                responsible_cpf: resp_cpf,
+                responsible_phone: resp_phone,
+                responsible_email: resp_email,
+                responsible_birth: resp_birth
             };
 
             // Save to sessionStorage
