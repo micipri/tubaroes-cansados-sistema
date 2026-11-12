@@ -183,62 +183,116 @@ async function loadDashboard() {
     }
 
     // Top Cards
+    const elTotalAthletes = document.getElementById('stat-total-athletes-count');
+    const elTotalAthletesSub = document.getElementById('stat-total-athletes-sub');
+    if (elTotalAthletes) {
+        elTotalAthletes.textContent = data.athletes ? data.athletes.total_count : 0;
+    }
+    if (elTotalAthletesSub && data.athletes) {
+        elTotalAthletesSub.textContent = `${data.athletes.confirmed_count} confirmadas • ${data.athletes.pending_count} pendentes`;
+    }
+
     document.getElementById('total-income').textContent = formatCurrency(data.total_income);
-    document.getElementById('stat-pix-amount').textContent = formatCurrency(data.athletes.pix_amount);
-    document.getElementById('stat-pix-count').textContent = `${data.athletes.pix_count} atleta(s) confirmados`;
 
-    document.getElementById('stat-card-amount').textContent = formatCurrency(data.athletes.card_amount);
-    document.getElementById('stat-card-count').textContent = `${data.athletes.card_count} atleta(s) confirmados`;
+    const pixAmountEl = document.getElementById('stat-pix-amount');
+    const pixCountEl = document.getElementById('stat-pix-count');
+    if (pixAmountEl) pixAmountEl.textContent = formatCurrency(data.athletes ? data.athletes.pix_amount : 0);
+    if (pixCountEl && data.athletes) {
+        if (data.athletes.pix_pending_count > 0) {
+            pixCountEl.textContent = `${data.athletes.pix_count} confirmado(s) • ${data.athletes.pix_pending_count} pendente(s)`;
+        } else {
+            pixCountEl.textContent = `${data.athletes.pix_count} atleta(s) confirmados`;
+        }
+    }
 
-    const totalBalance = data.total_balance;
+    const cardAmountEl = document.getElementById('stat-card-amount');
+    const cardCountEl = document.getElementById('stat-card-count');
+    if (cardAmountEl) cardAmountEl.textContent = formatCurrency(data.athletes ? data.athletes.card_amount : 0);
+    if (cardCountEl && data.athletes) {
+        if (data.athletes.card_pending_count > 0) {
+            cardCountEl.textContent = `${data.athletes.card_count} confirmado(s) • ${data.athletes.card_pending_count} pendente(s)`;
+        } else {
+            cardCountEl.textContent = `${data.athletes.card_count} atleta(s) confirmados`;
+        }
+    }
+
+    const totalBalance = data.total_balance || 0;
     const balanceEl = document.getElementById('total-balance');
-    balanceEl.textContent = formatCurrency(totalBalance);
-    balanceEl.style.color = totalBalance >= 0 ? '#38bdf8' : '#ef4444';
+    if (balanceEl) {
+        balanceEl.textContent = formatCurrency(totalBalance);
+        balanceEl.style.color = totalBalance >= 0 ? '#38bdf8' : '#ef4444';
+    }
 
     // Secondary KPIs
-    document.getElementById('stat-pending-amount').textContent = formatCurrency(data.athletes.pending_amount);
-    document.getElementById('stat-pending-count').textContent = `${data.athletes.pending_count} aguardando pagamento`;
+    if (data.athletes) {
+        const elPendingAmt = document.getElementById('stat-pending-amount');
+        const elPendingCnt = document.getElementById('stat-pending-count');
+        if (elPendingAmt) elPendingAmt.textContent = formatCurrency(data.athletes.pending_amount);
+        if (elPendingCnt) elPendingCnt.textContent = `${data.athletes.pending_count} aguardando pagamento`;
 
-    document.getElementById('stat-checkin-count').textContent = `${data.athletes.checkin_count} atletas`;
-    const checkinRatio = data.athletes.confirmed_count > 0 
-        ? Math.round((data.athletes.checkin_count / data.athletes.confirmed_count) * 100) 
-        : 0;
-    document.getElementById('stat-checkin-ratio').textContent = `${checkinRatio}% dos confirmados`;
+        const elCheckinCnt = document.getElementById('stat-checkin-count');
+        const elCheckinRatio = document.getElementById('stat-checkin-ratio');
+        if (elCheckinCnt) elCheckinCnt.textContent = `${data.athletes.checkin_count} atletas`;
+        const checkinRatio = data.athletes.confirmed_count > 0 
+            ? Math.round((data.athletes.checkin_count / data.athletes.confirmed_count) * 100) 
+            : 0;
+        if (elCheckinRatio) elCheckinRatio.textContent = `${checkinRatio}% dos confirmados`;
+    }
 
-    document.getElementById('total-expenses').textContent = formatCurrency(data.total_expenses);
-    document.getElementById('stat-costs-detail').textContent = `${formatCurrency(data.costs.event_costs)} em despesas`;
-    document.getElementById('stat-sponsors-amount').textContent = formatCurrency(data.sponsors.total_amount);
+    const eventCostsVal = (data.expenses && data.expenses.event_costs) || (data.costs && data.costs.event_costs) || 0;
+    const sponsorsVal = (data.income && data.income.sponsors) || (data.sponsors && data.sponsors.total_amount) || 0;
+
+    const elTotalExpenses = document.getElementById('total-expenses');
+    if (elTotalExpenses) elTotalExpenses.textContent = formatCurrency(data.total_expenses);
+
+    const elCostsDetail = document.getElementById('stat-costs-detail');
+    if (elCostsDetail) elCostsDetail.textContent = `${formatCurrency(eventCostsVal)} em despesas`;
+
+    const elSponsorsAmount = document.getElementById('stat-sponsors-amount');
+    if (elSponsorsAmount) elSponsorsAmount.textContent = formatCurrency(sponsorsVal);
 
     // Categories breakdown
     const catList = document.getElementById('categories-breakdown');
-    catList.innerHTML = '';
-    const categories = data.athletes.categories || {};
-    const catKeys = Object.keys(categories);
+    if (catList) {
+        catList.innerHTML = '';
+        const categories = (data.athletes && data.athletes.categories) || {};
+        const catKeys = Object.keys(categories);
 
-    if (catKeys.length === 0) {
-        catList.innerHTML = '<li style="color:var(--text-secondary); text-align:center;">Nenhuma inscrição realizada ainda.</li>';
-    } else {
-        catKeys.forEach(catName => {
-            const item = categories[catName];
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <div>
-                    <strong>${catName}</strong><br>
-                    <small style="color:var(--text-secondary);">${item.confirmed} confirmados de ${item.total} inscritos</small>
-                </div>
-                <strong style="color:var(--gold);">${formatCurrency(item.revenue)}</strong>
-            `;
-            catList.appendChild(li);
-        });
+        if (catKeys.length === 0) {
+            catList.innerHTML = '<li style="color:var(--text-secondary); text-align:center;">Nenhuma inscrição realizada ainda.</li>';
+        } else {
+            catKeys.forEach(catName => {
+                const item = categories[catName];
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>${catName}</strong><br>
+                        <small style="color:var(--text-secondary);">${item.confirmed} confirmados de ${item.total} inscritos</small>
+                    </div>
+                    <strong style="color:var(--gold);">${formatCurrency(item.revenue)}</strong>
+                `;
+                catList.appendChild(li);
+            });
+        }
     }
 
     // General Summary
-    document.getElementById('fb-confirmed').textContent = formatCurrency(data.athletes.confirmed_amount);
-    document.getElementById('fb-pix').textContent = formatCurrency(data.athletes.pix_amount);
-    document.getElementById('fb-card').textContent = formatCurrency(data.athletes.card_amount);
-    document.getElementById('fb-sponsors').textContent = formatCurrency(data.sponsors.total_amount);
-    document.getElementById('fb-expenses').textContent = `- ${formatCurrency(data.total_expenses)}`;
-    document.getElementById('fb-balance').textContent = formatCurrency(data.total_balance);
+    if (data.athletes) {
+        const elFbConfirmed = document.getElementById('fb-confirmed');
+        const elFbPix = document.getElementById('fb-pix');
+        const elFbCard = document.getElementById('fb-card');
+        if (elFbConfirmed) elFbConfirmed.textContent = formatCurrency(data.athletes.confirmed_amount);
+        if (elFbPix) elFbPix.textContent = formatCurrency(data.athletes.pix_amount);
+        if (elFbCard) elFbCard.textContent = formatCurrency(data.athletes.card_amount);
+    }
+    const elFbSponsors = document.getElementById('fb-sponsors');
+    if (elFbSponsors) elFbSponsors.textContent = formatCurrency(sponsorsVal);
+
+    const elFbExpenses = document.getElementById('fb-expenses');
+    if (elFbExpenses) elFbExpenses.textContent = `- ${formatCurrency(data.total_expenses)}`;
+
+    const elFbBalance = document.getElementById('fb-balance');
+    if (elFbBalance) elFbBalance.textContent = formatCurrency(data.total_balance);
 
     // Carregar Indicadores de Vagas (50 por prova)
     try {

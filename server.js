@@ -1709,8 +1709,14 @@ app.get('/api/summary', requireAuth, (req, res) => {
             confirmed_amount: 0,
             pix_count: 0,
             pix_amount: 0,
+            pix_pending_count: 0,
+            pix_pending_amount: 0,
+            pix_total_count: 0,
             card_count: 0,
             card_amount: 0,
+            card_pending_count: 0,
+            card_pending_amount: 0,
+            card_total_count: 0,
             pending_count: 0,
             pending_amount: 0,
             checkin_count: 0,
@@ -1727,6 +1733,15 @@ app.get('/api/summary', requireAuth, (req, res) => {
             event_costs: 0,
             party_costs: 0,
             store_costs: 0
+        },
+        costs: {
+            event_costs: 0,
+            party_costs: 0,
+            store_costs: 0,
+            total: 0
+        },
+        sponsors: {
+            total_amount: 0
         },
         total_income: 0,
         total_expenses: 0,
@@ -1745,22 +1760,39 @@ app.get('/api/summary', requireAuth, (req, res) => {
                     }
                     summary.athletes.categories[catName].total++;
 
-                    if (r.payment_status === 'Confirmado') {
+                    const isConfirmed = r.payment_status === 'Confirmado';
+                    const method = String(r.payment_method || '').trim();
+
+                    if (method === 'Pix') {
+                        summary.athletes.pix_total_count++;
+                    } else if (method === 'Cartão' || method === 'Cartao') {
+                        summary.athletes.card_total_count++;
+                    }
+
+                    if (isConfirmed) {
                         summary.athletes.confirmed_count++;
                         summary.athletes.confirmed_amount += price;
                         summary.athletes.categories[catName].confirmed++;
                         summary.athletes.categories[catName].revenue += price;
 
-                        if (r.payment_method === 'Pix') {
+                        if (method === 'Pix') {
                             summary.athletes.pix_count++;
                             summary.athletes.pix_amount += price;
-                        } else if (r.payment_method === 'Cartão') {
+                        } else if (method === 'Cartão' || method === 'Cartao') {
                             summary.athletes.card_count++;
                             summary.athletes.card_amount += price;
                         }
-                    } else {
+                    } else if (r.payment_status !== 'Cancelado') {
                         summary.athletes.pending_count++;
                         summary.athletes.pending_amount += price;
+
+                        if (method === 'Pix') {
+                            summary.athletes.pix_pending_count++;
+                            summary.athletes.pix_pending_amount += price;
+                        } else if (method === 'Cartão' || method === 'Cartao') {
+                            summary.athletes.card_pending_count++;
+                            summary.athletes.card_pending_amount += price;
+                        }
                     }
 
                     if (r.checkin_status === 1) {
@@ -1800,6 +1832,15 @@ app.get('/api/summary', requireAuth, (req, res) => {
         summary.total_income = summary.income.athletes + summary.income.sponsors;
         summary.total_expenses = summary.expenses.event_costs + summary.expenses.party_costs;
         summary.total_balance = summary.total_income - summary.total_expenses;
+        summary.costs = {
+            event_costs: summary.expenses.event_costs,
+            party_costs: summary.expenses.party_costs,
+            store_costs: summary.expenses.store_costs,
+            total: summary.total_expenses
+        };
+        summary.sponsors = {
+            total_amount: summary.income.sponsors
+        };
         summary.database_type = db.isPostgres ? 'supabase' : 'sqlite';
         summary.database_label = db.isPostgres ? '☁️ Supabase (PostgreSQL)' : '💾 SQLite Local';
         res.json(summary);
