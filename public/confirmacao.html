@@ -847,6 +847,16 @@
             }
         }
 
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // Initialize Page
         window.addEventListener('DOMContentLoaded', async () => {
             // 1. Check draft
@@ -872,7 +882,12 @@
                 return;
             }
 
-            renderAthleteReview();
+            try {
+                renderAthleteReview();
+            } catch (errReview) {
+                console.error('Erro ao renderizar revisão do atleta:', errReview);
+            }
+
             await loadStoreProducts();
             updateTotalCalculations();
             setupPaymentSelection();
