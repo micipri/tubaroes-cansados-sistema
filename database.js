@@ -143,23 +143,14 @@ if (connectionString) {
         }
     };
 
-    // Inicialização do Supabase / PostgreSQL (verificação de tabelas e seeds)
+    // Inicialização do Supabase / PostgreSQL (teste de conexão leve)
     (async () => {
         try {
             const client = await pool.connect();
             console.log('✅ [Supabase] Conectado com sucesso ao banco PostgreSQL!');
-
-            // Executa schema base se existir
-            const schemaFile = path.join(__dirname, 'supabase_schema.sql');
-            if (fs.existsSync(schemaFile)) {
-                const schemaSql = fs.readFileSync(schemaFile, 'utf8');
-                await client.query(schemaSql);
-                console.log('✅ [Supabase] Tabelas e seeds verificados/atualizados.');
-            }
-
             client.release();
         } catch (err) {
-            console.error('❌ [Supabase] Falha ao conectar/inicializar tabelas:', err.message);
+            console.error('❌ [Supabase] Falha ao conectar ao banco PostgreSQL:', err.message);
         }
     })();
 

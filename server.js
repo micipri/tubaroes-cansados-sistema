@@ -299,6 +299,27 @@ const EVENT_CATEGORIES = {
         distance: '2 km',
         price: 99.00,
         description: 'Lote promocional limitado de largada (2 km). Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+    },
+    'adulto': {
+        id: 'adulto_2k',
+        name: 'Travessia de Adultos (2 km)',
+        distance: '2 km',
+        price: 149.00,
+        description: 'Prova de 2 km em águas abertas para adultos. Inclui Kit Atleta: Touca, Camisa oficial, Bolsa, Medalha e Brindes.'
+    },
+    '2k': {
+        id: 'promocional_2k',
+        name: 'Travessia de Adultos (2 km) — Promocional de Largada',
+        distance: '2 km',
+        price: 99.00,
+        description: 'Prova de 2 km em águas abertas para adultos.'
+    },
+    '1k': {
+        id: 'promocional_1k',
+        name: 'Travessia de Adultos (1 km) — Promocional de Largada',
+        distance: '1 km',
+        price: 99.00,
+        description: 'Prova de 1 km em águas abertas para adultos.'
     }
 };
 
@@ -621,7 +642,8 @@ app.post('/api/public/complete-registration', (req, res) => {
         return res.status(400).json({ error: 'CPF inválido. Deve conter 11 dígitos numéricos.' });
     }
 
-    const cat = EVENT_CATEGORIES[category_id];
+    const cleanCatId = String(category_id || '').trim().toLowerCase();
+    const cat = EVENT_CATEGORIES[category_id] || EVENT_CATEGORIES[cleanCatId];
     if (!cat) {
         return res.status(400).json({ error: 'Modalidade de prova inválida selecionada.' });
     }
@@ -837,7 +859,8 @@ app.post('/api/public/register-athlete', (req, res) => {
         return res.status(400).json({ error: 'CPF inválido. Deve conter 11 dígitos numéricos.' });
     }
 
-    const cat = EVENT_CATEGORIES[category_id];
+    const cleanCatId = String(category_id || '').trim().toLowerCase();
+    const cat = EVENT_CATEGORIES[category_id] || EVENT_CATEGORIES[cleanCatId];
     if (!cat) {
         return res.status(400).json({ error: 'Modalidade de prova inválida selecionada.' });
     }
