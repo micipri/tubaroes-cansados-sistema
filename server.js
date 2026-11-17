@@ -116,6 +116,14 @@ app.get('/debug-db', (req, res) => {
     });
 });
 
+app.get('/api/admin/trigger-sync-database-clean', (req, res) => {
+    const { syncProductionDatabase } = require('./sync_production_db');
+    syncProductionDatabase(db, (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true, result });
+    });
+});
+
 // ─── Landing page, Inscrição & Confirmação ──────────────────────────────────
 app.get('/', (req, res) => {
     res.sendFile('landing.html', { root: path.join(__dirname, 'public') });
@@ -2186,4 +2194,10 @@ process.on('unhandledRejection', (reason) => console.error('[CRASH] unhandledRej
 // ─── Start ───────────────────────────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
+    try {
+        const { runAutoSyncIfPending } = require('./sync_production_db');
+        runAutoSyncIfPending(db);
+    } catch (e) {
+        console.warn('Erro ao verificar auto sync:', e.message);
+    }
 });
