@@ -686,7 +686,10 @@ async function loadCheckinStation() {
         document.getElementById('ci-total').textContent = summary.athletes.total_count;
         document.getElementById('ci-confirmed').textContent = summary.athletes.confirmed_count;
         document.getElementById('ci-done').textContent = summary.athletes.checkin_count;
-        document.getElementById('ci-pending').textContent = Math.max(0, summary.athletes.confirmed_count - summary.athletes.checkin_count);
+        const pendingCount = Math.max(0, summary.athletes.confirmed_count - summary.athletes.checkin_count);
+        document.getElementById('ci-pending').textContent = pendingCount;
+        const badgePending = document.getElementById('badge-pending-kits-count');
+        if (badgePending) badgePending.textContent = pendingCount;
     }
 
     loadCheckinTable();
@@ -701,28 +704,34 @@ async function loadCheckinTable() {
     tbody.innerHTML = '';
 
     if (checkedAthletes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhum check-in realizado ainda hoje.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Nenhum check-in realizado ainda hoje.</td></tr>`;
         return;
     }
 
     checkedAthletes.forEach(a => {
+        let storeItems = [];
+        try {
+            if (a.store_items) {
+                storeItems = typeof a.store_items === 'string' ? JSON.parse(a.store_items) : a.store_items;
+            }
+        } catch (e) {
+            storeItems = [];
+        }
+
+        const storeItemsHTML = storeItems && storeItems.length > 0
+            ? storeItems.map(it => `<span style="background: rgba(2, 132, 199, 0.25); color: #38bdf8; font-size: 0.78rem; padding: 2px 7px; border-radius: 4px; display: inline-block; margin: 1px 2px; border: 1px solid rgba(2, 132, 199, 0.45);"><strong>${it.quantity || 1}x</strong> ${escapeHtml(it.name)}</span>`).join(' ')
+            : `<span style="color: var(--text-secondary); font-size: 0.8rem;">—</span>`;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>#${a.id}</td>
-            <td><strong>${a.name}</strong></td>
+            <td><strong>${escapeHtml(a.name)}</strong></td>
             <td>${formatCpf(a.cpf)}</td>
-            <td>${a.category}</td>
-            <td><span class="badge-status" style="background: rgba(2, 132, 199, 0.2); color:#38bdf8;">${a.tshirt_size || 'M'}</span></td>
-            <td><strong style="color:var(--gold);">${a.cap_number || '—'}</strong></td>
-            <td>${a.kit_retrieved_by || 'Próprio atleta'}</td>
+            <td>${escapeHtml(a.category)}</td>
+            <td><span class="badge-status" style="background: rgba(2, 132, 199, 0.2); color:#38bdf8;">${escapeHtml(a.tshirt_size || 'M')}</span></td>
+            <td>${storeItemsHTML}</td>
+            <td>${escapeHtml(a.kit_retrieved_by || 'Próprio atleta')}</td>
             <td>${formatDate(a.checkin_date)}</td>
-            <td>
-                ${a.checkin_photo ? `
-                    <button type="button" class="btn" onclick="viewPhotoModal('${a.checkin_photo}', '${a.name}')" style="padding: 4px 8px; font-size: 0.8rem; background: rgba(255,255,255,0.08);">
-                        <i class="ri-image-line"></i> Ver Foto
-                    </button>
-                ` : '<span style="color:var(--text-secondary); font-size:0.8rem;">Sem foto</span>'}
-            </td>
             <td>
                 <button type="button" class="btn" onclick="undoCheckinHandler(${a.id})" style="padding: 4px 8px; font-size: 0.75rem; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3);">
                     Desfazer
@@ -791,20 +800,36 @@ async function selectAthleteForCheckin(athleteId) {
     const isConfirmed = a.payment_status === 'Confirmado';
     const isChecked = a.checkin_status === 1;
 
+    let storeItems = [];
+    try {
+        if (a.store_items) {
+            storeItems = typeof a.store_items === 'string' ? JSON.parse(a.store_items) : a.store_items;
+        }
+    } catch (e) {
+        storeItems = [];
+    }
+
+    const isKids = (a.category_id && a.category_id.toLowerCase() === 'kids') ||
+                   (a.category && a.category.toLowerCase().includes('kids')) ||
+                   a.tshirt_size === 'Kids';
+
+    const totalStoreItemsCount = storeItems.reduce((acc, it) => acc + (parseInt(it.quantity, 10) || 1), 0);
+
     workspace.innerHTML = `
         <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-glass);">
             
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 1.25rem;">
                 <div>
-                    <h2 style="font-size: 1.4rem; color: #fff; margin-bottom: 4px;">${a.name}</h2>
+                    <h2 style="font-size: 1.4rem; color: #fff; margin-bottom: 4px;">${escapeHtml(a.name)}</h2>
                     <span style="font-size: 0.9rem; color: var(--text-secondary);">CPF: ${formatCpf(a.cpf)} • Tel: ${formatPhone(a.phone)}</span>
-                    <div style="margin-top: 6px; font-weight: 700; color: #38bdf8;">${a.category}</div>
+                    <div style="margin-top: 6px; font-weight: 700; color: #38bdf8;">${escapeHtml(a.category)}</div>
                 </div>
                 <div style="text-align: right;">
                     ${isConfirmed
                         ? `<span class="badge-status confirmed" style="font-size:0.95rem; padding: 6px 14px;"><i class="ri-checkbox-circle-fill"></i> PAGO VIA ${a.payment_method || 'PIX/CARTÃO'}</span>`
                         : `<span class="badge-status pending" style="font-size:0.95rem; padding: 6px 14px;"><i class="ri-alert-line"></i> PAGAMENTO PENDENTE</span>`
                     }
+                    ${isChecked ? `<div style="margin-top: 6px;"><span class="badge-checkin-ok" style="font-size:0.85rem;"><i class="ri-check-double-line"></i> Kit Já Retirado (${formatDate(a.checkin_date)})</span></div>` : ''}
                 </div>
             </div>
 
@@ -812,67 +837,96 @@ async function selectAthleteForCheckin(athleteId) {
                 <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <strong style="color: #fca5a5;"><i class="ri-alert-fill"></i> Atenção: Inscrição com pagamento pendente!</strong>
-                        <p style="font-size: 0.85rem; color: #cbd5e1; margin-top: 2px;">Confirme o pagamento de ${formatCurrency(a.price)} agora para liberar a entrega do kit:</p>
+                        <p style="font-size: 0.85rem; color: #cbd5e1; margin-top: 2px;">Confirme o pagamento de ${formatCurrency(a.total_amount || a.price)} agora para liberar a entrega do kit:</p>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${a.price})" style="padding: 8px 14px; font-size: 0.85rem;">
+                        <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${a.total_amount || a.price})" style="padding: 8px 14px; font-size: 0.85rem;">
                             Confirmar PIX
                         </button>
-                        <button type="button" class="btn btn-card" onclick="confirmPaymentHandler(${a.id}, 'Cartão', ${a.price})" style="padding: 8px 14px; font-size: 0.85rem;">
+                        <button type="button" class="btn btn-card" onclick="confirmPaymentHandler(${a.id}, 'Cartão', ${a.total_amount || a.price})" style="padding: 8px 14px; font-size: 0.85rem;">
                             Confirmar Cartão
                         </button>
                     </div>
                 </div>
             ` : ''}
 
-            <!-- Check-in Form Form Inputs -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 1.5rem;">
+            <!-- Store Items Purchased Section -->
+            <div style="margin-bottom: 1.5rem;">
+                ${storeItems && storeItems.length > 0 ? `
+                    <div style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.22) 0%, rgba(3, 105, 161, 0.28) 100%); border: 2px solid #0284c7; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 20px rgba(2, 132, 199, 0.25);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                            <h4 style="margin: 0; color: #38bdf8; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                                <i class="ri-shopping-bag-3-fill" style="font-size: 1.3rem; color: #38bdf8;"></i>
+                                ITENS DA LOJA PARA ENTREGAR AO ATLETA (${totalStoreItemsCount} ${totalStoreItemsCount === 1 ? 'item' : 'itens'})
+                            </h4>
+                            <span style="background: #0284c7; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 700;">
+                                Total Loja: ${formatCurrency(a.store_amount || 0)}
+                            </span>
+                        </div>
+                        <p style="font-size: 0.88rem; color: #e0f2fe; margin-bottom: 12px;">
+                            <i class="ri-alert-fill" style="color: #fbbf24;"></i> <strong>Atenção equipe do check-in:</strong> Este atleta comprou os itens adicionais abaixo na loja no momento da inscrição. Separe e entregue ao atleta junto com o kit:
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${storeItems.map(item => `
+                                <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <span style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; font-weight: 800; font-size: 1rem; min-width: 38px; height: 38px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+                                            ${item.quantity || 1}x
+                                        </span>
+                                        <div>
+                                            <div style="color: #fff; font-weight: 700; font-size: 0.95rem;">${escapeHtml(item.name)}</div>
+                                            <div style="color: #94a3b8; font-size: 0.82rem;">Produto oficial Tubarões Cansados</div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 14px;">
+                                        <span style="color: var(--gold); font-weight: 700; font-size: 0.95rem;">
+                                            ${formatCurrency(item.subtotal || ((item.price || item.unit_price || 0) * (item.quantity || 1)))}
+                                        </span>
+                                        <span style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i class="ri-check-line"></i> Entregar item
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : `
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 12px;">
+                        <i class="ri-shopping-bag-line" style="font-size: 1.4rem; color: #64748b;"></i>
+                        <div>
+                            <strong style="color: #cbd5e1; font-size: 0.9rem; display: block;">Nenhum produto extra da loja foi adquirido</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.82rem;">Entregar apenas o Kit padrão de prova deste atleta.</span>
+                        </div>
+                    </div>
+                `}
+            </div>
+
+            <!-- Check-in Form Inputs -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 1.5rem;">
                 
                 <div>
                     <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Tamanho da Camisa do Kit</label>
-                    <select id="ci-tshirt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
-                        <option value="Tradicional P" ${a.tshirt_size === 'Tradicional P' ? 'selected' : ''}>Tradicional P</option>
-                        <option value="Tradicional M" ${a.tshirt_size === 'Tradicional M' ? 'selected' : ''}>Tradicional M</option>
-                        <option value="Tradicional G" ${a.tshirt_size === 'Tradicional G' ? 'selected' : ''}>Tradicional G</option>
-                        <option value="Tradicional GG" ${a.tshirt_size === 'Tradicional GG' ? 'selected' : ''}>Tradicional GG</option>
-                        <option value="Tradicional XGG" ${a.tshirt_size === 'Tradicional XGG' ? 'selected' : ''}>Tradicional XGG</option>
-                        <option value="Babylook P" ${a.tshirt_size === 'Babylook P' ? 'selected' : ''}>Babylook P</option>
-                        <option value="Babylook M" ${a.tshirt_size === 'Babylook M' ? 'selected' : ''}>Babylook M</option>
-                        <option value="Babylook G" ${a.tshirt_size === 'Babylook G' ? 'selected' : ''}>Babylook G</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Número da Touca / Numeral</label>
-                    <input type="text" id="ci-cap-number" value="${a.cap_number || ''}" placeholder="Ex: 042" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                    ${isKids ? `
+                        <div style="padding: 10px 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; color: #fbbf24; font-size: 0.88rem;">
+                            <i class="ri-information-line"></i> <strong>Kit Kids (Sem Camisa)</strong> — Sacochila, touca, medalha e brindes
+                        </div>
+                        <input type="hidden" id="ci-tshirt" value="Kids">
+                    ` : `
+                        <select id="ci-tshirt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                            <option value="M" ${a.tshirt_size === 'M' ? 'selected' : ''}>Tamanho M (Oficial)</option>
+                            <option value="G" ${a.tshirt_size === 'G' ? 'selected' : ''}>Tamanho G (Oficial)</option>
+                            <option value="XG" ${a.tshirt_size === 'XG' ? 'selected' : ''}>Tamanho XG (Oficial)</option>
+                            <option value="P" ${a.tshirt_size === 'P' || a.tshirt_size === 'Tradicional P' ? 'selected' : ''}>Tamanho P</option>
+                            <option value="GG" ${a.tshirt_size === 'GG' || a.tshirt_size === 'Tradicional GG' ? 'selected' : ''}>Tamanho GG</option>
+                        </select>
+                    `}
                 </div>
 
                 <div>
                     <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">Kit Retirado Por</label>
-                    <input type="text" id="ci-retrieved-by" value="${a.kit_retrieved_by || 'Próprio atleta'}" placeholder="Nome de quem está retirando" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                    <input type="text" id="ci-retrieved-by" value="${escapeHtml(a.kit_retrieved_by || (isKids && a.responsible_name ? a.responsible_name + ' (Responsável)' : 'Próprio atleta'))}" placeholder="Nome de quem está retirando" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
                 </div>
 
-            </div>
-
-            <!-- Optional Camera Section -->
-            <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-size: 0.9rem; font-weight: 700; color: #fff;"><i class="ri-camera-lens-line"></i> Foto de Confirmação do Kit (Opcional)</span>
-                    <button type="button" class="btn" id="btn-toggle-camera" onclick="startCamera()" style="padding: 6px 12px; font-size: 0.8rem; background: rgba(255,255,255,0.1);">
-                        <i class="ri-camera-fill"></i> Ativar Câmera
-                    </button>
-                </div>
-                <div id="camera-container" style="display: none; text-align: center;">
-                    <video id="camera-feed" class="camera-feed" autoplay playsinline></video>
-                    <canvas id="camera-canvas" style="display: none;"></canvas>
-                    <div style="margin-top: 10px;">
-                        <button type="button" class="btn btn-primary" onclick="capturePhoto()" style="padding: 8px 16px;">Tirar Foto</button>
-                    </div>
-                </div>
-                <div id="photo-preview-container" style="display: ${a.checkin_photo ? 'block' : 'none'}; text-align: center; margin-top: 10px;">
-                    <img id="photo-preview-img" src="${a.checkin_photo || ''}" style="max-height: 160px; border-radius: 8px; border: 2px solid var(--border-glass);">
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Foto atual do check-in</div>
-                </div>
             </div>
 
             <!-- Complete Checkin Button -->
@@ -891,71 +945,21 @@ async function selectAthleteForCheckin(athleteId) {
     workspace.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Camera control
-let capturedPhotoBase64 = null;
-
-window.startCamera = async function() {
-    const container = document.getElementById('camera-container');
-    const video = document.getElementById('camera-feed');
-    try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            video.srcObject = videoStream;
-            container.style.display = 'block';
-        } else {
-            alert('Câmera não suportada neste navegador.');
-        }
-    } catch (e) {
-        alert('Não foi possível acessar a câmera: ' + e.message);
-    }
-};
-
-window.capturePhoto = function() {
-    const video = document.getElementById('camera-feed');
-    const canvas = document.getElementById('camera-canvas');
-    if (!video || !canvas) return;
-
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
-
-    document.getElementById('photo-preview-img').src = capturedPhotoBase64;
-    document.getElementById('photo-preview-container').style.display = 'block';
-
-    // Stop video
-    if (videoStream) {
-        videoStream.getTracks().forEach(t => t.stop());
-        videoStream = null;
-    }
-    document.getElementById('camera-container').style.display = 'none';
-};
-
 window.submitCheckin = async function(athleteId) {
-    const tshirt = document.getElementById('ci-tshirt').value;
-    const capNumber = document.getElementById('ci-cap-number').value.trim();
-    const retrievedBy = document.getElementById('ci-retrieved-by').value.trim();
+    const tshirtEl = document.getElementById('ci-tshirt');
+    const retrievedByEl = document.getElementById('ci-retrieved-by');
+
+    const tshirt = tshirtEl ? tshirtEl.value : 'M';
+    const retrievedBy = retrievedByEl ? retrievedByEl.value.trim() : 'Próprio atleta';
 
     const btn = document.getElementById('btn-save-checkin');
     btn.disabled = true;
     btn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Salvando Check-in...`;
 
     try {
-        let photoUrl = null;
-        if (capturedPhotoBase64) {
-            const photoRes = await postData(`athletes/${athleteId}/photo`, { photo: capturedPhotoBase64 });
-            if (photoRes && photoRes.photoUrl) {
-                photoUrl = photoRes.photoUrl;
-            }
-        }
-
         const res = await putData(`athletes/${athleteId}/checkin`, {
             tshirt_size: tshirt,
-            cap_number: capNumber,
-            kit_retrieved_by: retrievedBy,
-            checkin_photo: photoUrl
+            kit_retrieved_by: retrievedBy
         });
 
         if (res.error) {
@@ -964,7 +968,6 @@ window.submitCheckin = async function(athleteId) {
         }
 
         document.getElementById('checkin-workspace').style.display = 'none';
-        capturedPhotoBase64 = null;
 
         alert('✓ Check-in e entrega de kit registrados com sucesso!');
         loadCheckinStation();
@@ -989,6 +992,290 @@ window.undoCheckinHandler = async function(athleteId) {
     }
 };
 
+// ═══════════════════════════════════════════════════════════════
+// MODAL: ATLETAS QUE FALTAM RETIRAR KIT
+// ═══════════════════════════════════════════════════════════════
+let pendingKitsData = [];
+let currentPendingFilter = 'all';
+
+window.openPendingKitsModal = async function() {
+    // Buscar todos os atletas que ainda não fizeram check-in
+    const athletes = await fetchData('athletes?checkin=0');
+    if (!athletes) {
+        alert('Erro ao carregar lista de atletas pendentes de kit.');
+        return;
+    }
+
+    pendingKitsData = athletes;
+    currentPendingFilter = 'all';
+
+    const confirmedCount = athletes.filter(a => a.payment_status === 'Confirmado').length;
+    const pendingPaymentCount = athletes.filter(a => a.payment_status !== 'Confirmado').length;
+    const withStoreCount = athletes.filter(a => {
+        try {
+            const items = typeof a.store_items === 'string' ? JSON.parse(a.store_items) : a.store_items;
+            return items && items.length > 0;
+        } catch (e) {
+            return false;
+        }
+    }).length;
+
+    const bodyHTML = `
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Top Controls -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <button type="button" id="pending-filter-all" class="btn" onclick="filterPendingKits('all')" style="padding: 6px 12px; font-size: 0.82rem; background: #0284c7; color: #fff; font-weight: 700; border-radius: 6px;">
+                        Todos (${athletes.length})
+                    </button>
+                    <button type="button" id="pending-filter-confirmed" class="btn" onclick="filterPendingKits('confirmed')" style="padding: 6px 12px; font-size: 0.82rem; background: rgba(255,255,255,0.08); color: #4ade80; border-radius: 6px;">
+                        ✓ Pagos (${confirmedCount})
+                    </button>
+                    <button type="button" id="pending-filter-pending" class="btn" onclick="filterPendingKits('pending')" style="padding: 6px 12px; font-size: 0.82rem; background: rgba(255,255,255,0.08); color: #f87171; border-radius: 6px;">
+                        ⚠️ Pagamento Pendente (${pendingPaymentCount})
+                    </button>
+                    <button type="button" id="pending-filter-store" class="btn" onclick="filterPendingKits('store')" style="padding: 6px 12px; font-size: 0.82rem; background: rgba(255,255,255,0.08); color: #38bdf8; border-radius: 6px;">
+                        🛍️ Com Produtos Loja (${withStoreCount})
+                    </button>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary" onclick="exportPendingKitsXLSX()" style="padding: 6px 14px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="ri-file-excel-2-line"></i> Exportar Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Field -->
+            <div>
+                <input type="text" id="pending-kits-search" class="search-athlete-input" placeholder="🔍 Filtrar por Nome, CPF, Telefone ou Modalidade..." oninput="filterPendingKitsBySearch(this.value)" style="margin: 0; width: 100%;">
+            </div>
+
+            <!-- Table Container -->
+            <div style="max-height: 520px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+                    <thead style="position: sticky; top: 0; background: #1e293b; z-index: 2; border-bottom: 2px solid rgba(255,255,255,0.15);">
+                        <tr>
+                            <th style="padding: 10px 12px;">ID</th>
+                            <th style="padding: 10px 12px;">Atleta</th>
+                            <th style="padding: 10px 12px;">Prova</th>
+                            <th style="padding: 10px 12px;">Camisa Kit</th>
+                            <th style="padding: 10px 12px;">Produtos Loja</th>
+                            <th style="padding: 10px 12px;">Pagamento</th>
+                            <th style="padding: 10px 12px; text-align: center;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-pending-kits-body">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary); padding: 4px 8px;">
+                <span id="pending-kits-filtered-count">Mostrando ${athletes.length} de ${athletes.length} atletas</span>
+                <span>💡 Clique em <strong>"Entregar Kit"</strong> para abrir diretamente a ficha de check-in.</span>
+            </div>
+        </div>
+    `;
+
+    createModal(
+        `<span style="display: flex; align-items: center; gap: 8px;"><i class="ri-user-search-line" style="color: #fbbf24;"></i> Atletas que Faltam Retirar o Kit (${athletes.length})</span>`,
+        bodyHTML,
+        null,
+        false,
+        '1050px'
+    );
+
+    renderPendingKitsTable(athletes);
+};
+
+window.filterPendingKits = function(filter) {
+    currentPendingFilter = filter;
+    ['all', 'confirmed', 'pending', 'store'].forEach(f => {
+        const btn = document.getElementById(`pending-filter-${f}`);
+        if (!btn) return;
+        if (f === filter) {
+            btn.style.background = '#0284c7';
+            btn.style.color = '#fff';
+            btn.style.fontWeight = '700';
+        } else {
+            btn.style.background = 'rgba(255,255,255,0.08)';
+            btn.style.color = f === 'confirmed' ? '#4ade80' : f === 'pending' ? '#f87171' : f === 'store' ? '#38bdf8' : 'var(--text-secondary)';
+            btn.style.fontWeight = 'normal';
+        }
+    });
+
+    const searchVal = document.getElementById('pending-kits-search') ? document.getElementById('pending-kits-search').value.toLowerCase().trim() : '';
+    applyPendingKitsFilters(searchVal);
+};
+
+window.filterPendingKitsBySearch = function(searchTerm) {
+    applyPendingKitsFilters(searchTerm.toLowerCase().trim());
+};
+
+function applyPendingKitsFilters(searchTerm) {
+    if (!pendingKitsData) return;
+
+    const filtered = pendingKitsData.filter(a => {
+        // Payment filter
+        if (currentPendingFilter === 'confirmed' && a.payment_status !== 'Confirmado') return false;
+        if (currentPendingFilter === 'pending' && a.payment_status === 'Confirmado') return false;
+        if (currentPendingFilter === 'store') {
+            try {
+                const items = typeof a.store_items === 'string' ? JSON.parse(a.store_items) : a.store_items;
+                if (!items || items.length === 0) return false;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Search term
+        if (searchTerm) {
+            const name = (a.name || '').toLowerCase();
+            const cpf = (a.cpf || '').replace(/\D/g, '');
+            const phone = (a.phone || '').replace(/\D/g, '');
+            const cat = (a.category || '').toLowerCase();
+            const cleanSearch = searchTerm.replace(/\D/g, '');
+
+            const matchText = name.includes(searchTerm) || cat.includes(searchTerm);
+            const matchDigits = cleanSearch && (cpf.includes(cleanSearch) || phone.includes(cleanSearch));
+            return matchText || matchDigits;
+        }
+
+        return true;
+    });
+
+    renderPendingKitsTable(filtered);
+}
+
+function renderPendingKitsTable(athletes) {
+    const tbody = document.getElementById('table-pending-kits-body');
+    const counter = document.getElementById('pending-kits-filtered-count');
+    if (!tbody) return;
+
+    if (counter) {
+        counter.textContent = `Mostrando ${athletes.length} de ${pendingKitsData.length} atletas`;
+    }
+
+    if (athletes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-secondary);">Nenhum atleta encontrado para os filtros selecionados.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = '';
+    athletes.forEach(a => {
+        let storeItems = [];
+        try {
+            if (a.store_items) {
+                storeItems = typeof a.store_items === 'string' ? JSON.parse(a.store_items) : a.store_items;
+            }
+        } catch (e) {
+            storeItems = [];
+        }
+
+        const isConfirmed = a.payment_status === 'Confirmado';
+        const isKids = (a.category_id && a.category_id.toLowerCase() === 'kids') ||
+                       (a.category && a.category.toLowerCase().includes('kids')) ||
+                       a.tshirt_size === 'Kids';
+
+        const storeItemsHTML = storeItems && storeItems.length > 0
+            ? storeItems.map(it => `
+                <div style="background: rgba(2, 132, 199, 0.25); color: #38bdf8; border: 1px solid rgba(2, 132, 199, 0.45); border-radius: 4px; padding: 2px 6px; font-size: 0.78rem; margin-bottom: 2px; white-space: nowrap;">
+                    <strong>${it.quantity || 1}x</strong> ${escapeHtml(it.name)}
+                </div>
+            `).join('')
+            : `<span style="color: var(--text-secondary); font-size: 0.8rem;">Nenhum</span>`;
+
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+        tr.innerHTML = `
+            <td style="padding: 10px 12px; color: var(--text-secondary);">#${a.id}</td>
+            <td style="padding: 10px 12px;">
+                <div style="font-weight: 700; color: #fff;">${escapeHtml(a.name)}</div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+                    CPF: ${formatCpf(a.cpf)} • <a href="https://wa.me/55${String(a.phone).replace(/\D/g, '')}" target="_blank" style="color: #34d399; text-decoration: none;"><i class="ri-whatsapp-line"></i> ${formatPhone(a.phone)}</a>
+                </div>
+            </td>
+            <td style="padding: 10px 12px; color: #38bdf8; font-weight: 600;">${escapeHtml(a.category)}</td>
+            <td style="padding: 10px 12px;">
+                ${isKids 
+                    ? `<span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">Kit Kids (Sem Camisa)</span>`
+                    : `<span class="badge-status" style="background: rgba(2, 132, 199, 0.2); color:#38bdf8;">${escapeHtml(a.tshirt_size || 'M')}</span>`
+                }
+            </td>
+            <td style="padding: 10px 12px;">${storeItemsHTML}</td>
+            <td style="padding: 10px 12px;">
+                ${isConfirmed
+                    ? `<span class="badge-status confirmed" style="font-size: 0.78rem;">Pago (${a.payment_method || 'PIX/Cartão'})</span>`
+                    : `<span class="badge-status pending" style="font-size: 0.78rem;">Pendente (${formatCurrency(a.total_amount || a.price)})</span>`
+                }
+            </td>
+            <td style="padding: 10px 12px; text-align: center;">
+                <button type="button" class="btn btn-primary" onclick="startCheckinFromPendingModal(${a.id})" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0369a1); white-space: nowrap;">
+                    <i class="ri-qr-scan-line"></i> Entregar Kit
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+window.startCheckinFromPendingModal = function(athleteId) {
+    closeActiveModal();
+    selectAthleteForCheckin(athleteId);
+};
+
+window.exportPendingKitsXLSX = function() {
+    if (!pendingKitsData || pendingKitsData.length === 0) {
+        alert('Não há atletas na lista de pendentes para exportar.');
+        return;
+    }
+
+    const headers = [
+        'ID', 'Nome Completo', 'CPF', 'Telefone', 'E-mail',
+        'Modalidade', 'Tamanho Camisa', 'Itens da Loja Comprados',
+        'Status Pagamento', 'Forma Pagamento', 'Valor Total (R$)',
+        'Responsável Legal (Kids)'
+    ];
+
+    const dataRows = pendingKitsData.map(a => {
+        let storeItemsText = 'Nenhum';
+        try {
+            if (a.store_items) {
+                const items = typeof a.store_items === 'string' ? JSON.parse(a.store_items) : a.store_items;
+                if (items && items.length > 0) {
+                    storeItemsText = items.map(it => `${it.quantity || 1}x ${it.name}`).join('; ');
+                }
+            }
+        } catch (e) {}
+
+        const isKids = (a.category_id && a.category_id.toLowerCase() === 'kids') ||
+                       (a.category && a.category.toLowerCase().includes('kids')) ||
+                       a.tshirt_size === 'Kids';
+
+        return [
+            a.id,
+            a.name,
+            formatCpf(a.cpf),
+            formatPhone(a.phone),
+            a.email,
+            a.category,
+            isKids ? 'Kit Kids (Sem Camisa)' : (a.tshirt_size || 'M'),
+            storeItemsText,
+            a.payment_status,
+            a.payment_method || '',
+            a.total_amount || a.price || 0,
+            a.responsible_name ? `${a.responsible_name} (${formatPhone(a.responsible_phone || '')})` : ''
+        ];
+    });
+
+    const wsData = [headers, ...dataRows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Faltam_Retirar_Kit');
+    XLSX.writeFile(wb, `Faltam_Retirar_Kit_Tubaroes_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+
+// Fallback if needed
 window.viewPhotoModal = function(url, athleteName) {
     const html = `
         <div style="text-align: center;">
@@ -1155,7 +1442,7 @@ window.deleteUserHandler = async function(id) {
 // ═══════════════════════════════════════════════════════════════
 // MODAL SYSTEM & UTILITIES
 // ═══════════════════════════════════════════════════════════════
-function createModal(title, bodyHTML, onConfirm, showSaveBtn = true) {
+function createModal(title, bodyHTML, onConfirm, showSaveBtn = true, maxWidth = '680px') {
     closeActiveModal();
 
     const overlay = document.createElement('div');
@@ -1169,7 +1456,7 @@ function createModal(title, bodyHTML, onConfirm, showSaveBtn = true) {
     overlay.innerHTML = `
         <div style="
             background: #0f172a; border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 16px; padding: 2rem; width: 100%; max-width: 680px;
+            border-radius: 16px; padding: 2rem; width: 100%; max-width: ${maxWidth};
             box-shadow: 0 25px 60px rgba(0,0,0,0.7); max-height: 90vh; overflow-y: auto;
             position: relative; animation: modalIn .2s ease;
         ">
