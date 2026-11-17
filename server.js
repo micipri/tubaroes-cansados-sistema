@@ -70,53 +70,7 @@ function requireMaster(req, res, next) {
     return res.status(403).json({ error: 'Acesso negado. Apenas o usuário master pode realizar esta ação.' });
 }
 
-// ─── TEMP: diagnóstico de filesystem e banco (remover após debug) ───────────
-app.get('/debug-fs', (req, res) => {
-    const fs = require('fs');
-    const check = (p) => { try { return fs.readdirSync(p); } catch(e) { return 'ERR: ' + e.message; } };
-    res.json({
-        __dirname,
-        cwd: process.cwd(),
-        public:       check(path.join(__dirname, 'public')),
-        publicAdmin:  check(path.join(__dirname, 'public', 'admin')),
-        cwdPublic:    check(path.join(process.cwd(), 'public')),
-        cwdAdmin:     check(path.join(process.cwd(), 'public', 'admin')),
-    });
-});
-
-app.get('/debug-db', (req, res) => {
-    const fs = require('fs');
-    const info = {
-        database_type: db.isPostgres ? 'supabase' : 'sqlite',
-        has_DATABASE_URL: !!process.env.DATABASE_URL,
-        has_SUPABASE_DB_URL: !!process.env.SUPABASE_DB_URL,
-        files_in_app_data: (() => { try { return fs.readdirSync('/app/data'); } catch(e) { return e.message; } })(),
-    };
-    
-    const tables = ['athletes', 'store_products', 'assessorias', 'coupons', 'users', 'event_costs', 'party_costs', 'store_sales', 'online_orders'];
-    const counts = {};
-    let pending = tables.length;
-    
-    tables.forEach(t => {
-        db.get(`SELECT COUNT(*) as c FROM ${t}`, (err, r) => {
-            counts[t] = r ? (r.c || r.count || 0) : (err ? err.message : 0);
-            pending--;
-            if (pending === 0) {
-                info.counts = counts;
-                // Also get list of athletes if any
-                db.all("SELECT id, name, cpf, category, payment_status, created_at FROM athletes LIMIT 20", (err2, athletes) => {
-                    info.athletes_sample = athletes || [];
-                    db.all("SELECT id, name, sell_price, stock, show_in_checkout FROM store_products", (err3, prods) => {
-                        info.store_products = prods || [];
-                        res.json(info);
-                    });
-                });
-            }
-        });
-    });
-});
-
-app.get('/api/admin/trigger-sync-database-clean', (req, res) => {
+app.post('/api/admin/sync-database-clean', requireAuth, requireMaster, (req, res) => {
     const { syncProductionDatabase } = require('./sync_production_db');
     syncProductionDatabase(db, (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
