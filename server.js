@@ -70,7 +70,7 @@ function requireMaster(req, res, next) {
     return res.status(403).json({ error: 'Acesso negado. Apenas o usuário master pode realizar esta ação.' });
 }
 
-// ─── TEMP: diagnóstico de filesystem (remover após debug) ────────────────────
+// ─── TEMP: diagnóstico de filesystem e banco (remover após debug) ───────────
 app.get('/debug-fs', (req, res) => {
     const fs = require('fs');
     const check = (p) => { try { return fs.readdirSync(p); } catch(e) { return 'ERR: ' + e.message; } };
@@ -81,6 +81,29 @@ app.get('/debug-fs', (req, res) => {
         publicAdmin:  check(path.join(__dirname, 'public', 'admin')),
         cwdPublic:    check(path.join(process.cwd(), 'public')),
         cwdAdmin:     check(path.join(process.cwd(), 'public', 'admin')),
+    });
+});
+
+app.get('/debug-db', (req, res) => {
+    const fs = require('fs');
+    const info = {
+        database_type: db.isPostgres ? 'supabase' : 'sqlite',
+        has_DATABASE_URL: !!process.env.DATABASE_URL,
+        has_SUPABASE_DB_URL: !!process.env.SUPABASE_DB_URL,
+        database_url_host: process.env.DATABASE_URL ? (process.env.DATABASE_URL.split('@')[1] || '').split('/')[0] : null,
+        files_in_app_data: (() => { try { return fs.readdirSync('/app/data'); } catch(e) { return e.message; } })(),
+        files_in_cwd: (() => { try { return fs.readdirSync(process.cwd()).filter(f => f.includes('sqlite') || f.includes('.env')); } catch(e) { return e.message; } })(),
+    };
+    
+    db.get("SELECT COUNT(*) as c FROM athletes", (err, r1) => {
+        info.athletes_count = r1 ? (r1.c || r1.count) : (err ? err.message : 0);
+        db.get("SELECT COUNT(*) as c FROM store_products", (err2, r2) => {
+            info.store_products_count = r2 ? (r2.c || r2.count) : (err2 ? err2.message : 0);
+            db.get("SELECT COUNT(*) as c FROM assessorias", (err3, r3) => {
+                info.assessorias_count = r3 ? (r3.c || r3.count) : (err3 ? err3.message : 0);
+                res.json(info);
+            });
+        });
     });
 });
 
