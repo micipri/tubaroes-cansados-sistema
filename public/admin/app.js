@@ -576,11 +576,8 @@ async function openAthleteModal(athleteId) {
                             Ao confirmar o pagamento, a inscrição será validada e o valor total de <strong>${formatCurrency(totalToPay)}</strong> será contabilizado imediatamente no financeiro do evento.
                         </p>
                         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                            <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${totalToPay})" style="padding: 12px 24px; font-size: 1rem;">
-                                <i class="ri-qr-code-line"></i> Confirmar via PIX (${formatCurrency(totalToPay)})
-                            </button>
-                            <button type="button" class="btn btn-card" onclick="confirmPaymentHandler(${a.id}, 'Cartão', ${totalToPay})" style="padding: 12px 24px; font-size: 1rem;">
-                                <i class="ri-bank-card-line"></i> Confirmar via CARTÃO (${formatCurrency(totalToPay)})
+                            <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${totalToPay})" style="padding: 12px 28px; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff;">
+                                <i class="ri-checkbox-circle-fill"></i> Confirmar Pagamento PIX (${formatCurrency(totalToPay)})
                             </button>
                         </div>
                     </div>
@@ -840,11 +837,8 @@ async function selectAthleteForCheckin(athleteId) {
                         <p style="font-size: 0.85rem; color: #cbd5e1; margin-top: 2px;">Confirme o pagamento de ${formatCurrency(a.total_amount || a.price)} agora para liberar a entrega do kit:</p>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${a.total_amount || a.price})" style="padding: 8px 14px; font-size: 0.85rem;">
-                            Confirmar PIX
-                        </button>
-                        <button type="button" class="btn btn-card" onclick="confirmPaymentHandler(${a.id}, 'Cartão', ${a.total_amount || a.price})" style="padding: 8px 14px; font-size: 0.85rem;">
-                            Confirmar Cartão
+                        <button type="button" class="btn btn-pix" onclick="confirmPaymentHandler(${a.id}, 'Pix', ${a.total_amount || a.price})" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff;">
+                            <i class="ri-checkbox-circle-fill"></i> Confirmar PIX
                         </button>
                     </div>
                 </div>

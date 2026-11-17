@@ -660,23 +660,20 @@
                     </div>
                 </div>
                 <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    Selecione como prefere pagar sua inscrição e produtos adicionais:
+                    Forma de pagamento da inscrição e produtos adicionais:
                 </p>
 
-                <div class="payment-options-grid">
-                    <div class="payment-card selected" data-method="Pix">
-                        <div class="payment-icon"><i class="ri-qr-code-line"></i></div>
+                <div class="payment-options-grid" style="grid-template-columns: 1fr;">
+                    <div class="payment-card selected" data-method="Pix" style="cursor: default; border-color: #0284c7; background: rgba(2, 132, 199, 0.12);">
+                        <div class="payment-icon" style="background: #0284c7; color: #fff;"><i class="ri-qr-code-line"></i></div>
                         <div class="payment-text">
-                            <h4>PIX Oficial</h4>
-                            <p>Aprovação rápida e segura com QR Code e Chave Copia e Cola.</p>
-                        </div>
-                    </div>
-
-                    <div class="payment-card" data-method="Cartão">
-                        <div class="payment-icon"><i class="ri-bank-card-line"></i></div>
-                        <div class="payment-text">
-                            <h4>Cartão de Crédito</h4>
-                            <p>Pagamento online seguro via Mercado Pago (à vista ou parcelado).</p>
+                            <h4 style="color: #fff; display: flex; align-items: center; gap: 8px;">
+                                PIX Oficial dos Tubarões Cansados
+                                <span style="font-size: 0.75rem; background: rgba(34, 197, 94, 0.2); color: #4ade80; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Instantâneo & Seguro</span>
+                            </h4>
+                            <p style="color: #cbd5e1; font-size: 0.85rem; margin-top: 4px;">
+                                Ao confirmar, você receberá o QR Code oficial e o código Copia e Cola para pagamento no seu banco.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -782,24 +779,6 @@
 
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.4;">
                         Após o pagamento, guarde o comprovante. Assim que identificado, sua inscrição estará confirmada para retirada do kit oficial.
-                    </p>
-                </div>
-
-                <!-- Se Pagamento for CARTÃO DE CRÉDITO -->
-                <div id="payment-card-box" style="display: none; background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(2, 132, 199, 0.35); border-radius: 14px; padding: 1.75rem; max-width: 540px; margin: 0 auto 1.5rem;">
-                    <div style="font-size: 0.9rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
-                        <i class="ri-bank-card-line"></i> Pagamento com Cartão de Crédito
-                    </div>
-                    <p style="font-size: 0.95rem; color: #cbd5e1; margin-bottom: 14px;">
-                        Clique no botão abaixo para pagar com cartão em ambiente seguro pelo Mercado Pago:
-                    </p>
-
-                    <a id="fin-card-btn" href="#" target="_blank" class="btn-pay-card">
-                        <i class="ri-external-link-line"></i> Pagar com Cartão de Crédito
-                    </a>
-
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 1rem;">
-                        Após concluir a transação na operadora do cartão, sua inscrição é confirmada automaticamente.
                     </p>
                 </div>
 
@@ -1114,43 +1093,37 @@
                     document.getElementById('fin-store-desc').textContent = `${data.store_items.length} item(ns) (${formatCurrency(data.store_amount)})`;
                 }
 
-                if (data.payment_method === 'Pix') {
-                    document.getElementById('payment-pix-box').style.display = 'block';
-                    if (data.pix_key) document.getElementById('fin-pix-key').textContent = data.pix_key;
-                    if (data.pix_payload) document.getElementById('fin-pix-payload').value = data.pix_payload;
-                    if (data.pix_receiver) document.getElementById('fin-pix-receiver').textContent = data.pix_receiver;
+                // Exibir tela de pagamento PIX Oficial
+                document.getElementById('payment-pix-box').style.display = 'block';
+                if (data.pix_key) document.getElementById('fin-pix-key').textContent = data.pix_key;
+                if (data.pix_payload) document.getElementById('fin-pix-payload').value = data.pix_payload;
+                if (data.pix_receiver) document.getElementById('fin-pix-receiver').textContent = data.pix_receiver;
 
-                    const qrImg = document.getElementById('fin-pix-qr');
-                    qrImg.src = data.pix_qr_image || '/pix_qrcode.jpg';
+                const qrImg = document.getElementById('fin-pix-qr');
+                qrImg.src = data.pix_qr_image || '/pix_qrcode.jpg';
 
-                    // Botão Copiar Código Copia e Cola
-                    const btnCopyPayload = document.getElementById('btn-copy-payload');
-                    if (btnCopyPayload) {
-                        btnCopyPayload.onclick = () => {
-                            const payload = document.getElementById('fin-pix-payload').value;
-                            navigator.clipboard.writeText(payload).then(() => {
-                                btnCopyPayload.innerHTML = '<i class="ri-check-line"></i> Copiado!';
-                                setTimeout(() => btnCopyPayload.innerHTML = '<i class="ri-file-copy-line"></i> Copiar Código', 2500);
-                            });
-                        };
-                    }
+                // Botão Copiar Código Copia e Cola
+                const btnCopyPayload = document.getElementById('btn-copy-payload');
+                if (btnCopyPayload) {
+                    btnCopyPayload.onclick = () => {
+                        const payload = document.getElementById('fin-pix-payload').value;
+                        navigator.clipboard.writeText(payload).then(() => {
+                            btnCopyPayload.innerHTML = '<i class="ri-check-line"></i> Copiado!';
+                            setTimeout(() => btnCopyPayload.innerHTML = '<i class="ri-file-copy-line"></i> Copiar Código', 2500);
+                        });
+                    };
+                }
 
-                    // Botão Copiar Chave E-mail
-                    const btnCopyKey = document.getElementById('btn-copy-final-pix');
-                    if (btnCopyKey) {
-                        btnCopyKey.onclick = () => {
-                            const key = document.getElementById('fin-pix-key').textContent.trim();
-                            navigator.clipboard.writeText(key).then(() => {
-                                btnCopyKey.innerHTML = '<i class="ri-check-line"></i> Copiado!';
-                                setTimeout(() => btnCopyKey.innerHTML = '<i class="ri-file-copy-line"></i> Copiar E-mail', 2500);
-                            });
-                        };
-                    }
-
-                } else {
-                    document.getElementById('payment-card-box').style.display = 'block';
-                    const cardBtn = document.getElementById('fin-card-btn');
-                    cardBtn.href = data.card_payment_link || 'https://mpago.la/tubaroescansados';
+                // Botão Copiar Chave E-mail
+                const btnCopyKey = document.getElementById('btn-copy-final-pix');
+                if (btnCopyKey) {
+                    btnCopyKey.onclick = () => {
+                        const key = document.getElementById('fin-pix-key').textContent.trim();
+                        navigator.clipboard.writeText(key).then(() => {
+                            btnCopyKey.innerHTML = '<i class="ri-check-line"></i> Copiado!';
+                            setTimeout(() => btnCopyKey.innerHTML = '<i class="ri-file-copy-line"></i> Copiar E-mail', 2500);
+                        });
+                    };
                 }
 
                 // Inscription concluded - clear session draft

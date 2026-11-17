@@ -604,9 +604,10 @@ function adjustTshirtStock(cleanTshirt, existingAthlete) {
     }
 }
 
-// Public endpoint: Concluir Inscrição com Validação, Produtos da Loja e Escolha de Pagamento
+// Public endpoint: Concluir Inscrição com Validação, Produtos da Loja e Pagamento PIX
 app.post('/api/public/complete-registration', (req, res) => {
-    const { athlete, store_items = [], payment_method } = req.body;
+    const { athlete, store_items = [] } = req.body;
+    const payment_method = 'Pix';
 
     if (!athlete) {
         return res.status(400).json({ error: 'Dados do atleta não fornecidos.' });
