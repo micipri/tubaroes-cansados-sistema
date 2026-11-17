@@ -90,19 +90,28 @@ app.get('/debug-db', (req, res) => {
         database_type: db.isPostgres ? 'supabase' : 'sqlite',
         has_DATABASE_URL: !!process.env.DATABASE_URL,
         has_SUPABASE_DB_URL: !!process.env.SUPABASE_DB_URL,
-        database_url_host: process.env.DATABASE_URL ? (process.env.DATABASE_URL.split('@')[1] || '').split('/')[0] : null,
         files_in_app_data: (() => { try { return fs.readdirSync('/app/data'); } catch(e) { return e.message; } })(),
-        files_in_cwd: (() => { try { return fs.readdirSync(process.cwd()).filter(f => f.includes('sqlite') || f.includes('.env')); } catch(e) { return e.message; } })(),
     };
     
-    db.get("SELECT COUNT(*) as c FROM athletes", (err, r1) => {
-        info.athletes_count = r1 ? (r1.c || r1.count) : (err ? err.message : 0);
-        db.get("SELECT COUNT(*) as c FROM store_products", (err2, r2) => {
-            info.store_products_count = r2 ? (r2.c || r2.count) : (err2 ? err2.message : 0);
-            db.get("SELECT COUNT(*) as c FROM assessorias", (err3, r3) => {
-                info.assessorias_count = r3 ? (r3.c || r3.count) : (err3 ? err3.message : 0);
-                res.json(info);
-            });
+    const tables = ['athletes', 'store_products', 'assessorias', 'coupons', 'users', 'event_costs', 'party_costs', 'store_sales', 'online_orders'];
+    const counts = {};
+    let pending = tables.length;
+    
+    tables.forEach(t => {
+        db.get(`SELECT COUNT(*) as c FROM ${t}`, (err, r) => {
+            counts[t] = r ? (r.c || r.count || 0) : (err ? err.message : 0);
+            pending--;
+            if (pending === 0) {
+                info.counts = counts;
+                // Also get list of athletes if any
+                db.all("SELECT id, name, cpf, category, payment_status, created_at FROM athletes LIMIT 20", (err2, athletes) => {
+                    info.athletes_sample = athletes || [];
+                    db.all("SELECT id, name, sell_price, stock, show_in_checkout FROM store_products", (err3, prods) => {
+                        info.store_products = prods || [];
+                        res.json(info);
+                    });
+                });
+            }
         });
     });
 });
