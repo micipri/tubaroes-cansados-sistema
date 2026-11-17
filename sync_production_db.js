@@ -114,7 +114,36 @@ function syncProductionDatabase(db, callback) {
     });
 }
 
+function ensureAthleteColumns(db) {
+    if (!db || db.isPostgres) return;
+    const requiredColumns = [
+        { name: 'store_items', def: "TEXT DEFAULT '[]'" },
+        { name: 'store_amount', def: "REAL DEFAULT 0" },
+        { name: 'total_amount', def: "REAL DEFAULT 0" },
+        { name: 'responsible_name', def: "TEXT DEFAULT NULL" },
+        { name: 'responsible_cpf', def: "TEXT DEFAULT NULL" },
+        { name: 'responsible_phone', def: "TEXT DEFAULT NULL" },
+        { name: 'responsible_email', def: "TEXT DEFAULT NULL" },
+        { name: 'responsible_birth', def: "TEXT DEFAULT NULL" }
+    ];
+
+    db.all("PRAGMA table_info(athletes)", (err, columns) => {
+        if (!err && columns) {
+            requiredColumns.forEach(col => {
+                if (!columns.some(c => c.name === col.name)) {
+                    db.run(`ALTER TABLE athletes ADD COLUMN ${col.name} ${col.def}`, (alterErr) => {
+                        if (alterErr) console.warn(`Aviso ao adicionar coluna ${col.name}:`, alterErr.message);
+                        else console.log(`✅ [Schema Migration] Coluna ${col.name} adicionada com sucesso em athletes.`);
+                    });
+                }
+            });
+        }
+    });
+}
+
 function runAutoSyncIfPending(db) {
+    ensureAthleteColumns(db);
+
     const dataDir = '/app/data';
     const markerFile = path.join(dataDir, '.synced_10anos_v2');
 
@@ -138,4 +167,4 @@ function runAutoSyncIfPending(db) {
     }
 }
 
-module.exports = { syncProductionDatabase, runAutoSyncIfPending };
+module.exports = { syncProductionDatabase, runAutoSyncIfPending, ensureAthleteColumns };

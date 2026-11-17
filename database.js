@@ -221,24 +221,41 @@ function createSqliteTables(dbInstance) {
             kit_retrieved_by TEXT,
             cap_number TEXT,
             notes TEXT,
+            responsible_name TEXT,
+            responsible_cpf TEXT,
+            responsible_phone TEXT,
+            responsible_email TEXT,
+            responsible_birth TEXT,
+            store_items TEXT DEFAULT '[]',
+            store_amount REAL DEFAULT 0,
+            total_amount REAL DEFAULT 0,
             created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
         )`);
 
         dbInstance.run(`CREATE INDEX IF NOT EXISTS idx_athletes_cpf ON athletes(cpf)`);
         dbInstance.run(`CREATE INDEX IF NOT EXISTS idx_athletes_status ON athletes(payment_status)`);
 
-        // Migration: add store_items, store_amount, total_amount to athletes
+        // Migration: add store and responsible columns to athletes
         dbInstance.all("PRAGMA table_info(athletes)", (err, columns) => {
             if (!err && columns) {
-                if (!columns.some(c => c.name === 'store_items')) {
-                    dbInstance.run("ALTER TABLE athletes ADD COLUMN store_items TEXT DEFAULT '[]'");
-                }
-                if (!columns.some(c => c.name === 'store_amount')) {
-                    dbInstance.run("ALTER TABLE athletes ADD COLUMN store_amount REAL DEFAULT 0");
-                }
-                if (!columns.some(c => c.name === 'total_amount')) {
-                    dbInstance.run("ALTER TABLE athletes ADD COLUMN total_amount REAL DEFAULT 0");
-                }
+                const requiredColumns = [
+                    { name: 'store_items', def: "TEXT DEFAULT '[]'" },
+                    { name: 'store_amount', def: "REAL DEFAULT 0" },
+                    { name: 'total_amount', def: "REAL DEFAULT 0" },
+                    { name: 'responsible_name', def: "TEXT DEFAULT NULL" },
+                    { name: 'responsible_cpf', def: "TEXT DEFAULT NULL" },
+                    { name: 'responsible_phone', def: "TEXT DEFAULT NULL" },
+                    { name: 'responsible_email', def: "TEXT DEFAULT NULL" },
+                    { name: 'responsible_birth', def: "TEXT DEFAULT NULL" }
+                ];
+                requiredColumns.forEach(col => {
+                    if (!columns.some(c => c.name === col.name)) {
+                        dbInstance.run(`ALTER TABLE athletes ADD COLUMN ${col.name} ${col.def}`, (alterErr) => {
+                            if (alterErr) console.warn(`Aviso ao adicionar coluna ${col.name}:`, alterErr.message);
+                            else console.log(`✅ Coluna ${col.name} adicionada com sucesso na tabela athletes.`);
+                        });
+                    }
+                });
             }
         });
 
